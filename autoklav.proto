@@ -1,0 +1,120 @@
+syntax = "proto3";
+
+package Autoklav;
+
+service Autoklav {
+    // Status
+    rpc getStatus(Empty) returns (Status);
+
+    // Global variables
+    rpc getVariables(Empty) returns (Variables);
+    rpc setVariable(SetVariable) returns (Status);
+
+    // Process
+    rpc startProcess(StartProcessRequest) returns (Status);
+    rpc stopProcess(Empty) returns (Status);
+
+    // Sensor
+    rpc getSensorValues(Empty) returns (SensorValues);
+
+    // StateMachine
+    rpc getStateMachineValues(Empty) returns (StateMachineValues);
+}
+
+message Empty {
+
+}
+
+message Status {
+    int32 code = 1;
+    int32 errors = 2;
+    string errorsString = 3;
+}
+
+message Variables {
+    double targetK = 1;
+    int32 serialDataTime = 2;
+    int32 stateMachineTick = 3;
+    double sterilizationTemp = 4;
+    double pasterizationTemp = 5;
+}
+
+message SetVariable {
+    string name = 1;
+    string value = 2;
+}
+
+message SensorValues {
+    double temp = 1;
+    double tempK = 2;
+    double pressure = 3;
+}
+
+message StateMachineValues {
+    uint32 time = 1;
+    double temp = 2;
+    double tempK = 3;
+    double dTemp = 4;
+    double pressure = 5;
+    double Dr = 6;
+    double Fr = 7;
+    double r = 8;
+    double sumFr = 9;
+    double sumr = 10;
+}
+
+enum ProcessConfigType {
+    STERILIZATION = 0;
+    PASTERIZATION = 1;
+    CUSTOM = 2;
+}
+
+enum ProcessConfigState {
+    READY = 0;
+    STARTING = 1;
+    FILLING = 2;
+    HEATING = 3;
+    COOLING = 4;
+    FINISHING = 5;
+    FINISHED = 6;
+}
+
+enum ProcessConfigMode {
+    TARGETF = 0;
+    TIME = 1;
+}
+
+message ProcessConfig {
+    ProcessConfigType type = 1;
+    double customTemp = 2;
+    ProcessConfigMode mode = 3;
+    double targetF = 4;
+    uint32 targetTime = 5;
+    double maintainTemp = 6;
+    double maintainPressure = 7;
+    double finishTemp = 8;
+}
+
+message ProcessInfo {
+    string productName = 1;
+    string productQuantity = 2;
+    string bacteria = 3;
+    string description = 4;
+    string processStart = 5;
+    string processLength = 6;
+}
+
+message ProcessLogRow {
+    int32 id = 1;
+    string productName = 2;
+    string productQuantity = 3;
+    string bacteria = 4;
+    string description = 5;
+    string processStart = 6;
+    string processLength = 7;
+}
+
+message StartProcessRequest {
+    ProcessConfig processConfig = 1;
+    ProcessInfo processInfo = 2;
+}
