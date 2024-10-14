@@ -61,6 +61,8 @@ private:
     StateMachineValues values;
     ProcessConfig processConfig;
 
+    quint64 id;
+
     double calcdTemp(double temp);
 
 private slots:

@@ -8,7 +8,7 @@ Serial::Serial(QObject *parent)
     : QObject{parent}
 {
     // Create serial port
-    m_serial = std::make_unique<QSerialPort>("/dev/pts/1", this);
+    m_serial = std::make_unique<QSerialPort>("COM3", this);
     m_serial->setBaudRate(QSerialPort::Baud9600);
     m_serial->setDataBits(QSerialPort::Data8);
     m_serial->setParity(QSerialPort::NoParity);
@@ -16,6 +16,7 @@ Serial::Serial(QObject *parent)
     m_serial->setFlowControl(QSerialPort::NoFlowControl);
     m_serial->open(QIODevice::ReadWrite);
 
+    Logger::crit(m_serial->errorString());
     // Connect read data slot
     connect(m_serial.get(), &QSerialPort::readyRead, this, &Serial::readData);
     // On port disconnect or error try reconnecting
@@ -25,7 +26,8 @@ Serial::Serial(QObject *parent)
 void Serial::readData()
 {
     // Save data to buffer
-    m_buffer.append(m_serial->readAll());
+    m_buffer.append(m_serial->readAll());    
+    Logger::info(m_buffer);
 
     // Call function to parse data
     parseData();

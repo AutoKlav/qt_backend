@@ -35,6 +35,7 @@ QString DbManager::loadGlobal(QString name)
         return query.value(0).toString();
     } else {
         Logger::crit(QString("Database: Unable to fetch global %1").arg(name));
+        Logger::crit(QString("SQL error: %1").arg(query.lastError().text()));
         return "";
     }
 }
@@ -58,6 +59,7 @@ bool DbManager::updateGlobal(QString name, QString value)
 
     if (!query.exec()) {
         Logger::crit(QString("Database: Unable to update global %1 to %2").arg(name, value));
+        Logger::crit(QString("SQL error: %1").arg(query.lastError().text()));
         return false;
     }
 
@@ -98,6 +100,7 @@ bool DbManager::updateSensor(QString name, double newMinValue, double newMaxValu
 
     if (!query.exec()) {
         Logger::crit(QString("Database: Unable to update sensor %1").arg(name));
+        Logger::crit(QString("SQL error: %1").arg(query.lastError().text()));
         return false;
     }
 
@@ -124,6 +127,7 @@ ProcessLog DbManager::getProcessLog(int id)
         return ProcessLog(id, name, {productName, productQuantity, bacteria, description, processStart, processLength});
     } else {
         Logger::crit(QString("Database: Unable to fetch process log %1").arg(id));
+        Logger::crit(QString("SQL error: %1").arg(query.lastError().text()));
         return ProcessLog();
     }
 }
@@ -147,6 +151,7 @@ ProcessLog DbManager::getProcessLog(QString name)
         return ProcessLog(id, name, {productName, productQuantity, bacteria, description, processStart, processLength});
     } else {
         Logger::crit(QString("Database: Unable to fetch process log %1").arg(name));
+        Logger::crit(QString("SQL error: %1").arg(query.lastError().text()));
         return ProcessLog();
     }
 }
@@ -166,6 +171,7 @@ int DbManager::createProcessLog(QString name, ProcessInfo info)
 
     if (!query.exec()) {
         Logger::crit(QString("Database: Unable to create process log %1").arg(name));
+        Logger::crit(QString("SQL error: %1").arg(query.lastError().text()));
         return -1;
     }
 
@@ -187,6 +193,7 @@ bool DbManager::updateProcessLog(int id, ProcessInfo info)
 
     if (!query.exec()) {
         Logger::crit(QString("Database: Unable to update process log %1").arg(id));
+        Logger::crit(QString("SQL error: %1").arg(query.lastError().text()));
         return false;
     }
 

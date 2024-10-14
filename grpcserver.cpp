@@ -1,43 +1,47 @@
+// Copyright (C) 2023 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
+
 #include "grpcserver.h"
 
-#include <QtConcurrent>
-#include <QSqlDatabase>
+#include "autoklav.grpc.pb.h"
 
 #include "sensor.h"
 #include "globals.h"
 #include "processlog.h"
-#include "autoklav.pb.h"
-#include "globalerrors.h"
 #include "statemachine.h"
+#include "globalerrors.h"
 
-using grpc::ServerBuilder;
+#include <QThread>
+#include <QDebug>
+#include <QRandomGenerator>
+
+#include <grpc++/grpc++.h>
+#include <memory>
 
 namespace {
-    std::shared_ptr<Server> buildAndStartService(AutoklavServiceImplementation & service_)
-    {
-      auto server_address("0.0.0.0:50061");
 
-      return ServerBuilder()
-          .AddListeningPort(server_address, grpc::InsecureServerCredentials())
-          .RegisterService(&service_)
-          .BuildAndStart();
-    }
-}
+using grpc::Server;
+using grpc::ServerBuilder;
+using grpc::ServerContext;
+using grpc::ServerWriter;
+using grpc::Status;
 
-GRpcServer::GRpcServer(QObject *parent)
-    : QObject(parent), server(buildAndStartService(this->service))
+// Logic and data behind the server's behavior.
+class AutoklavServiceImpl final : public autoklav::Autoklav::Service
 {
-    (void)QtConcurrent::run([=] {
-        this->server->Wait();
-    });
+    Status getStatus(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay) override;
+    Status getVariables(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Variables *replay) override;
+    Status setVariable(grpc::ServerContext *context, const autoklav::SetVariable *request, autoklav::Status *replay) override;
+    Status startProcess(grpc::ServerContext *context, const autoklav::StartProcessRequest *request, autoklav::Status *replay) override;
+    Status stopProcess(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay) override;
+    Status getSensorValues(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::SensorValues *replay) override;
+    Status getStateMachineValues(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::StateMachineValues *replay) override;
+    // Custom helper function
+    void setStatusReply(autoklav::Status *replay, int code);
+};
 }
 
-void GRpcServer::shutdown()
-{
-    server->Shutdown();
-}
-
-Status AutoklavServiceImplementation::getStatus(grpc::ServerContext *context, const Autoklav::Empty *request, Autoklav::Status *replay)
+Status AutoklavServiceImpl::getStatus(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay)
 {
     Q_UNUSED(context);
     Q_UNUSED(request);
@@ -46,7 +50,7 @@ Status AutoklavServiceImplementation::getStatus(grpc::ServerContext *context, co
     return Status::OK;
 }
 
-Status AutoklavServiceImplementation::getVariables(grpc::ServerContext *context, const Autoklav::Empty *request, Autoklav::Variables *replay)
+Status AutoklavServiceImpl::getVariables(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Variables *replay)
 {
     Q_UNUSED(context);
     Q_UNUSED(request);
@@ -62,7 +66,7 @@ Status AutoklavServiceImplementation::getVariables(grpc::ServerContext *context,
     return Status::OK;
 }
 
-Status AutoklavServiceImplementation::setVariable(grpc::ServerContext *context, const Autoklav::SetVariable *request, Autoklav::Status *replay)
+Status AutoklavServiceImpl::setVariable(grpc::ServerContext *context, const autoklav::SetVariable *request, autoklav::Status *replay)
 {
     Q_UNUSED(context);
 
@@ -86,7 +90,7 @@ Status AutoklavServiceImplementation::setVariable(grpc::ServerContext *context, 
     return Status::OK;
 }
 
-Status AutoklavServiceImplementation::startProcess(grpc::ServerContext *context, const Autoklav::StartProcessRequest *request, Autoklav::Status *replay)
+Status AutoklavServiceImpl::startProcess(grpc::ServerContext *context, const autoklav::StartProcessRequest *request, autoklav::Status *replay)
 {
     Q_UNUSED(context);
 
@@ -116,7 +120,7 @@ Status AutoklavServiceImplementation::startProcess(grpc::ServerContext *context,
     return Status::OK;
 }
 
-Status AutoklavServiceImplementation::stopProcess(grpc::ServerContext *context, const Autoklav::Empty *request, Autoklav::Status *replay)
+Status AutoklavServiceImpl::stopProcess(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay)
 {
     Q_UNUSED(context);
     Q_UNUSED(request);
@@ -127,7 +131,7 @@ Status AutoklavServiceImplementation::stopProcess(grpc::ServerContext *context, 
     return Status::OK;
 }
 
-Status AutoklavServiceImplementation::getSensorValues(grpc::ServerContext *context, const Autoklav::Empty *request, Autoklav::SensorValues *replay)
+Status AutoklavServiceImpl::getSensorValues(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::SensorValues *replay)
 {
     Q_UNUSED(context);
     Q_UNUSED(request);
@@ -142,7 +146,7 @@ Status AutoklavServiceImplementation::getSensorValues(grpc::ServerContext *conte
     return Status::OK;
 }
 
-Status AutoklavServiceImplementation::getStateMachineValues(grpc::ServerContext *context, const Autoklav::Empty *request, Autoklav::StateMachineValues *replay)
+Status AutoklavServiceImpl::getStateMachineValues(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::StateMachineValues *replay)
 {
     Q_UNUSED(context);
     Q_UNUSED(request);
@@ -163,9 +167,28 @@ Status AutoklavServiceImplementation::getStateMachineValues(grpc::ServerContext 
     return Status::OK;
 }
 
-void AutoklavServiceImplementation::setStatusReply(Autoklav::Status *replay, int code)
+void AutoklavServiceImpl::setStatusReply(autoklav::Status *replay, int code)
 {
     replay->set_code(code);
     replay->set_errors(GlobalErrors::getErrors());
     replay->set_errorsstring(GlobalErrors::getErrorsString().join("|").toStdString());
+}
+
+void GRpcServer::run()
+{
+    std::string serverUri("127.0.0.1:50061");
+    AutoklavServiceImpl service;
+
+    grpc::ServerBuilder builder;
+    builder.AddListeningPort(serverUri, grpc::InsecureServerCredentials());
+    builder.RegisterService(&service);
+
+    std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
+    if (!server) {
+        qDebug() << "Creating grpc::Server failed.";
+        return;
+    }
+
+    qDebug() << "Server listening on " << serverUri;
+    server->Wait();
 }

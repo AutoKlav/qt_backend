@@ -4,6 +4,7 @@
 #include "dbmanager.h"
 #include "mockserial.h"
 #include "statemachine.h"
+#include "serial.h"
 
 Master::Master(QObject *parent)
     : QObject{parent}
@@ -13,8 +14,10 @@ Master::Master(QObject *parent)
     db.loadGlobals();
     db.loadSensors();
 
-//    Serial::instance();
-    MockSerial::instance();
+    // Switch to MockSerial to test without Arduino
+    Serial::instance();
+//    MockSerial::instance();
+
     StateMachine::instance();
 
     Logger::info("Program started");

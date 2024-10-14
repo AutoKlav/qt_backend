@@ -7,14 +7,12 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
-//    qInstallMessageHandler(Logger::messageHandler);
+//    qInstallMessageHandler(Logger::messageHandler); // Enable logging to file
 
     Master::instance();
 
-    GRpcServer grpcServer;
-
-    // On program interupt, stop the grpc server
-    QObject::connect(&a, &QCoreApplication::aboutToQuit, &grpcServer, &GRpcServer::shutdown);
+    auto server = std::make_unique<GRpcServer>();
+    server->run();
 
     return a.exec();
 }
