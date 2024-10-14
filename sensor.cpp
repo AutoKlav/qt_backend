@@ -57,7 +57,7 @@ void Sensor::parseSerialData(QString data)
 {
     // Parse data
     // Split data by sensors
-    QList<QString> sensors = data.split(',');
+    QList<QString> sensors = data.split(';');
     // Iterate over sensors
     for (const QString &sensor : sensors)
     {

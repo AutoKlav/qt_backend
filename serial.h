@@ -17,6 +17,8 @@ public:
 
     static Serial& instance();
 
+    void open();
+    void close();
     void sendData(QString data);
 
 private:
@@ -24,7 +26,7 @@ private:
 
     void parseData();
 
-    std::unique_ptr<QSerialPort> m_serial;
+    QSerialPort *m_serial = nullptr;
     QByteArray m_buffer;
 
 private slots:

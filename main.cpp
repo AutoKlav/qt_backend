@@ -1,6 +1,7 @@
 #include <QCoreApplication>
 
 #include "master.h"
+#include "serial.h"
 #include "grpcserver.h"
 
 int main(int argc, char *argv[])
@@ -11,8 +12,7 @@ int main(int argc, char *argv[])
 
     Master::instance();
 
-    auto server = std::make_unique<GRpcServer>();
-    server->run();
+    GRpcServer grpcServer;
 
     return a.exec();
 }

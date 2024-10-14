@@ -1,10 +1,10 @@
 #include "master.h"
 
 #include "logger.h"
+#include "serial.h"
 #include "dbmanager.h"
 #include "mockserial.h"
 #include "statemachine.h"
-#include "serial.h"
 
 Master::Master(QObject *parent)
     : QObject{parent}
@@ -15,8 +15,8 @@ Master::Master(QObject *parent)
     db.loadSensors();
 
     // Switch to MockSerial to test without Arduino
-    Serial::instance();
-//    MockSerial::instance();
+    Serial::instance().open();
+    // MockSerial::instance();
 
     StateMachine::instance();
 

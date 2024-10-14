@@ -8,7 +8,7 @@ set(CMAKE_AUTORCC ON)
 
 # Qt6::Grpc module is not used directly in this project. But this allows to find Qt6::Grpc's
 # dependencies without setting extra cmake module paths.
-find_package(Qt6 COMPONENTS Grpc SerialPort Sql)
+find_package(Qt6 COMPONENTS Concurrent Grpc SerialPort Sql)
 find_package(WrapgRPCPlugin)
 find_package(WrapgRPC)
 
@@ -65,8 +65,6 @@ target_link_libraries(ServerRunner_grpc_gen
 
 add_library(ServerRunner
     STATIC
-    grpcserver.cpp
-    grpcserver.h
     grpcserver.h grpcserver.cpp
 )
 
@@ -81,7 +79,6 @@ target_link_libraries(ServerRunner
 
 add_executable(NewAutoklav
   main.cpp
-  dbmanager.h dbmanager.cpp
   dbmanager.cpp dbmanager.h
   globalerrors.cpp globalerrors.h
   globals.cpp globals.h
@@ -100,9 +97,10 @@ add_executable(NewAutoklav
 target_link_libraries(NewAutoklav
     PRIVATE
     Qt6::Core
-    ServerRunner
+    Qt6::Concurrent
     Qt6::SerialPort
     Qt6::Sql
+    ServerRunner
 )
 
 include(GNUInstallDirs)

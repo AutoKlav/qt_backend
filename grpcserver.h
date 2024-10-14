@@ -1,10 +1,22 @@
 #ifndef GRPCSERVER_H
 #define GRPCSERVER_H
 
-class GRpcServer
+#include <QObject>
+#include <memory>
+
+class GRpcServer : public QObject
 {
+    Q_OBJECT
 public:
-    void run();
+    explicit GRpcServer(QObject *parent = nullptr);
+    ~GRpcServer();
+
+public slots:
+    void shutdown();
+
+private:
+    class Impl;
+    std::unique_ptr<Impl> impl;
 };
 
 #endif // GRPCSERVER_H
