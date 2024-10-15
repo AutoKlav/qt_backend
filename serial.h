@@ -35,7 +35,7 @@ private:
 
 private slots:
     void readData();
-    void reconnect(QSerialPort::SerialPortError error);    
+    void tryToReconnectWhenErrorAppears(QSerialPort::SerialPortError error);
 
 };
 
