@@ -185,10 +185,20 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getSensorValues(grpc::ServerContex
 
     const auto sensorValues = Sensor::getValues();
 
+    // Fetch error flags
+    QVector<QString> errorStrings = GlobalErrors::getErrorsString();
+
+    // If there is a serial error, send abort status
+    for(const QString& errorString : errorStrings){
+        if(errorString == GlobalErrors::SERIAL_ERROR){
+            return Status(grpc::StatusCode::ABORTED, GlobalErrors::SERIAL_ERROR.toStdString());
+        }        
+    }
+    
     replay->set_temp(sensorValues.temp);
     replay->set_tempk(sensorValues.tempK);
     replay->set_pressure(sensorValues.pressure);
-
+    
     return Status::OK;
 }
 
