@@ -45,22 +45,20 @@ void Serial::readData()
 void Serial::parseData()
 {
     // Find last data instance
-    int endIndex = m_buffer.lastIndexOf(";");
+    int endIndex = m_buffer.lastIndexOf("]");
     if (endIndex == -1)
         return;
 
     // Find beginning of last data instance
-    int startIndex = m_buffer.indexOf(";");
-    if (startIndex == -1)
-        return;
-
-    if (startIndex == endIndex)
+    int startIndex = m_buffer.lastIndexOf("[", endIndex);
+    if (startIndex == -1 || startIndex >= endIndex)
         return;
 
     // Get last data instance
-    QByteArray data = m_buffer.mid(startIndex + 1, endIndex - startIndex - 2);
+    QByteArray data = m_buffer.mid(startIndex + 1, endIndex - startIndex - 1);
+
     // Remove all data except incomplete data
-    m_buffer = m_buffer.mid(endIndex);
+    m_buffer = m_buffer.mid(endIndex + 1);
 
     Sensor::parseSerialData(data);
 }
