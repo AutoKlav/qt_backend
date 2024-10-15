@@ -15,7 +15,10 @@ Serial::Serial(QObject *parent)
     // Connect read data slot
     connect(m_serial, &QSerialPort::readyRead, this, &Serial::readData);
 
-    // Connect the retry timer to attempt reconnection
+    // When error appears, try to reconnect
+    connect(m_serial, &QSerialPort::errorOccurred, this, &Serial::tryToReconnectWhenErrorAppears);
+
+    // If reconnect fails, try to reconnect again using timer
     connect(&m_retryTimer, &QTimer::timeout, this, [this]() {
         Logger::debug("Attempting to reconnect to the serial port...");
 
@@ -26,10 +29,7 @@ Serial::Serial(QObject *parent)
         } else {
             Logger::crit(QString("Failed to reconnect, error: %1").arg(m_serial->errorString()));
         }
-    });
-
-    // On port disconnect or error try reconnecting
-    connect(m_serial, &QSerialPort::errorOccurred, this, &Serial::reconnect);
+    });    
 }
 
 void Serial::readData()
@@ -65,7 +65,7 @@ void Serial::parseData()
     Sensor::parseSerialData(data);
 }
 
-void Serial::reconnect(QSerialPort::SerialPortError error)
+void Serial::tryToReconnectWhenErrorAppears(QSerialPort::SerialPortError error)
 {
     if (error == QSerialPort::SerialPortError::NoError)
         return;
