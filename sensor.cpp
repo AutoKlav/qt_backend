@@ -73,7 +73,7 @@ void Sensor::parseSerialData(QString data)
         // Get sensor value
         QString sensorValue = sensorData[1];
 
-        // Update sensor value
+        // Update sensor value if sensor exists
         if (mapPinName.contains(sensorName)) {
             mapPinName[sensorName]->setValue(sensorValue);
         } else {
