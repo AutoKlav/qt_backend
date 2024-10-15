@@ -4,11 +4,30 @@
 #include "logger.h"
 #include "globalerrors.h"
 
+#include <QTimer>
+
 Serial::Serial(QObject *parent)
     : QObject{parent}, m_serial(new QSerialPort(this))
 {
+    // Initialize the retry timer with a 5-second interval
+    m_retryTimer.setInterval(WAIT_TIME_MS);
+
     // Connect read data slot
     connect(m_serial, &QSerialPort::readyRead, this, &Serial::readData);
+
+    // Connect the retry timer to attempt reconnection
+    connect(&m_retryTimer, &QTimer::timeout, this, [this]() {
+        Logger::info("Attempting to reconnect to the serial port...");
+
+        if (m_serial->open(QIODevice::ReadWrite)) {
+            Logger::info("Reconnected successfully.");
+            GlobalErrors::removeError(GlobalErrors::SerialError);
+            m_retryTimer.stop();  // Stop retrying once successfully connected
+        } else {
+            Logger::crit(QString("Failed to reconnect, error: %1").arg(m_serial->errorString()));
+        }
+    });
+
     // On port disconnect or error try reconnecting
     connect(m_serial, &QSerialPort::errorOccurred, this, &Serial::reconnect);
 }
@@ -52,14 +71,15 @@ void Serial::reconnect(QSerialPort::SerialPortError error)
     if (error == QSerialPort::SerialPortError::NoError)
         return;
 
-    Logger::crit(QString("Serial: Error occured %1").arg(error));
+    Logger::crit(QString("Serial: Error occurred %1").arg(error));
     GlobalErrors::setError(GlobalErrors::SerialError);
 
+    // Close the serial port if open
     if (m_serial->isOpen())
         m_serial->close();
 
-    if (m_serial->open(QIODevice::ReadWrite))
-        GlobalErrors::removeError(GlobalErrors::SerialError);
+    // Start the retry timer to reconnect every 5 seconds
+    m_retryTimer.start();
 }
 
 Serial &Serial::instance()

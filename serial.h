@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QDateTime>
 #include <QSerialPort>
+#include <QTimer>
 
 class Serial : public QObject
 {
@@ -28,10 +29,13 @@ private:
 
     QSerialPort *m_serial = nullptr;
     QByteArray m_buffer;
+    QTimer m_retryTimer;  // Timer to handle reconnection attempts
+    static constexpr int WAIT_TIME_MS = 5000;
+
 
 private slots:
     void readData();
-    void reconnect(QSerialPort::SerialPortError error);
+    void reconnect(QSerialPort::SerialPortError error);    
 
 };
 
