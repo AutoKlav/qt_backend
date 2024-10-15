@@ -17,10 +17,10 @@ Serial::Serial(QObject *parent)
 
     // Connect the retry timer to attempt reconnection
     connect(&m_retryTimer, &QTimer::timeout, this, [this]() {
-        Logger::info("Attempting to reconnect to the serial port...");
+        Logger::debug("Attempting to reconnect to the serial port...");
 
         if (m_serial->open(QIODevice::ReadWrite)) {
-            Logger::info("Reconnected successfully.");
+            Logger::debug("Reconnected successfully.");
             GlobalErrors::removeError(GlobalErrors::SerialError);
             m_retryTimer.stop();  // Stop retrying once successfully connected
         } else {
@@ -65,7 +65,6 @@ void Serial::parseData()
     Sensor::parseSerialData(data);
 }
 
-// TODO: Handle if Arduino is disconnected (stop program from crashing, retry every x seconds)
 void Serial::reconnect(QSerialPort::SerialPortError error)
 {
     if (error == QSerialPort::SerialPortError::NoError)
