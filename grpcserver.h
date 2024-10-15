@@ -4,6 +4,13 @@
 #include <QObject>
 #include <memory>
 
+/**
+ * @brief The GRpcServer class represents a gRPC server.
+ * 
+ * This class is responsible for handling gRPC server operations.
+ * It provides functionality to start and stop the server, as well as
+ * perform other server-related tasks.
+ */
 class GRpcServer : public QObject
 {
     Q_OBJECT
@@ -12,6 +19,12 @@ public:
     ~GRpcServer();
 
 public slots:
+    /**
+     * @brief Shutdowns the gRPC server.
+     * 
+     * This slot is used to gracefully shutdown the gRPC server.
+     * It stops the server and performs any necessary cleanup operations.
+     */
     void shutdown();
 
 private:

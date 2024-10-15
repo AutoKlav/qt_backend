@@ -14,6 +14,11 @@ public:
     };
     Q_DECLARE_FLAGS(Errors, Error);
 
+    static const QString DB_ERROR;
+    static const QString SERIAL_ERROR;
+    static const QString OLD_DATA_ERROR;
+    static const QString SERIAL_SEND_ERROR;
+
     static void setError(Error error);
     static void removeError(Error error);
     static Errors getErrors();
