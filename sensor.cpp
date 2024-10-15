@@ -5,6 +5,7 @@
 #include "globals.h"
 #include "mockserial.h"
 #include "globalerrors.h"
+#include "logger.h"
 
 qint64 Sensor::lastDataTime = 0;
 QList<Sensor> Sensor::sensors = QList<Sensor>();
@@ -72,8 +73,14 @@ void Sensor::parseSerialData(QString data)
         // Get sensor value
         QString sensorValue = sensorData[1];
 
-        // Update sensor value
-        mapPinName[sensorName]->setValue(sensorValue);
+        // Update sensor value if sensor exists
+        if (mapPinName.contains(sensorName)) {
+            mapPinName[sensorName]->setValue(sensorValue);
+        } else {
+            Logger::crit(QString("Sensor '%1' not found in database.").arg(sensorName));
+            GlobalErrors::setError(GlobalErrors::DbError);
+        }
+
         lastDataTime = QDateTime::currentMSecsSinceEpoch();
     }
 }
