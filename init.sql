@@ -35,3 +35,15 @@ CREATE TABLE ProcessLog (
     processLength TEXT
 );
 CREATE INDEX idx_process_start ON ProcessLog(processStart);
+
+// create table called procesLog with id, processlog foreign key of process, temp, tempK, pressure, timestamp
+
+CREATE TABLE ProcessLogTemp (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    processId INTEGER NOT NULL,
+    temp REAL NOT NULL,
+    tempK REAL NOT NULL,
+    pressure REAL NOT NULL,
+    timestamp DATETIME NOT NULL,
+    FOREIGN KEY (processId) REFERENCES Process(id)
+);
