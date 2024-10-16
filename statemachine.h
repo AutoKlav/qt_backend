@@ -46,7 +46,7 @@ public:
     bool isRunning();
 
     StateMachineValues getValues();
-    StateMachineValues calcValues();
+    StateMachineValues calculateDrFrRValuesFromSensors();
 
     static StateMachine &instance();
 

@@ -1,5 +1,4 @@
 #include "statemachine.h"
-
 #include "logger.h"
 #include "sensor.h"
 #include "globals.h"
@@ -39,7 +38,7 @@ bool StateMachine::start(ProcessConfig processConfig, ProcessInfo processInfo)
     processLog = new ProcessLog(processStart.toString(Qt::ISODate), processInfo, this);
     values = StateMachineValues();
 
-    // timer->start(Globals::stateMachineTick);
+    // Start the timer with the state machine tick interval
     QMetaObject::invokeMethod(timer, "start", Qt::AutoConnection, Q_ARG(int, Globals::stateMachineTick));
     tick();
 
@@ -51,6 +50,7 @@ bool StateMachine::stop()
     if (!isRunning())
         return false;
 
+    // Deactivate all sensors
     Sensor::mapName["waterFill"]->send(0);
     Sensor::mapName["heating"]->send(0);
     Sensor::mapName["bypass"]->send(0);
@@ -71,39 +71,39 @@ StateMachineValues StateMachine::getValues()
     return values;
 }
 
-StateMachineValues StateMachine::calcValues()
+StateMachineValues StateMachine::calculateDrFrRValuesFromSensors()
 {
-    StateMachineValues smValues;
+    StateMachineValues stateMachineValues;
 
     auto sensorValues = Sensor::getValues();
 
-    smValues.temp = sensorValues.temp;
-    smValues.tempK = sensorValues.tempK;
-    smValues.pressure = sensorValues.pressure;
+    stateMachineValues.temp = sensorValues.temp;
+    stateMachineValues.tempK = sensorValues.tempK;
+    stateMachineValues.pressure = sensorValues.pressure;
 
-    smValues.dTemp = calcdTemp(smValues.tempK);
+    stateMachineValues.dTemp = calcdTemp(stateMachineValues.tempK);
 
-    smValues.Dr = qPow(10,  0.1 * smValues.dTemp) * (Globals::stateMachineTick / 60000.0);
-    smValues.Fr = qPow(10, -0.1 * smValues.dTemp) * (Globals::stateMachineTick / 60000.0);
-    smValues.r = 5 * smValues.Fr;
+    stateMachineValues.Dr = qPow(10,  0.1 * stateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
+    stateMachineValues.Fr = qPow(10, -0.1 * stateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
+    stateMachineValues.r = 5 * stateMachineValues.Fr;
 
     if (isRunning()) {
-        smValues.time = processStart.msecsTo(QDateTime::currentDateTime());
+        stateMachineValues.time = processStart.msecsTo(QDateTime::currentDateTime());
 
-        smValues.sumFr = values.sumFr + smValues.Fr;
-        smValues.sumr = values.sumr + smValues.r;
+        stateMachineValues.sumFr = values.sumFr + stateMachineValues.Fr;
+        stateMachineValues.sumr = values.sumr + stateMachineValues.r;
     } else {
-        smValues.time = 0;
-        smValues.sumFr = 0;
-        smValues.sumr = 0;
+        stateMachineValues.time = 0;
+        stateMachineValues.sumFr = 0;
+        stateMachineValues.sumr = 0;
     }
 
-    return smValues;
+    return stateMachineValues;
 }
 
 void StateMachine::tick()
 {
-    values = calcValues();
+    values = calculateDrFrRValuesFromSensors();
 
     if (processLog && isRunning())
         processLog->appendLog(values);
@@ -115,42 +115,42 @@ void StateMachine::tick()
     case State::STARTING:
         Logger::info("StateMachine: Starting");
 
-        Sensor::mapName["waterFill"]->send(1);  // Ukljucivanje punjenja vodom
-        Sensor::mapName["heating"]->send(1);    // Ukljucivanje grijaca
-        Sensor::mapName["bypass"]->send(1);     // Ukljucivanje bypassa
+        Sensor::mapName["waterFill"]->send(1);  // Start water filling
+        Sensor::mapName["heating"]->send(1);    // Start heating
+        Sensor::mapName["bypass"]->send(1);     // Enable bypass
 
         state = State::FILLING;
         Logger::info("StateMachine: Filling");
         break;
 
     case State::FILLING:
-        // Ceka dok se tlak ne popne na 0.5 bara
+        // Wait until pressure reaches 0.5 bar
         if (values.pressure < 0.5)
             break;
 
-        Sensor::mapName["waterFill"]->send(0);  // Iskljucivanje punjenje vodom
-        Sensor::mapName["bypass"]->send(0);     // Iskljucivanje bypassa
-        Sensor::mapName["pump"]->send(1);       // Ukljucivanje cirkulacione pumpe
-        Sensor::mapName["inPressure"]->send(1);   // Ukljucivanje tlaka 2bara
+        Sensor::mapName["waterFill"]->send(0);  // Stop water filling
+        Sensor::mapName["bypass"]->send(0);     // Disable bypass
+        Sensor::mapName["pump"]->send(1);       // Start circulation pump
+        Sensor::mapName["inPressure"]->send(1); // Set pressure to 2 bars
 
         state = State::HEATING;
         Logger::info("StateMachine: Heating");
         break;
 
     case State::HEATING:
-        // Odrzava zadanu temperaturu u +-1
+        // Maintain the set temperature within a ±1°C range
         if (values.temp > processConfig.maintainTemp + 1)
-            Sensor::mapName["heating"]->send(0);    // Iskljucivanje grijaca
+            Sensor::mapName["heating"]->send(0); // Turn off heating
         else if (values.temp < processConfig.maintainTemp - 1)
-            Sensor::mapName["heating"]->send(1);    // Ukljucivanje grijaca
+            Sensor::mapName["heating"]->send(1); // Turn on heating
 
-        // Odrzava zadani tlak u +-0.05
+        // Maintain the set pressure within a ±0.05 bar range
         if (values.pressure > processConfig.maintainPressure + 0.05)
-            Sensor::mapName["inPressure"]->send(0);    // Iskljucivanje tlaka 2bara
+            Sensor::mapName["inPressure"]->send(0); // Turn off 2 bar pressure
         else if (values.pressure < processConfig.maintainPressure - 0.05)
-            Sensor::mapName["inPressure"]->send(1);    // Ukljucivanje tlaka 2bara
+            Sensor::mapName["inPressure"]->send(1); // Turn on 2 bar pressure
 
-        // Grijanje dok ne dode do zadanone F vrijednosti ili prolaska vremena
+        // Continue heating until the target F value or time is reached
         if (processConfig.mode == Mode::TARGETF) {
             if (values.sumFr < processConfig.targetF)
                 break;
@@ -159,29 +159,29 @@ void StateMachine::tick()
                 break;
         }
 
-        Sensor::mapName["heating"]->send(0);        // Iskljucivanje grijaca
-        Sensor::mapName["inPressure"]->send(0);       // Iskljuciti tlak 2bara
-        Sensor::mapName["cooling"]->send(1);        // Otvoriti magnetski ventil hladjenja
-        Sensor::mapName["bypass"]->send(1);         // Ukljucivanje bypassa
+        Sensor::mapName["heating"]->send(0);        // Turn off heating
+        Sensor::mapName["inPressure"]->send(0);     // Turn off 2 bar pressure
+        Sensor::mapName["cooling"]->send(1);        // Start cooling by opening magnetic valve
+        Sensor::mapName["bypass"]->send(1);         // Enable bypass
 
         state = State::COOLING;
         Logger::info("StateMachine: Cooling");
         break;
 
     case State::COOLING:
-        // Hladnjenje do zadane temperature
+        // Cool down until the target temperature is reached
         if (values.tempK > processConfig.finishTemp)
             break;
 
-        Sensor::mapName["cooling"]->send(0);        // Iskljuciti hladjenje u autoklavu
-        Sensor::mapName["bypass"]->send(0);         // Iskljucivanje bypassa
+        Sensor::mapName["cooling"]->send(0);    // Turn off cooling
+        Sensor::mapName["bypass"]->send(0);     // Disable bypass
 
         state = State::FINISHING;
         Logger::info("StateMachine: Finishing");
         break;
 
     case State::FINISHING:
-        Sensor::mapName["pump"]->send(0);           // Iskljucivanje cirkulacione pumpe
+        Sensor::mapName["pump"]->send(0);   // Stop circulation pump
 
         state = State::FINISHED;
         Logger::info("StateMachine: Finished");
