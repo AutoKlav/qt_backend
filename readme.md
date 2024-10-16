@@ -24,8 +24,8 @@ Use QJsonDocument for communication
 
 ## Start/Stop process
 
-- set variables
-- start/stop process
+- ~~set variables~~
+- ~~start/stop process~~
 
 ---
 

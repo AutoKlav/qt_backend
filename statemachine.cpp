@@ -71,7 +71,7 @@ StateMachineValues StateMachine::getValues()
     return values;
 }
 
-StateMachineValues StateMachine::calcValues()
+StateMachineValues StateMachine::calculateDrFrRValuesFromSensors()
 {
     StateMachineValues smValues;
 
@@ -103,7 +103,7 @@ StateMachineValues StateMachine::calcValues()
 
 void StateMachine::tick()
 {
-    values = calcValues();
+    values = calculateDrFrRValuesFromSensors();
 
     if (processLog && isRunning())
         processLog->appendLog(values);

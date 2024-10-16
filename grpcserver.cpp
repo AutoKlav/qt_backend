@@ -136,6 +136,12 @@ Status GRpcServer::Impl::AutoklavServiceImpl::setVariable(grpc::ServerContext *c
     return Status::OK;
 }
 
+/**
+ * @brief Represents the status of a gRPC server operation.
+ */
+/**
+ * @brief Represents the status of a gRPC operation.
+ */
 Status GRpcServer::Impl::AutoklavServiceImpl::startProcess(grpc::ServerContext *context, const autoklav::StartProcessRequest *request, autoklav::Status *replay)
 {
     Q_UNUSED(context);
@@ -207,7 +213,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getStateMachineValues(grpc::Server
     Q_UNUSED(context);
     Q_UNUSED(request);
 
-    const auto stateMachineValues = StateMachine::instance().calcValues();
+    const auto stateMachineValues = StateMachine::instance().calculateDrFrRValuesFromSensors();
 
     replay->set_time(stateMachineValues.time);
     replay->set_temp(stateMachineValues.temp);
