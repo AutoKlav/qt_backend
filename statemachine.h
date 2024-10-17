@@ -5,6 +5,7 @@
 #include <QObject>
 #include <QDateTime>
 
+#include "process.h"
 #include "processlog.h"
 
 
@@ -54,8 +55,8 @@ private:
     explicit StateMachine(QObject *parent = nullptr);
 
     QTimer *timer;
+    Process *process;
     ProcessLog *processLog;
-
     State state;
     QDateTime processStart;
     StateMachineValues values;

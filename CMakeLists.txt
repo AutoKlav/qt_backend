@@ -90,7 +90,8 @@ add_executable(NewAutoklav
   serial.cpp serial.h
   statemachine.cpp statemachine.h
 
-  init.sql  
+  init.sql
+  process.cpp process.h
 
 )
 
