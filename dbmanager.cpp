@@ -156,10 +156,10 @@ ProcessLog DbManager::getProcessLog(QString name)
     }
 }
 
-int DbManager::createProcessLog(QString name, ProcessInfo info)
+int DbManager::createProcess(QString name, ProcessInfo info)
 {
     QSqlQuery query(m_db);
-    query.prepare("INSERT INTO ProcessLog (name, productName, productQuantity, bacteria, description, processStart, processLength) "
+    query.prepare("INSERT INTO Process (name, productName, productQuantity, bacteria, description, processStart, processLength) "
                   "VALUES (:name, :productName, :productQuantity, :bacteria, :description, :processStart, :processLength)");
     query.bindValue(":name", name);
     query.bindValue(":productName", info.productName);
@@ -179,10 +179,10 @@ int DbManager::createProcessLog(QString name, ProcessInfo info)
     return query.lastInsertId().toInt();
 }
 
-bool DbManager::updateProcessLog(int id, ProcessInfo info)
+bool DbManager::updateProcess(int id, ProcessInfo info)
 {
     QSqlQuery query(m_db);
-    query.prepare("UPDATE ProcessLog SET productName = :productName, productQuantity = :productQuantity, bacteria = :bacteria, "
+    query.prepare("UPDATE Process SET productName = :productName, productQuantity = :productQuantity, bacteria = :bacteria, "
                   "description = :description, processLength = :processLength WHERE id = :id");
     query.bindValue(":id", id);
     query.bindValue(":productName", info.productName);
@@ -197,7 +197,17 @@ bool DbManager::updateProcessLog(int id, ProcessInfo info)
         return false;
     }
 
-    Logger::info(QString("Database: Update process log %1").arg(id));
+    Logger::info(QString("Database: Update process %1").arg(id));
+    return true;
+}
+
+int DbManager::createProcessLog(QString name, ProcessInfo info)
+{
+    return 1;
+}
+
+bool DbManager::updateProcessLog(int id, ProcessInfo info)
+{
     return true;
 }
 

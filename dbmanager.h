@@ -43,6 +43,7 @@ public:
 
     /// Process
     int createProcess(QString name, ProcessInfo info);
+    bool updateProcess(int id, ProcessInfo info);
 
     // ProcessLog
     ProcessLog getProcessLog(int id);

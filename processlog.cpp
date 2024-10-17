@@ -92,9 +92,9 @@ void ProcessLog::loadLogs()
 bool ProcessLog::save()
 {
     if (id == -1) {
-        id = DbManager::instance().createProcessLog(name, info);
+        id = DbManager::instance().createProcess(name, info);
         return id != -1;
     } else {
-        return DbManager::instance().updateProcessLog(id, info);
+        return DbManager::instance().updateProcess(id, info);
     }
 }
