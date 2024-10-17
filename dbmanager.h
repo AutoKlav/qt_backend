@@ -41,6 +41,9 @@ public:
     void loadSensors();
     bool updateSensor(QString name, double newMinValue, double newMaxValue);
 
+    /// Process
+    int createProcess(QString name, ProcessInfo info);
+
     // ProcessLog
     ProcessLog getProcessLog(int id);
     ProcessLog getProcessLog(QString name);
