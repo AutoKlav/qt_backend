@@ -12,7 +12,7 @@ StateMachine::StateMachine(QObject *parent)
     connect(timer, &QTimer::timeout, this, &StateMachine::tick);
 }
 
-double StateMachine::calcdTemp(double temp)
+double StateMachine::calculateDeltaTemerature(double temp)
 {
     switch (processConfig.type) {
     case Type::STERILIZATION:
@@ -81,7 +81,7 @@ StateMachineValues StateMachine::calculateDrFrRValuesFromSensors()
     stateMachineValues.tempK = sensorValues.tempK;
     stateMachineValues.pressure = sensorValues.pressure;
 
-    stateMachineValues.dTemp = calcdTemp(stateMachineValues.tempK);
+    stateMachineValues.dTemp = calculateDeltaTemerature(stateMachineValues.tempK);
 
     stateMachineValues.Dr = qPow(10,  0.1 * stateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
     stateMachineValues.Fr = qPow(10, -0.1 * stateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);

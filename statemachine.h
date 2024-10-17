@@ -63,7 +63,7 @@ private:
 
     quint64 id;
 
-    double calcdTemp(double temp);
+    double calculateDeltaTemerature(double temp);
 
 private slots:
     void tick();
