@@ -1,7 +1,6 @@
 #ifndef PROCESSLOG_H
 #define PROCESSLOG_H
 
-#include <QFile>
 #include <QList>
 #include <QObject>
 
@@ -38,45 +37,24 @@ struct StateMachineValues {
     }
 };
 
-struct ProcessInfo {
-    QString productName, productQuantity;
-    QString bacteria;
-    QString description;
-    QString processStart, processLength;
-};
-
-struct ProcessLogRow : ProcessInfo {
-    int id;
-};
-
 class ProcessLog : public QObject
 {
     Q_OBJECT
 
     int id = -1;
     QString name;
-    ProcessInfo info;
     QList<StateMachineValues> logs;
-
-    QFile file;
 
 public:
     explicit ProcessLog();
-    explicit ProcessLog(QString name, ProcessInfo info, QObject *parent = nullptr);
-    explicit ProcessLog(int id, QString name, ProcessInfo info, QObject *parent = nullptr);
-
-    bool appendLog(StateMachineValues log);
+    explicit ProcessLog(int id, QString name, QObject *parent = nullptr);
 
     int getId();
-    QString getName();
-    ProcessInfo getInfo();
+    QString getName();    
     QList<StateMachineValues> getLogs();
 
-    bool setInfo(ProcessInfo newInfo);
-
-private:
-    void loadLogs();
-    bool save();
+private:    
+    int saveProcessLog();
 
 };
 

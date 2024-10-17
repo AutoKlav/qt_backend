@@ -91,7 +91,7 @@ add_executable(NewAutoklav
   statemachine.cpp statemachine.h
 
   init.sql
-  TODO.md
+  process.cpp process.h
 
 )
 

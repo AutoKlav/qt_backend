@@ -12,7 +12,7 @@ StateMachine::StateMachine(QObject *parent)
     connect(timer, &QTimer::timeout, this, &StateMachine::tick);
 }
 
-double StateMachine::calcdTemp(double temp)
+double StateMachine::calculateDeltaTemerature(double temp)
 {
     switch (processConfig.type) {
     case Type::STERILIZATION:
@@ -35,7 +35,7 @@ bool StateMachine::start(ProcessConfig processConfig, ProcessInfo processInfo)
     state = State::STARTING;
 
     processStart = QDateTime::currentDateTime();
-    processLog = new ProcessLog(processStart.toString(Qt::ISODate), processInfo, this);
+    process = new Process(processStart.toString(Qt::ISODate), processInfo, this);
     values = StateMachineValues();
 
     // Start the timer with the state machine tick interval
@@ -81,7 +81,7 @@ StateMachineValues StateMachine::calculateDrFrRValuesFromSensors()
     stateMachineValues.tempK = sensorValues.tempK;
     stateMachineValues.pressure = sensorValues.pressure;
 
-    stateMachineValues.dTemp = calcdTemp(stateMachineValues.tempK);
+    stateMachineValues.dTemp = calculateDeltaTemerature(stateMachineValues.tempK);
 
     stateMachineValues.Dr = qPow(10,  0.1 * stateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
     stateMachineValues.Fr = qPow(10, -0.1 * stateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
@@ -104,9 +104,6 @@ StateMachineValues StateMachine::calculateDrFrRValuesFromSensors()
 void StateMachine::tick()
 {
     values = calculateDrFrRValuesFromSensors();
-
-    if (processLog && isRunning())
-        processLog->appendLog(values);
 
     switch (state) {
     case State::READY:
@@ -192,10 +189,10 @@ void StateMachine::tick()
 
         Logger::info("StateMachine: Ready");
 
-        if (processLog) {
-            auto processLogInfo = processLog->getInfo();
-            processLogInfo.processLength = QString::number(values.time);
-            processLog->setInfo(processLogInfo);
+        if (process) {
+            auto processInfo = process->getInfo();
+            processInfo.processLength = QString::number(values.time);
+            process->setInfo(processInfo);
         }
 
         state = State::READY;

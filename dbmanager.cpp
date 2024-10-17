@@ -108,58 +108,10 @@ bool DbManager::updateSensor(QString name, double newMinValue, double newMaxValu
     return true;
 }
 
-ProcessLog DbManager::getProcessLog(int id)
+int DbManager::createProcess(QString name, ProcessInfo info)
 {
     QSqlQuery query(m_db);
-    query.prepare("SELECT * FROM ProcessLog WHERE id = :id");
-    query.bindValue(":id", id);
-
-    if (query.exec() && query.next()) {
-        auto id = query.value(0).toInt();
-        auto name = query.value(1).toString();
-        auto productName = query.value(2).toString();
-        auto productQuantity = query.value(3).toString();
-        auto bacteria = query.value(4).toString();
-        auto description = query.value(5).toString();
-        auto processStart = query.value(6).toString();
-        auto processLength = query.value(7).toString();
-
-        return ProcessLog(id, name, {productName, productQuantity, bacteria, description, processStart, processLength});
-    } else {
-        Logger::crit(QString("Database: Unable to fetch process log %1").arg(id));
-        Logger::crit(QString("SQL error: %1").arg(query.lastError().text()));
-        return ProcessLog();
-    }
-}
-
-ProcessLog DbManager::getProcessLog(QString name)
-{
-    QSqlQuery query(m_db);
-    query.prepare("SELECT * FROM ProcessLog WHERE name = :name");
-    query.bindValue(":name", name);
-
-    if (query.exec() && query.next()) {
-        auto id = query.value(0).toInt();
-        auto name = query.value(1).toString();
-        auto productName = query.value(2).toString();
-        auto productQuantity = query.value(3).toString();
-        auto bacteria = query.value(4).toString();
-        auto description = query.value(5).toString();
-        auto processStart = query.value(6).toString();
-        auto processLength = query.value(7).toString();
-
-        return ProcessLog(id, name, {productName, productQuantity, bacteria, description, processStart, processLength});
-    } else {
-        Logger::crit(QString("Database: Unable to fetch process log %1").arg(name));
-        Logger::crit(QString("SQL error: %1").arg(query.lastError().text()));
-        return ProcessLog();
-    }
-}
-
-int DbManager::createProcessLog(QString name, ProcessInfo info)
-{
-    QSqlQuery query(m_db);
-    query.prepare("INSERT INTO ProcessLog (name, productName, productQuantity, bacteria, description, processStart, processLength) "
+    query.prepare("INSERT INTO Process (name, productName, productQuantity, bacteria, description, processStart, processLength) "
                   "VALUES (:name, :productName, :productQuantity, :bacteria, :description, :processStart, :processLength)");
     query.bindValue(":name", name);
     query.bindValue(":productName", info.productName);
@@ -179,10 +131,10 @@ int DbManager::createProcessLog(QString name, ProcessInfo info)
     return query.lastInsertId().toInt();
 }
 
-bool DbManager::updateProcessLog(int id, ProcessInfo info)
+bool DbManager::updateProcess(int id, ProcessInfo info)
 {
     QSqlQuery query(m_db);
-    query.prepare("UPDATE ProcessLog SET productName = :productName, productQuantity = :productQuantity, bacteria = :bacteria, "
+    query.prepare("UPDATE Process SET productName = :productName, productQuantity = :productQuantity, bacteria = :bacteria, "
                   "description = :description, processLength = :processLength WHERE id = :id");
     query.bindValue(":id", id);
     query.bindValue(":productName", info.productName);
@@ -197,11 +149,21 @@ bool DbManager::updateProcessLog(int id, ProcessInfo info)
         return false;
     }
 
-    Logger::info(QString("Database: Update process log %1").arg(id));
+    Logger::info(QString("Database: Update process %1").arg(id));
     return true;
 }
 
-QList<ProcessLogRow> DbManager::searchProcessLogs(ProcessLogFilters filters)
+int DbManager::createProcessLog(QString name, ProcessInfo info)
+{
+    return 1;
+}
+
+bool DbManager::updateProcessLog(int id, ProcessInfo info)
+{
+    return true;
+}
+
+QList<ProcessRow> DbManager::searchProcessLogs(ProcessLogFilters filters)
 {
     QString queryStr = "SELECT * FROM ProcessLog WHERE 1";
     if (!filters.name.isEmpty()) {
@@ -212,7 +174,7 @@ QList<ProcessLogRow> DbManager::searchProcessLogs(ProcessLogFilters filters)
     }
 
     QSqlQuery query(queryStr, m_db);
-    QList<ProcessLogRow> rows;
+    QList<ProcessRow> rows;
     while (query.next()) {
         auto id = query.value(0).toInt();
         // auto name = query.value(1).toString();
@@ -223,7 +185,7 @@ QList<ProcessLogRow> DbManager::searchProcessLogs(ProcessLogFilters filters)
         auto processStart = query.value(6).toString();
         auto processLength = query.value(7).toString();
 
-        ProcessLogRow row = {
+        ProcessRow row = {
             {productName, productQuantity, bacteria, description, processStart, processLength}, id
         };
         rows.append(row);

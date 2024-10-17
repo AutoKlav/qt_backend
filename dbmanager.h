@@ -7,6 +7,7 @@
 #include <QSqlError>
 
 #include "processlog.h"
+#include "process.h"
 
 /*
  * Globals:
@@ -41,13 +42,17 @@ public:
     void loadSensors();
     bool updateSensor(QString name, double newMinValue, double newMaxValue);
 
+    // Process
+    int createProcess(QString name, ProcessInfo info);
+    bool updateProcess(int id, ProcessInfo info);
+
     // ProcessLog
     ProcessLog getProcessLog(int id);
     ProcessLog getProcessLog(QString name);
     int createProcessLog(QString name, ProcessInfo info);
     bool updateProcessLog(int id, ProcessInfo info);
 
-    QList<ProcessLogRow> searchProcessLogs(ProcessLogFilters filters);
+    QList<ProcessRow> searchProcessLogs(ProcessLogFilters filters);
     QStringList getProcessLogNames();
 
     static DbManager& instance();
