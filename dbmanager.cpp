@@ -200,11 +200,11 @@ int DbManager::createProcessLog(QString name)
     QSqlQuery query(m_db);
     query.prepare("INSERT INTO ProcessLog (processId, temp, tempK, pressure, state, Dr, Fr, r, sumFr, sumr, timestamp) "
                   "VALUES (:processId, :temp, :tempK, :pressure, :state, :Dr, :Fr, :r, :sumFr, :sumr, :timestamp)");
-    query.bindValue(":processId", 1);  // Ensure processId is included
+    query.bindValue(":processId", 1);  
     query.bindValue(":temp", values.temp);
     query.bindValue(":tempK", values.tempK);
     query.bindValue(":pressure", values.pressure);
-    query.bindValue(":state", "state");  // Replace "state" with the actual state if necessary
+    query.bindValue(":state", "state");
     query.bindValue(":Dr", values.Dr);
     query.bindValue(":Fr", values.Fr);
     query.bindValue(":r", values.r);
