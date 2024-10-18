@@ -8,13 +8,26 @@ class GlobalErrors
 public:
     enum Error {
         DbError =           0x1,
-        SerialError =       0x2,
-        OldDataError =      0x4,
-        SerialSendError =   0x8,
+        DbTargetKError =    0x2,
+        DbSerialDataTimeError = 0x4,
+        DbStateMachineTickError = 0x8,
+        DbSterilizationTempError = 0x10,
+        DbPasterizationTempError = 0x20,
+        SerialError =       0x40,
+        OldDataError =      0x80,
+        SerialSendError =   0x100,        
     };
     Q_DECLARE_FLAGS(Errors, Error);
 
+    // Db errors
     static const QString DB_ERROR;
+    static const QString DB_GLOBAL_TARGET_K_LOAD_FAILED;
+    static const QString DB_GLOBAL_SERIAL_DATA_TIME_LOAD_FAILED;
+    static const QString DB_GLOBAL_STATE_MACHINE_TICK_LOAD_FAILED;
+    static const QString DB_GLOBAL_STERILIZATION_TEMP_LOAD_FAILED;
+    static const QString DB_GLOBAL_PASTERIZATION_TEMP_LOAD_FAILED;
+
+    // Serial errors
     static const QString SERIAL_ERROR;
     static const QString OLD_DATA_ERROR;
     static const QString SERIAL_SEND_ERROR;
