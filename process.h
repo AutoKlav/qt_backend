@@ -32,6 +32,7 @@ public:
     int getId();
     ProcessInfo getInfo();
     bool setInfo(ProcessInfo newInfo);
+    QString getName();
 
 private:
     int saveProcess();

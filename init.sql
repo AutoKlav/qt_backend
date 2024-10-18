@@ -42,6 +42,7 @@ CREATE TABLE ProcessLog (
     temp REAL NOT NULL,
     tempK REAL NOT NULL,
     pressure REAL NOT NULL,
+    state TEXT NOT NULL,
     Dr REAL NOT NULL,
     Fr REAL NOT NULL,
     r REAL NOT NULL,

@@ -14,6 +14,11 @@ Process::Process(QString name, ProcessInfo info, QObject *parent)
     saveProcess();
 }
 
+QString Process::getName()
+{
+    return name;
+}
+
 ProcessInfo Process::getInfo()
 {
     return info;

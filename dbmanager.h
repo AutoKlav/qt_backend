@@ -24,7 +24,7 @@
 class DbManager
 {
 public:
-    struct ProcessLogFilters {
+    struct ProcessFilters {
         QString name;
         QString minDate, maxDate;
     };
@@ -49,11 +49,10 @@ public:
     // ProcessLog
     ProcessLog getProcessLog(int id);
     ProcessLog getProcessLog(QString name);
-    int createProcessLog(QString name, ProcessInfo info);
-    bool updateProcessLog(int id, ProcessInfo info);
+    int createProcessLog(QString name);
 
-    QList<ProcessRow> searchProcessLogs(ProcessLogFilters filters);
-    QStringList getProcessLogNames();
+    QList<ProcessRow> searchProcesses(ProcessFilters filters);
+    QStringList getProcessesNames();
 
     static DbManager& instance();
 
