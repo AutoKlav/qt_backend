@@ -12,11 +12,11 @@ public:
         double pasterizationTemp;
     };
 
-    inline static double targetK = 0.0;
-    inline static int serialDataTime = 3000;
-    inline static int stateMachineTick = 60000;
-    inline static double sterilizationTemp = 121.1;
-    inline static double pasterizationTemp = 70.0;
+    inline static double targetK = 0;
+    inline static int serialDataTime = 0;
+    inline static int stateMachineTick = 0;
+    inline static double sterilizationTemp = 0;
+    inline static double pasterizationTemp = 0;
 
     static bool setTargetK(double value);
     static bool setSerialDataTime(int value);

@@ -37,7 +37,7 @@ CREATE TABLE Process (
 
 CREATE INDEX idx_process_start ON Process(processStart);
 
-CREATE TABLE ProcessLog (    
+CREATE TABLE ProcessLog (
     processId INTEGER NOT NULL,
     temp REAL NOT NULL,
     tempK REAL NOT NULL,

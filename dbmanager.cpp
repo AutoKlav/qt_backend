@@ -42,12 +42,50 @@ QString DbManager::loadGlobal(QString name)
 
 void DbManager::loadGlobals()
 {
-    // TODO: Don't set if loadGlobal() returns empty string
-    Globals::targetK = loadGlobal("targetK").toDouble();
-    Globals::serialDataTime = loadGlobal("serialDataTime").toInt();
-    Globals::stateMachineTick = loadGlobal("stateMachineTick").toInt();
-    Globals::sterilizationTemp = loadGlobal("sterilizationTemp").toDouble();
-    Globals::pasterizationTemp = loadGlobal("pasterizationTemp").toDouble();
+    QString targetKStr = loadGlobal("targetK");
+    if (!targetKStr.isEmpty()) {
+        Globals::targetK = targetKStr.toDouble();
+    }
+    else {
+        Logger::crit(GlobalErrors::DB_GLOBAL_TARGET_K_LOAD_FAILED);
+        GlobalErrors::setError(GlobalErrors::DbTargetKError);
+    }
+
+    QString serialDataTimeStr = loadGlobal("serialDataTime");
+    if (!serialDataTimeStr.isEmpty()) {
+        Globals::serialDataTime = serialDataTimeStr.toInt();
+    }
+    else {
+        Logger::crit(GlobalErrors::DB_GLOBAL_SERIAL_DATA_TIME_LOAD_FAILED);
+        GlobalErrors::setError(GlobalErrors::DbSerialDataTimeError);
+    }
+
+    QString stateMachineTickStr = loadGlobal("stateMachineTick");
+    if (!stateMachineTickStr.isEmpty()) {
+        Globals::stateMachineTick = stateMachineTickStr.toInt();
+    }
+    else {
+        Logger::crit(GlobalErrors::DB_GLOBAL_STATE_MACHINE_TICK_LOAD_FAILED);
+        GlobalErrors::setError(GlobalErrors::DbStateMachineTickError);
+    }
+
+    QString sterilizationTempStr = loadGlobal("sterilizationTemp");
+    if (!sterilizationTempStr.isEmpty()) {
+        Globals::sterilizationTemp = sterilizationTempStr.toDouble();
+    }
+    else {
+        Logger::crit(GlobalErrors::DB_GLOBAL_STERILIZATION_TEMP_LOAD_FAILED);
+        GlobalErrors::setError(GlobalErrors::DbSterilizationTempError);
+    }
+
+    QString pasterizationTempStr = loadGlobal("pasterizationTemp");
+    if (!pasterizationTempStr.isEmpty()) {
+        Globals::pasterizationTemp = pasterizationTempStr.toDouble();
+    }
+    else {
+        Logger::crit(GlobalErrors::DB_GLOBAL_PASTERIZATION_TEMP_LOAD_FAILED);
+        GlobalErrors::setError(GlobalErrors::DbPasterizationTempError);
+    }
 }
 
 bool DbManager::updateGlobal(QString name, QString value)
