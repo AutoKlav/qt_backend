@@ -196,14 +196,9 @@ int DbManager::createProcessLog(QString name, ProcessInfo info)
     return 1;
 }
 
-bool DbManager::updateProcessLog(int id, ProcessInfo info)
+QList<ProcessRow> DbManager::searchProcesses(ProcessFilters filters)
 {
-    return true;
-}
-
-QList<ProcessRow> DbManager::searchProcessLogs(ProcessLogFilters filters)
-{
-    QString queryStr = "SELECT * FROM ProcessLog WHERE 1";
+    QString queryStr = "SELECT * FROM Process WHERE 1";
     if (!filters.name.isEmpty()) {
         queryStr += " AND name LIKE '%" + filters.name + "%'";
     }
@@ -231,9 +226,9 @@ QList<ProcessRow> DbManager::searchProcessLogs(ProcessLogFilters filters)
     return rows;
 }
 
-QStringList DbManager::getProcessLogNames()
+QStringList DbManager::getProcessesNames()
 {
-    QSqlQuery query("SELECT DISTINCT name FROM ProcessLog", m_db);
+    QSqlQuery query("SELECT DISTINCT name FROM Process", m_db);
     QStringList names;
     while (query.next()) {
         names.append(query.value(0).toString());
