@@ -2,6 +2,7 @@
 #include "logger.h"
 #include "sensor.h"
 #include "globals.h"
+#include "dbmanager.h"
 
 StateMachine::StateMachine(QObject *parent)
     : QObject{parent}
@@ -12,7 +13,7 @@ StateMachine::StateMachine(QObject *parent)
     connect(timer, &QTimer::timeout, this, &StateMachine::tick);
 }
 
-double StateMachine::calculateDeltaTemerature(double temp)
+double StateMachine::calculateDeltaTemperature(double temp)
 {
     switch (processConfig.type) {
     case Type::STERILIZATION:
@@ -81,7 +82,7 @@ StateMachineValues StateMachine::calculateDrFrRValuesFromSensors()
     stateMachineValues.tempK = sensorValues.tempK;
     stateMachineValues.pressure = sensorValues.pressure;
 
-    stateMachineValues.dTemp = calculateDeltaTemerature(stateMachineValues.tempK);
+    stateMachineValues.dTemp = calculateDeltaTemperature(stateMachineValues.tempK);
 
     stateMachineValues.Dr = qPow(10,  0.1 * stateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
     stateMachineValues.Fr = qPow(10, -0.1 * stateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
@@ -98,6 +99,8 @@ StateMachineValues StateMachine::calculateDrFrRValuesFromSensors()
         stateMachineValues.sumr = 0;
     }
 
+    DbManager::instance().createProcessLog("name");
+
     return stateMachineValues;
 }
 
@@ -107,6 +110,7 @@ void StateMachine::tick()
 
     switch (state) {
     case State::READY:
+
         break;
 
     case State::STARTING:

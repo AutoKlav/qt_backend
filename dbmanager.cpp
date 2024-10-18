@@ -6,6 +6,7 @@
 #include "logger.h"
 #include "globals.h"
 #include "globalerrors.h"
+#include "statemachine.h"
 
 DbManager::DbManager()
 {
@@ -191,9 +192,34 @@ bool DbManager::updateProcess(int id, ProcessInfo info)
     return true;
 }
 
-int DbManager::createProcessLog(QString name, ProcessInfo info)
+int DbManager::createProcessLog(QString name)
 {
-    return 1;
+    StateMachine &stateMachine = StateMachine::instance();
+    auto values = stateMachine.getValues();
+
+    QSqlQuery query(m_db);
+    query.prepare("INSERT INTO ProcessLog (processId, temp, tempK, pressure, state, Dr, Fr, r, sumFr, sumr, timestamp) "
+                  "VALUES (:processId, :temp, :tempK, :pressure, :state, :Dr, :Fr, :r, :sumFr, :sumr, :timestamp)");
+    query.bindValue(":processId", 1);  // Ensure processId is included
+    query.bindValue(":temp", values.temp);
+    query.bindValue(":tempK", values.tempK);
+    query.bindValue(":pressure", values.pressure);
+    query.bindValue(":state", "state");  // Replace "state" with the actual state if necessary
+    query.bindValue(":Dr", values.Dr);
+    query.bindValue(":Fr", values.Fr);
+    query.bindValue(":r", values.r);
+    query.bindValue(":sumFr", values.sumFr);
+    query.bindValue(":sumr", values.sumr);
+    query.bindValue(":timestamp", QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"));
+
+    if (!query.exec()) {
+        Logger::crit(QString("Database: Unable to create process log"));
+        Logger::crit(QString("SQL error: %1").arg(query.lastError().text()));
+        return -1;
+    }
+
+    Logger::info(QString("Database: Created process log entry"));
+    return query.lastInsertId().toInt();
 }
 
 QList<ProcessRow> DbManager::searchProcesses(ProcessFilters filters)
