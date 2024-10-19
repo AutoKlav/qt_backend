@@ -98,8 +98,11 @@ StateMachineValues StateMachine::calculateDrFrRValuesFromSensors(QString process
         stateMachineValues.sumFr = 0;
         stateMachineValues.sumr = 0;
     }
-
-    DbManager::instance().createProcessLog(processName);
+    // Save process log to database if name is provided, if not, method is called by grpc 
+    // server and we don't want to write it in db
+    if (!processName.isEmpty()) {
+        DbManager::instance().createProcessLog(processName);
+    }
 
     return stateMachineValues;
 }

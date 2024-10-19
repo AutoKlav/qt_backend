@@ -47,7 +47,10 @@ public:
     bool isRunning();
 
     StateMachineValues getValues();
-    StateMachineValues calculateDrFrRValuesFromSensors(QString processName);
+
+    // If processName is not provided, the function is used by `getStateMachineValues` method
+    // and doesn't require a processName
+    StateMachineValues calculateDrFrRValuesFromSensors(QString processName = QString());
 
     static StateMachine &instance();
 

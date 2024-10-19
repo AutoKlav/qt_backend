@@ -53,9 +53,6 @@ public:
     QString getName();    
     QList<StateMachineValues> getLogs();
 
-private:    
-    int saveProcessLog();
-
 };
 
 #endif // PROCESSLOG_H
