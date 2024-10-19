@@ -72,7 +72,7 @@ StateMachineValues StateMachine::getValues()
     return values;
 }
 
-StateMachineValues StateMachine::calculateDrFrRValuesFromSensors()
+StateMachineValues StateMachine::calculateDrFrRValuesFromSensors(QString processName)
 {
     StateMachineValues stateMachineValues;
 
@@ -99,14 +99,14 @@ StateMachineValues StateMachine::calculateDrFrRValuesFromSensors()
         stateMachineValues.sumr = 0;
     }
 
-    DbManager::instance().createProcessLog("name");
+    DbManager::instance().createProcessLog(processName);
 
     return stateMachineValues;
 }
 
 void StateMachine::tick()
 {
-    values = calculateDrFrRValuesFromSensors();
+    values = calculateDrFrRValuesFromSensors(process->getName());
 
     switch (state) {
     case State::READY:

@@ -47,7 +47,7 @@ public:
     bool isRunning();
 
     StateMachineValues getValues();
-    StateMachineValues calculateDrFrRValuesFromSensors();
+    StateMachineValues calculateDrFrRValuesFromSensors(QString processName);
 
     static StateMachine &instance();
 
