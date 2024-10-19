@@ -22,7 +22,6 @@ INSERT INTO Sensor VALUES ( "pump", "D3", 0, 1 );
 INSERT INTO Sensor VALUES ( "inPressure", "D4", 0, 1 );
 INSERT INTO Sensor VALUES ( "cooling", "D5", 0, 1 );
 
-
 -- Process
 CREATE TABLE Process (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -37,8 +36,9 @@ CREATE TABLE Process (
 
 CREATE INDEX idx_process_start ON Process(processStart);
 
+-- ProcessLog
 CREATE TABLE ProcessLog (
-    processId INTEGER NOT NULL,
+    processName TEXT NOT NULL,
     temp REAL NOT NULL,
     tempK REAL NOT NULL,
     pressure REAL NOT NULL,
@@ -49,5 +49,5 @@ CREATE TABLE ProcessLog (
     sumFr REAL NOT NULL,
     sumr REAL NOT NULL,    
     timestamp DATETIME NOT NULL,
-    FOREIGN KEY (processId) REFERENCES Process(id)
+    FOREIGN KEY (processName) REFERENCES Process(name)
 );

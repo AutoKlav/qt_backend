@@ -22,15 +22,3 @@ QList<StateMachineValues> ProcessLog::getLogs()
 {
     return logs;
 }
-
-
-int ProcessLog::saveProcessLog()
-{
-    // if (id == -1) {
-    //     id = DbManager::instance().createProcess(name, info);
-    //     return id;
-    // } else {
-    //     return DbManager::instance().updateProcess(id, info);
-    // }
-    return 0;
-}
