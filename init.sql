@@ -11,16 +11,16 @@ INSERT INTO Globals VALUES ( "pasterizationTemp", "70.0" );
 -- Sensor
 CREATE TABLE Sensor ( name TEXT NOT NULL UNIQUE, pinName TEXT NOT NULL UNIQUE, minValue REAL NOT NULL, maxValue REAL NOT NULL );
 
-INSERT INTO Sensor VALUES ( "temp", "A0", 0, 150 );
-INSERT INTO Sensor VALUES ( "tempK", "A1", 0, 150 );
-INSERT INTO Sensor VALUES ( "pressure", "A2", 0, 3 );
+INSERT INTO Sensor VALUES ( "temp", "ADC_1", 0, 150 );
+INSERT INTO Sensor VALUES ( "tempK", "ADC_2", 0, 150 );
+INSERT INTO Sensor VALUES ( "pressure", "ADC_3", 0, 3 );
 
-INSERT INTO Sensor VALUES ( "waterFill", "D0", 0, 1 );
-INSERT INTO Sensor VALUES ( "heating", "D1", 0, 1 );
-INSERT INTO Sensor VALUES ( "bypass", "D2", 0, 1 );
-INSERT INTO Sensor VALUES ( "pump", "D3", 0, 1 );
-INSERT INTO Sensor VALUES ( "inPressure", "D4", 0, 1 );
-INSERT INTO Sensor VALUES ( "cooling", "D5", 0, 1 );
+INSERT INTO Sensor VALUES ( "waterFill", "IO_0", 0, 1 );
+INSERT INTO Sensor VALUES ( "heating", "IO_1", 0, 1 );
+INSERT INTO Sensor VALUES ( "bypass", "IO_2", 0, 1 );
+INSERT INTO Sensor VALUES ( "pump", "IO_3", 0, 1 );
+INSERT INTO Sensor VALUES ( "inPressure", "IO_4", 0, 1 );
+INSERT INTO Sensor VALUES ( "cooling", "IO_5", 0, 1 );
 
 -- Process
 CREATE TABLE Process (

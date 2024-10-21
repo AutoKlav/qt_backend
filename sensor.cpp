@@ -3,9 +3,9 @@
 #include <QDateTime>
 
 #include "globals.h"
-#include "mockserial.h"
 #include "globalerrors.h"
 #include "logger.h"
+#include "serial.h"
 
 qint64 Sensor::lastDataTime = 0;
 QList<Sensor> Sensor::sensors = QList<Sensor>();
@@ -24,7 +24,7 @@ void Sensor::send(double value)
 
     auto data = QString("%1=%2").arg(pinName).arg(pinValue);
 
-    auto &serial = MockSerial::instance();
+    auto &serial = Serial::instance();
     serial.sendData(data);
 }
 
