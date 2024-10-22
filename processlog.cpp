@@ -7,12 +7,6 @@ ProcessLog::ProcessLog()
     Logger::crit("ProcessLog: Entered empty process log (this shouldn't happen)");
 }
 
-
-int ProcessLog::getId()
-{
-    return id;
-}
-
 QString ProcessLog::getName()
 {
     return name;
