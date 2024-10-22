@@ -4,13 +4,15 @@
 #include "globals.h"
 #include "dbmanager.h"
 
+// Constructor
 StateMachine::StateMachine(QObject *parent)
-    : QObject{parent}
-{
-    state = State::READY;
+    : QObject(parent), state(READY), timer(new QTimer(this)), process(nullptr), processLog(nullptr) {
+    // Initialization code
+}
 
-    timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, &StateMachine::tick);
+// Definition of getState method
+int StateMachine::getState() {
+    return static_cast<int>(state);
 }
 
 double StateMachine::calculateDeltaTemperature(double temp)

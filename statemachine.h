@@ -8,7 +8,6 @@
 #include "process.h"
 #include "processlog.h"
 
-
 class StateMachine : public QObject
 {
     Q_OBJECT
@@ -45,6 +44,7 @@ public:
     bool start(ProcessConfig processConfig, ProcessInfo processInfo);
     bool stop();
     bool isRunning();
+    int getState(); 
 
     StateMachineValues getValues();
 

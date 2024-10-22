@@ -195,6 +195,8 @@ bool DbManager::updateProcess(int id, ProcessInfo info)
 int DbManager::createProcessLog(int processId)
 {
     StateMachine &stateMachine = StateMachine::instance();
+    auto currentState = QString::number(stateMachine.getState());
+
     auto values = stateMachine.getValues();
 
     QSqlQuery query(m_db);
@@ -204,7 +206,7 @@ int DbManager::createProcessLog(int processId)
     query.bindValue(":temp", values.temp);
     query.bindValue(":tempK", values.tempK);
     query.bindValue(":pressure", values.pressure);
-    query.bindValue(":state", "state");
+    query.bindValue(":state", currentState);
     query.bindValue(":Dr", values.Dr);
     query.bindValue(":Fr", values.Fr);
     query.bindValue(":r", values.r);
