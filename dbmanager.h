@@ -49,7 +49,7 @@ public:
     // ProcessLog
     ProcessLog getProcessLog(int id);
     ProcessLog getProcessLog(QString name);
-    int createProcessLog(QString processName);
+    int createProcessLog(int processId);
 
     QList<ProcessRow> searchProcesses(ProcessFilters filters);
     QStringList getProcessesNames();

@@ -72,7 +72,7 @@ StateMachineValues StateMachine::getValues()
     return values;
 }
 
-StateMachineValues StateMachine::calculateDrFrRValuesFromSensors(QString processName)
+StateMachineValues StateMachine::calculateDrFrRValuesFromSensors(int processId)
 {
     StateMachineValues stateMachineValues;
 
@@ -98,18 +98,15 @@ StateMachineValues StateMachine::calculateDrFrRValuesFromSensors(QString process
         stateMachineValues.sumFr = 0;
         stateMachineValues.sumr = 0;
     }
-    // Save process log to database if name is provided, if not, method is called by grpc 
-    // server and we don't want to write it in db
-    if (!processName.isEmpty()) {
-        DbManager::instance().createProcessLog(processName);
-    }
+
+    DbManager::instance().createProcessLog(processId);
 
     return stateMachineValues;
 }
 
 void StateMachine::tick()
 {
-    values = calculateDrFrRValuesFromSensors(process->getName());
+    values = calculateDrFrRValuesFromSensors(process->getId());
 
     switch (state) {
     case State::READY:
