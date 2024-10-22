@@ -38,7 +38,7 @@ CREATE INDEX idx_process_start ON Process(processStart);
 
 -- ProcessLog
 CREATE TABLE ProcessLog (
-    processName TEXT NOT NULL,
+    processId INTEGER NOT NULL,
     temp REAL NOT NULL,
     tempK REAL NOT NULL,
     pressure REAL NOT NULL,

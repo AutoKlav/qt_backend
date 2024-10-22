@@ -192,19 +192,21 @@ bool DbManager::updateProcess(int id, ProcessInfo info)
     return true;
 }
 
-int DbManager::createProcessLog(QString processName)
+int DbManager::createProcessLog(int processId)
 {
     StateMachine &stateMachine = StateMachine::instance();
+    auto currentState = QString::number(stateMachine.getState());
+
     auto values = stateMachine.getValues();
 
     QSqlQuery query(m_db);
-    query.prepare("INSERT INTO ProcessLog (processName, temp, tempK, pressure, state, Dr, Fr, r, sumFr, sumr, timestamp) "
-                  "VALUES (:processName, :temp, :tempK, :pressure, :state, :Dr, :Fr, :r, :sumFr, :sumr, :timestamp)");
-    query.bindValue(":processName", processName);
+    query.prepare("INSERT INTO ProcessLog (processId, temp, tempK, pressure, state, Dr, Fr, r, sumFr, sumr, timestamp) "
+                  "VALUES (:processId, :temp, :tempK, :pressure, :state, :Dr, :Fr, :r, :sumFr, :sumr, :timestamp)");
+    query.bindValue(":processId", processId);
     query.bindValue(":temp", values.temp);
     query.bindValue(":tempK", values.tempK);
     query.bindValue(":pressure", values.pressure);
-    query.bindValue(":state", "state");
+    query.bindValue(":state", currentState);
     query.bindValue(":Dr", values.Dr);
     query.bindValue(":Fr", values.Fr);
     query.bindValue(":r", values.r);

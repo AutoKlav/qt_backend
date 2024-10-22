@@ -41,15 +41,13 @@ class ProcessLog : public QObject
 {
     Q_OBJECT
 
-    int id = -1;
     QString name;
     QList<StateMachineValues> logs;
 
 public:
     explicit ProcessLog();
-    explicit ProcessLog(int id, QString name, QObject *parent = nullptr);
+    explicit ProcessLog(QString name, QObject *parent = nullptr);
 
-    int getId();
     QString getName();    
     QList<StateMachineValues> getLogs();
 

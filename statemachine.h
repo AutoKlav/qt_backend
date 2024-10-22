@@ -8,7 +8,6 @@
 #include "process.h"
 #include "processlog.h"
 
-
 class StateMachine : public QObject
 {
     Q_OBJECT
@@ -45,12 +44,13 @@ public:
     bool start(ProcessConfig processConfig, ProcessInfo processInfo);
     bool stop();
     bool isRunning();
+    int getState(); 
 
     StateMachineValues getValues();
 
     // If processName is not provided, the function is used by `getStateMachineValues` method
     // and doesn't require a processName
-    StateMachineValues calculateDrFrRValuesFromSensors(QString processName = QString());
+    StateMachineValues calculateDrFrRValuesFromSensors(int processId);
 
     static StateMachine &instance();
 

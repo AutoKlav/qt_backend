@@ -19,6 +19,11 @@ QString Process::getName()
     return name;
 }
 
+int Process::getId()
+{
+    return id;
+}
+
 ProcessInfo Process::getInfo()
 {
     return info;

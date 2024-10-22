@@ -4,13 +4,15 @@
 #include "globals.h"
 #include "dbmanager.h"
 
+// Constructor
 StateMachine::StateMachine(QObject *parent)
-    : QObject{parent}
-{
-    state = State::READY;
+    : QObject(parent), state(READY), timer(new QTimer(this)), process(nullptr), processLog(nullptr) {
+    // Initialization code
+}
 
-    timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, &StateMachine::tick);
+// Definition of getState method
+int StateMachine::getState() {
+    return static_cast<int>(state);
 }
 
 double StateMachine::calculateDeltaTemperature(double temp)
@@ -72,7 +74,7 @@ StateMachineValues StateMachine::getValues()
     return values;
 }
 
-StateMachineValues StateMachine::calculateDrFrRValuesFromSensors(QString processName)
+StateMachineValues StateMachine::calculateDrFrRValuesFromSensors(int processId)
 {
     StateMachineValues stateMachineValues;
 
@@ -98,18 +100,15 @@ StateMachineValues StateMachine::calculateDrFrRValuesFromSensors(QString process
         stateMachineValues.sumFr = 0;
         stateMachineValues.sumr = 0;
     }
-    // Save process log to database if name is provided, if not, method is called by grpc 
-    // server and we don't want to write it in db
-    if (!processName.isEmpty()) {
-        DbManager::instance().createProcessLog(processName);
-    }
+
+    DbManager::instance().createProcessLog(processId);
 
     return stateMachineValues;
 }
 
 void StateMachine::tick()
 {
-    values = calculateDrFrRValuesFromSensors(process->getName());
+    values = calculateDrFrRValuesFromSensors(process->getId());
 
     switch (state) {
     case State::READY:
