@@ -101,8 +101,8 @@ StateMachineValues StateMachine::calculateDrFrRValuesFromSensors(int processId)
         stateMachineValues.sumr = 0;
     }
 
-    // Avoid creating process log if grpc getValues endpoint is called
-    if(processId != -1){
+    // ProcessId will be only -1 when it is requested on the fly, from Grpc server
+    if(processId!=-1){
         DbManager::instance().createProcessLog(processId);
     }
 
