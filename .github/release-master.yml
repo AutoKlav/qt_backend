@@ -1,0 +1,41 @@
+name: Release App
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  NODE_VERSION: '20.x' # set this to the node version to use
+  BUN_VERSION: '1.0.20' # set this to the bun version to use
+
+jobs:
+  Release:
+    name: Release
+    runs-on: ubuntu-20.04
+
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      statuses: write
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install Dependencies
+        run: bun install --pure-lockfile
+
+      - name: Release
+        run: bun semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SEMANTIC_RELEASE_PACKAGE: ${{ github.event.repository.name }}
