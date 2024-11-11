@@ -161,14 +161,55 @@ QList<ProcessInfo> DbManager::getAllProcessesOrderedDesc()
         auto processStart = query.value(6).toString();
         auto processLength = query.value(7).toString();
 
-        ProcessInfo info = {
-            productName, productQuantity, bacteria, description, processStart, processLength
-        };
+        ProcessInfo info;
+        info.productName = productName;
+        info.productQuantity = productQuantity;
+        info.bacteria = bacteria;
+        info.description = description;
+        info.processStart = processStart;
+        info.processLength = processLength;
 
         processes.append(info);
     }
 
     return processes;
+}
+
+QList<ProcessLogInfoRow> DbManager::getAllProcessLogsOrderedDesc(int processId)
+{
+    QSqlQuery query("SELECT * From ProcessLog WHERE processId = 8 ORDER BY timestamp desc", m_db); // WHERE processId = :processId ORDER BY timestamp desc
+    //query.bindValue(":processId", processId);
+    QList<ProcessLogInfoRow> processLogs;
+    while (query.next()) {
+        auto id = query.value(0).toInt();
+        auto temp = query.value(2).toDouble();
+        auto tempK = query.value(3).toDouble();
+        auto pressure = query.value(4).toDouble();
+        auto state = query.value(5).toString();
+        auto Dr = query.value(6).toDouble();
+        auto Fr = query.value(7).toDouble();
+        auto r = query.value(8).toDouble();
+        auto sumFr = query.value(9).toDouble();
+        auto sumr = query.value(10).toDouble();
+        auto timestamp = query.value(11).toString();
+
+        ProcessLogInfoRow log;
+        log.processId = id;
+        log.temp = temp;
+        log.tempK = tempK;
+        log.pressure = pressure;
+        log.state = state;
+        log.Dr = Dr;
+        log.Fr = Fr;
+        log.r = r;
+        log.sumFr = sumFr;
+        log.sumr = sumr;
+        log.timestamp = timestamp;
+
+        processLogs.append(log);
+    }
+
+    return processLogs;
 }
 
 int DbManager::createProcess(QString name, ProcessInfo info)

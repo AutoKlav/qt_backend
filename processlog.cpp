@@ -1,6 +1,7 @@
 #include "processlog.h"
 
 #include "logger.h"
+#include "dbmanager.h"
 
 ProcessLog::ProcessLog()
 {
@@ -15,4 +16,10 @@ QString ProcessLog::getName()
 QList<StateMachineValues> ProcessLog::getLogs()
 {
     return logs;
+}
+
+QList<ProcessLogInfoRow> ProcessLog::getAllProcessLogsOrderedDesc(int processId)
+{
+    auto processLogs = DbManager::instance().getAllProcessLogsOrderedDesc(processId);
+    return processLogs;
 }
