@@ -203,3 +203,10 @@ Use QJsonDocument for communication
     }
 }
 ```
+
+## Generate protoc file
+
+```bash
+C:\vcpkg\installed\x64
+-windows\tools\protobuf\protoc.exe --cpp_out=. proto\autoklav.proto
+```

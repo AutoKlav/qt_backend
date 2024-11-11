@@ -3,7 +3,7 @@
 #include "logger.h"
 #include "serial.h"
 #include "dbmanager.h"
-#include "mockserial.h"
+//#include "mockserial.h"
 #include "statemachine.h"
 
 Master::Master(QObject *parent)

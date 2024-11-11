@@ -10,6 +10,7 @@
 #include "processlog.h"
 #include "statemachine.h"
 #include "globalerrors.h"
+//#include "dbmanager.h"
 
 using grpc::Status;
 
@@ -28,6 +29,7 @@ private:
     {
     public:
         Status getStatus(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay) override;
+        //Status getProcesses(grpc::ServerContext *context, const autoklav::Empty *request, autoklav:: ProcessInfo *replay) override;
         Status getVariables(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Variables *replay) override;
         Status setVariable(grpc::ServerContext *context, const autoklav::SetVariable *request, autoklav::Status *replay) override;
         Status startProcess(grpc::ServerContext *context, const autoklav::StartProcessRequest *request, autoklav::Status *replay) override;
@@ -95,6 +97,30 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getStatus(grpc::ServerContext *con
     setStatusReply(replay, 0);
     return Status::OK;
 }
+
+// Implement Get Processes
+// Status GRpcServer::Impl::AutoklavServiceImpl::getProcesses(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::ProcessInfo *replay)
+// {
+//     Q_UNUSED(context);
+//     Q_UNUSED(request);
+
+//     const auto processes = DbManager::instance().getProcesses();
+
+//     for (const auto &process : processes) {
+
+//         auto processInfo = replay->add_processes();
+//         //processInfo->set_id(process.id);
+
+//         processInfo->set_productname(process.productName.toStdString());
+//         processInfo->set_productquantity(process.productQuantity.toStdString());
+//         processInfo->set_bacteria(process.bacteria.toStdString());
+//         processInfo->set_description(process.description.toStdString());
+//         processInfo->set_processstart(process.processStart.toStdString());
+//         processInfo->set_processlength(process.processLength.toStdString());
+//     }
+
+//     return Status::OK;
+// }
 
 Status GRpcServer::Impl::AutoklavServiceImpl::getVariables(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Variables *replay)
 {

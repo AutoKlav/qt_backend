@@ -47,6 +47,7 @@ public:
     bool updateProcess(int id, ProcessInfo info);
 
     // ProcessLog
+    QList<ProcessInfo> getAllProcessesOrderedDesc();
     ProcessLog getProcessLog(int id);
     ProcessLog getProcessLog(QString name);
     int createProcessLog(int processId);
