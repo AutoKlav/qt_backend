@@ -28,6 +28,7 @@ class Process : public QObject
 public:
     explicit Process();
     explicit Process(QString name, ProcessInfo info, QObject *parent = nullptr);
+    static QList<ProcessInfo> getAllProcesses();
 
     int getId();
     ProcessInfo getInfo();

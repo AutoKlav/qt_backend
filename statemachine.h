@@ -52,8 +52,6 @@ public:
     // and doesn't require a processName
     StateMachineValues calculateDrFrRValuesFromSensors(int processId);
     
-    QList<ProcessInfo> getAllProcesses(); 
-
     static StateMachine &instance();
 
 private:
