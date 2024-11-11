@@ -10,7 +10,6 @@
 #include "processlog.h"
 #include "statemachine.h"
 #include "globalerrors.h"
-//#include "dbmanager.h"
 
 using grpc::Status;
 
@@ -240,6 +239,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getStateMachineValues(grpc::Server
     Q_UNUSED(request);
 
     const auto stateMachineValues = StateMachine::instance().calculateDrFrRValuesFromSensors(-1);
+    const auto processes = StateMachine::instance().getAllProcesses();
 
     replay->set_time(stateMachineValues.time);
     replay->set_temp(stateMachineValues.temp);

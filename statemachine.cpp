@@ -74,6 +74,11 @@ StateMachineValues StateMachine::getValues()
     return values;
 }
 
+QList<ProcessInfo> StateMachine::getAllProcesses() {
+    auto processes = DbManager::instance().getAllProcessesOrderedDesc();
+    return processes;
+}
+
 StateMachineValues StateMachine::calculateDrFrRValuesFromSensors(int processId)
 {
     StateMachineValues stateMachineValues;
