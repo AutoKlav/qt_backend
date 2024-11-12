@@ -28,7 +28,7 @@ private:
     {
     public:
         Status getStatus(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay) override;
-        //Status getProcesses(grpc::ServerContext *context, const autoklav::Empty *request, autoklav:: ProcessInfo *replay) override;
+        Status getAllProcesses(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::ProcessInfo *replay) override;
         Status getVariables(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Variables *replay) override;
         Status setVariable(grpc::ServerContext *context, const autoklav::SetVariable *request, autoklav::Status *replay) override;
         Status startProcess(grpc::ServerContext *context, const autoklav::StartProcessRequest *request, autoklav::Status *replay) override;
@@ -208,6 +208,17 @@ Status GRpcServer::Impl::AutoklavServiceImpl::stopProcess(grpc::ServerContext *c
     return Status::OK;
 }
 
+Status GRpcServer::Impl::AutoklavServiceImpl::getAllProcesses(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::ProcessInfo *replay)
+{
+    Q_UNUSED(context);
+    Q_UNUSED(request);
+
+    const auto processes = Process::getAllProcesses();
+    const auto procesLogs = ProcessLog::getAllProcessLogsOrderedDesc(8);
+
+    return Status::OK;
+}
+
 Status GRpcServer::Impl::AutoklavServiceImpl::getSensorValues(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::SensorValues *replay)
 {
     Q_UNUSED(context);
@@ -239,8 +250,6 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getStateMachineValues(grpc::Server
     Q_UNUSED(request);
 
     const auto stateMachineValues = StateMachine::instance().calculateDrFrRValuesFromSensors(-1);
-    const auto processes = Process::getAllProcesses();
-    const auto procesLogs = ProcessLog::getAllProcessLogsOrderedDesc(8);
 
     replay->set_time(stateMachineValues.time);
     replay->set_temp(stateMachineValues.temp);

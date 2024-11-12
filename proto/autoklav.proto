@@ -11,6 +11,7 @@ service Autoklav {
     rpc setVariable(SetVariable) returns (Status);
 
     // Process
+    rpc getAllProcesses(Empty) returns (ProcessInfo);
     rpc startProcess(StartProcessRequest) returns (Status);
     rpc stopProcess(Empty) returns (Status);
 
@@ -96,12 +97,13 @@ message ProcessConfig {
 }
 
 message ProcessInfo {
-    string productName = 1;
-    string productQuantity = 2;
-    string bacteria = 3;
-    string description = 4;
-    string processStart = 5;
-    string processLength = 6;
+    uint32 id = 1;
+    string productName = 2;
+    string productQuantity = 3;
+    string bacteria = 4;
+    string description = 5;
+    string processStart = 6;
+    string processLength = 7;
 }
 
 message ProcessLogRow {
