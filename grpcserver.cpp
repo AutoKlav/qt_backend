@@ -215,6 +215,22 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getProcessLogs(grpc::ServerContext
 
     const auto procesLogs = ProcessLog::getAllProcessLogsOrderedDesc(8);
 
+    for (const auto &processLog : procesLogs) {
+        auto processLogInfo = replay->add_processlogs();
+
+        processLogInfo->set_id(processLog.processId);
+        processLogInfo->set_time(processLog.timestamp.toInt());
+        processLogInfo->set_temp(processLog.temp);
+        processLogInfo->set_tempk(processLog.tempK);
+        processLogInfo->set_pressure(processLog.pressure);
+        processLogInfo->set_state(processLog.state.toInt());
+        processLogInfo->set_dr(processLog.Dr);
+        processLogInfo->set_fr(processLog.Fr);
+        processLogInfo->set_r(processLog.r);
+        processLogInfo->set_sumfr(processLog.sumFr);
+        processLogInfo->set_sumr(processLog.sumr);        
+    }
+
     return Status::OK;
 }
 

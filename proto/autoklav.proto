@@ -51,16 +51,18 @@ message SensorValues {
 }
 
 message StateMachineValues {
-    uint32 time = 1;
-    double temp = 2;
-    double tempK = 3;
-    double dTemp = 4;
-    double pressure = 5;
-    double Dr = 6;
-    double Fr = 7;
-    double r = 8;
-    double sumFr = 9;
-    double sumr = 10;
+    uint32 id = 1;
+    uint32 time = 2;
+    double temp = 3;
+    double tempK = 4;
+    double dTemp = 5;
+    double pressure = 6;
+    uint32 state = 7;
+    double Dr = 8;
+    double Fr = 9;
+    double r = 10;
+    double sumFr = 11;
+    double sumr = 12;
 }
 
 enum ProcessConfigType {
@@ -105,16 +107,6 @@ message ProcessInfo {
     string processLength = 7;
 }
 
-message ProcessLogRow {
-    int32 id = 1;
-    string productName = 2;
-    string productQuantity = 3;
-    string bacteria = 4;
-    string description = 5;
-    string processStart = 6;
-    string processLength = 7;
-}
-
 message StartProcessRequest {
     ProcessConfig processConfig = 1;
     ProcessInfo processInfo = 2;
@@ -126,5 +118,5 @@ message ProcessInfoList {
 }
 
 message ProcessLogList {
-    repeated ProcessLogRow processLogs = 1; 
+    repeated StateMachineValues processLogs = 1; 
 }
