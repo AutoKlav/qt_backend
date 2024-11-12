@@ -29,7 +29,7 @@ private:
     public:
         Status getStatus(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay) override;
         Status getAllProcesses(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::ProcessInfoList *replay) override;
-        Status getProcessLogs(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::ProcessLogList *replay) override;
+        Status getProcessLogs(grpc::ServerContext *context, const autoklav::ProcessLogRequest *request, autoklav::ProcessLogList *replay) override;
         Status getVariables(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Variables *replay) override;
         Status setVariable(grpc::ServerContext *context, const autoklav::SetVariable *request, autoklav::Status *replay) override;
         Status startProcess(grpc::ServerContext *context, const autoklav::StartProcessRequest *request, autoklav::Status *replay) override;
@@ -208,12 +208,12 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getAllProcesses(grpc::ServerContex
     return Status::OK;
 }
 
-Status GRpcServer::Impl::AutoklavServiceImpl::getProcessLogs(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::ProcessLogList *replay)
+Status GRpcServer::Impl::AutoklavServiceImpl::getProcessLogs(grpc::ServerContext *context, const autoklav::ProcessLogRequest *request, autoklav::ProcessLogList *replay)
 {
     Q_UNUSED(context);
-    Q_UNUSED(request);
 
-    const auto procesLogs = ProcessLog::getAllProcessLogsOrderedDesc(8);
+    const auto id = request->id();
+    const auto procesLogs = ProcessLog::getAllProcessLogsOrderedDesc(id);
 
     for (const auto &processLog : procesLogs) {
         auto processLogInfo = replay->add_processlogs();
