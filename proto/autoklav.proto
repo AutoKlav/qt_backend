@@ -12,6 +12,7 @@ service Autoklav {
 
     // Process
     rpc getAllProcesses(Empty) returns (ProcessInfoList);
+    rpc getProcessLogs(Empty) returns (ProcessLogList);
     rpc startProcess(StartProcessRequest) returns (Status);
     rpc stopProcess(Empty) returns (Status);
 
@@ -122,4 +123,8 @@ message StartProcessRequest {
 // New message to hold a list of ProcessInfo
 message ProcessInfoList {
     repeated ProcessInfo processes = 1;
+}
+
+message ProcessLogList {
+    repeated ProcessLogRow processLogs = 1; 
 }
