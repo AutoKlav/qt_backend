@@ -204,7 +204,7 @@ Use QJsonDocument for communication
 }
 ```
 
-## Add endpoint
+## Add endpoint guidelines
 
 1. Modify proto\autoklav.proto
 2. Build to verfiy .proto file
