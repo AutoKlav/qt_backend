@@ -98,30 +98,6 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getStatus(grpc::ServerContext *con
     return Status::OK;
 }
 
-// Implement Get Processes
-// Status GRpcServer::Impl::AutoklavServiceImpl::getProcesses(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::ProcessInfo *replay)
-// {
-//     Q_UNUSED(context);
-//     Q_UNUSED(request);
-
-//     const auto processes = DbManager::instance().getProcesses();
-
-//     for (const auto &process : processes) {
-
-//         auto processInfo = replay->add_processes();
-//         //processInfo->set_id(process.id);
-
-//         processInfo->set_productname(process.productName.toStdString());
-//         processInfo->set_productquantity(process.productQuantity.toStdString());
-//         processInfo->set_bacteria(process.bacteria.toStdString());
-//         processInfo->set_description(process.description.toStdString());
-//         processInfo->set_processstart(process.processStart.toStdString());
-//         processInfo->set_processlength(process.processLength.toStdString());
-//     }
-
-//     return Status::OK;
-// }
-
 Status GRpcServer::Impl::AutoklavServiceImpl::getVariables(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Variables *replay)
 {
     Q_UNUSED(context);
@@ -216,27 +192,18 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getAllProcesses(grpc::ServerContex
 
     const auto processes = Process::getAllProcesses();
 
-    autoklav::ProcessInfo process1;
-    process1.set_id(1);
-    process1.set_productname("Product 1");
-    process1.set_productquantity("10L");
-    process1.set_bacteria("Bacteria A");
-    process1.set_description("Description 1");
-    process1.set_processstart("2023-01-01 10:00:00");
-    process1.set_processlength("2 hours");
+    for (const auto &process : processes) {
 
-    autoklav::ProcessInfo process2;
-    process2.set_id(2);
-    process2.set_productname("Product 2");
-    process2.set_productquantity("20L");
-    process2.set_bacteria("Bacteria B");
-    process2.set_description("Description 2");
-    process2.set_processstart("2023-01-02 11:00:00");
-    process2.set_processlength("3 hours");
+        auto processInfo = replay->add_processes();
 
-    // Add processes to the reply
-    *replay->add_processes() = process1;
-    *replay->add_processes() = process2;
+        processInfo->set_id(process.id);
+        processInfo->set_productname(process.productName.toStdString());
+        processInfo->set_productquantity(process.productQuantity.toStdString());
+        processInfo->set_bacteria(process.bacteria.toStdString());
+        processInfo->set_description(process.description.toStdString());
+        processInfo->set_processstart(process.processStart.toStdString());
+        processInfo->set_processlength(process.processLength.toStdString());
+    }
 
     return Status::OK;
 }
