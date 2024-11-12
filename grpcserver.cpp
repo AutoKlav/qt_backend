@@ -10,7 +10,6 @@
 #include "processlog.h"
 #include "statemachine.h"
 #include "globalerrors.h"
-//#include "dbmanager.h"
 
 using grpc::Status;
 
@@ -29,7 +28,8 @@ private:
     {
     public:
         Status getStatus(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay) override;
-        //Status getProcesses(grpc::ServerContext *context, const autoklav::Empty *request, autoklav:: ProcessInfo *replay) override;
+        Status getAllProcesses(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::ProcessInfoList *replay) override;
+        Status getProcessLogs(grpc::ServerContext *context, const autoklav::ProcessLogRequest *request, autoklav::ProcessLogList *replay) override;
         Status getVariables(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Variables *replay) override;
         Status setVariable(grpc::ServerContext *context, const autoklav::SetVariable *request, autoklav::Status *replay) override;
         Status startProcess(grpc::ServerContext *context, const autoklav::StartProcessRequest *request, autoklav::Status *replay) override;
@@ -97,30 +97,6 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getStatus(grpc::ServerContext *con
     setStatusReply(replay, 0);
     return Status::OK;
 }
-
-// Implement Get Processes
-// Status GRpcServer::Impl::AutoklavServiceImpl::getProcesses(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::ProcessInfo *replay)
-// {
-//     Q_UNUSED(context);
-//     Q_UNUSED(request);
-
-//     const auto processes = DbManager::instance().getProcesses();
-
-//     for (const auto &process : processes) {
-
-//         auto processInfo = replay->add_processes();
-//         //processInfo->set_id(process.id);
-
-//         processInfo->set_productname(process.productName.toStdString());
-//         processInfo->set_productquantity(process.productQuantity.toStdString());
-//         processInfo->set_bacteria(process.bacteria.toStdString());
-//         processInfo->set_description(process.description.toStdString());
-//         processInfo->set_processstart(process.processStart.toStdString());
-//         processInfo->set_processlength(process.processLength.toStdString());
-//     }
-
-//     return Status::OK;
-// }
 
 Status GRpcServer::Impl::AutoklavServiceImpl::getVariables(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Variables *replay)
 {
@@ -206,6 +182,55 @@ Status GRpcServer::Impl::AutoklavServiceImpl::stopProcess(grpc::ServerContext *c
     bool succ = StateMachine::instance().stop();
 
     setStatusReply(replay, !succ);
+    return Status::OK;
+}
+
+Status GRpcServer::Impl::AutoklavServiceImpl::getAllProcesses(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::ProcessInfoList *replay)
+{
+    Q_UNUSED(context);
+    Q_UNUSED(request);
+
+    const auto processes = Process::getAllProcesses();
+
+    for (const auto &process : processes) {
+
+        auto processInfo = replay->add_processes();
+
+        processInfo->set_id(process.id);
+        processInfo->set_productname(process.productName.toStdString());
+        processInfo->set_productquantity(process.productQuantity.toStdString());
+        processInfo->set_bacteria(process.bacteria.toStdString());
+        processInfo->set_description(process.description.toStdString());
+        processInfo->set_processstart(process.processStart.toStdString());
+        processInfo->set_processlength(process.processLength.toStdString());
+    }
+
+    return Status::OK;
+}
+
+Status GRpcServer::Impl::AutoklavServiceImpl::getProcessLogs(grpc::ServerContext *context, const autoklav::ProcessLogRequest *request, autoklav::ProcessLogList *replay)
+{
+    Q_UNUSED(context);
+
+    const auto id = request->id();
+    const auto procesLogs = ProcessLog::getAllProcessLogsOrderedDesc(id);
+
+    for (const auto &processLog : procesLogs) {
+        auto processLogInfo = replay->add_processlogs();
+
+        processLogInfo->set_id(processLog.processId);
+        processLogInfo->set_time(processLog.timestamp.toInt());
+        processLogInfo->set_temp(processLog.temp);
+        processLogInfo->set_tempk(processLog.tempK);
+        processLogInfo->set_pressure(processLog.pressure);
+        processLogInfo->set_state(processLog.state.toInt());
+        processLogInfo->set_dr(processLog.Dr);
+        processLogInfo->set_fr(processLog.Fr);
+        processLogInfo->set_r(processLog.r);
+        processLogInfo->set_sumfr(processLog.sumFr);
+        processLogInfo->set_sumr(processLog.sumr);        
+    }
+
     return Status::OK;
 }
 

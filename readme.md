@@ -204,9 +204,9 @@ Use QJsonDocument for communication
 }
 ```
 
-## Generate protoc file
+## Add endpoint guidelines
 
-```bash
-C:\vcpkg\installed\x64
--windows\tools\protobuf\protoc.exe --cpp_out=. proto\autoklav.proto
-```
+1. Modify proto\autoklav.proto
+2. Build to verfiy .proto file
+3. Modify grpc server
+4. Import new .proto file in postman

@@ -43,11 +43,12 @@ public:
     bool updateSensor(QString name, double newMinValue, double newMaxValue);
 
     // Process
+    QList<ProcessRow> getAllProcessesOrderedDesc();
     int createProcess(QString name, ProcessInfo info);
     bool updateProcess(int id, ProcessInfo info);
 
     // ProcessLog
-    QList<ProcessInfo> getAllProcessesOrderedDesc();
+    QList<ProcessLogInfoRow> getAllProcessLogsOrderedDesc(int processId);
     ProcessLog getProcessLog(int id);
     ProcessLog getProcessLog(QString name);
     int createProcessLog(int processId);

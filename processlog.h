@@ -10,6 +10,7 @@ struct StateMachineValues {
     double tempK;
     double dTemp;
     double pressure;
+    QString state;
     double Dr;
     double Fr;
     double r;
@@ -36,6 +37,11 @@ struct StateMachineValues {
         };
     }
 };
+ 
+struct ProcessLogInfoRow : StateMachineValues {
+    int processId;    
+    QString timestamp;
+};
 
 class ProcessLog : public QObject
 {
@@ -50,6 +56,7 @@ public:
 
     QString getName();    
     QList<StateMachineValues> getLogs();
+    static QList<ProcessLogInfoRow> getAllProcessLogsOrderedDesc(int processId);
 
 };
 

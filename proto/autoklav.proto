@@ -11,6 +11,8 @@ service Autoklav {
     rpc setVariable(SetVariable) returns (Status);
 
     // Process
+    rpc getAllProcesses(Empty) returns (ProcessInfoList);
+    rpc getProcessLogs(ProcessLogRequest) returns (ProcessLogList);
     rpc startProcess(StartProcessRequest) returns (Status);
     rpc stopProcess(Empty) returns (Status);
 
@@ -21,9 +23,7 @@ service Autoklav {
     rpc getStateMachineValues(Empty) returns (StateMachineValues);
 }
 
-message Empty {
-
-}
+message Empty {}
 
 message Status {
     int32 code = 1;
@@ -51,16 +51,18 @@ message SensorValues {
 }
 
 message StateMachineValues {
-    uint32 time = 1;
-    double temp = 2;
-    double tempK = 3;
-    double dTemp = 4;
-    double pressure = 5;
-    double Dr = 6;
-    double Fr = 7;
-    double r = 8;
-    double sumFr = 9;
-    double sumr = 10;
+    uint32 id = 1;
+    uint32 time = 2;
+    double temp = 3;
+    double tempK = 4;
+    double dTemp = 5;
+    double pressure = 6;
+    uint32 state = 7;
+    double Dr = 8;
+    double Fr = 9;
+    double r = 10;
+    double sumFr = 11;
+    double sumr = 12;
 }
 
 enum ProcessConfigType {
@@ -96,16 +98,7 @@ message ProcessConfig {
 }
 
 message ProcessInfo {
-    string productName = 1;
-    string productQuantity = 2;
-    string bacteria = 3;
-    string description = 4;
-    string processStart = 5;
-    string processLength = 6;
-}
-
-message ProcessLogRow {
-    int32 id = 1;
+    uint32 id = 1;
     string productName = 2;
     string productQuantity = 3;
     string bacteria = 4;
@@ -117,4 +110,17 @@ message ProcessLogRow {
 message StartProcessRequest {
     ProcessConfig processConfig = 1;
     ProcessInfo processInfo = 2;
+}
+
+message ProcessLogRequest{
+    uint32 id = 1;
+}
+
+// New message to hold a list of ProcessInfo
+message ProcessInfoList {
+    repeated ProcessInfo processes = 1;
+}
+
+message ProcessLogList {
+    repeated StateMachineValues processLogs = 1; 
 }
