@@ -11,7 +11,7 @@ service Autoklav {
     rpc setVariable(SetVariable) returns (Status);
 
     // Process
-    rpc getAllProcesses(Empty) returns (ProcessInfo);
+    rpc getAllProcesses(Empty) returns (ProcessInfoList);
     rpc startProcess(StartProcessRequest) returns (Status);
     rpc stopProcess(Empty) returns (Status);
 
@@ -22,9 +22,7 @@ service Autoklav {
     rpc getStateMachineValues(Empty) returns (StateMachineValues);
 }
 
-message Empty {
-
-}
+message Empty {}
 
 message Status {
     int32 code = 1;
@@ -119,4 +117,9 @@ message ProcessLogRow {
 message StartProcessRequest {
     ProcessConfig processConfig = 1;
     ProcessInfo processInfo = 2;
+}
+
+// New message to hold a list of ProcessInfo
+message ProcessInfoList {
+    repeated ProcessInfo processes = 1;
 }

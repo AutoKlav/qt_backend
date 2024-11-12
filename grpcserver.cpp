@@ -28,7 +28,7 @@ private:
     {
     public:
         Status getStatus(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay) override;
-        Status getAllProcesses(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::ProcessInfo *replay) override;
+        Status getAllProcesses(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::ProcessInfoList *replay) override;
         Status getVariables(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Variables *replay) override;
         Status setVariable(grpc::ServerContext *context, const autoklav::SetVariable *request, autoklav::Status *replay) override;
         Status startProcess(grpc::ServerContext *context, const autoklav::StartProcessRequest *request, autoklav::Status *replay) override;
@@ -208,13 +208,35 @@ Status GRpcServer::Impl::AutoklavServiceImpl::stopProcess(grpc::ServerContext *c
     return Status::OK;
 }
 
-Status GRpcServer::Impl::AutoklavServiceImpl::getAllProcesses(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::ProcessInfo *replay)
+Status GRpcServer::Impl::AutoklavServiceImpl::getAllProcesses(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::ProcessInfoList *replay)
 {
     Q_UNUSED(context);
     Q_UNUSED(request);
 
     const auto processes = Process::getAllProcesses();
     const auto procesLogs = ProcessLog::getAllProcessLogsOrderedDesc(8);
+
+    autoklav::ProcessInfo process1;
+    process1.set_id(1);
+    process1.set_productname("Product 1");
+    process1.set_productquantity("10L");
+    process1.set_bacteria("Bacteria A");
+    process1.set_description("Description 1");
+    process1.set_processstart("2023-01-01 10:00:00");
+    process1.set_processlength("2 hours");
+
+    autoklav::ProcessInfo process2;
+    process2.set_id(2);
+    process2.set_productname("Product 2");
+    process2.set_productquantity("20L");
+    process2.set_bacteria("Bacteria B");
+    process2.set_description("Description 2");
+    process2.set_processstart("2023-01-02 11:00:00");
+    process2.set_processlength("3 hours");
+
+    // Add processes to the reply
+    *replay->add_processes() = process1;
+    *replay->add_processes() = process2;
 
     return Status::OK;
 }
