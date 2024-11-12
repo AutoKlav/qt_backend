@@ -14,7 +14,7 @@ Process::Process(QString name, ProcessInfo info, QObject *parent)
     saveProcess();
 }
 
-QList<ProcessInfo> Process::getAllProcesses() {
+QList<ProcessRow> Process::getAllProcesses() {
     auto processes = DbManager::instance().getAllProcessesOrderedDesc();
     return processes;
 }

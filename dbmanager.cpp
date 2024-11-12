@@ -147,12 +147,12 @@ bool DbManager::updateSensor(QString name, double newMinValue, double newMaxValu
     return true;
 }
 
-QList<ProcessInfo> DbManager::getAllProcessesOrderedDesc()
+QList<ProcessRow> DbManager::getAllProcessesOrderedDesc()
 {
     QSqlQuery query("SELECT * FROM Process ORDER BY processStart desc", m_db);
-    QList<ProcessInfo> processes;
+    QList<ProcessRow> processes;
     while (query.next()) {
-        //auto id = query.value(0).toInt();
+        auto id = query.value(0).toInt();
         auto name = query.value(1).toString();
         auto productName = query.value(2).toString();
         auto productQuantity = query.value(3).toString();
@@ -161,7 +161,8 @@ QList<ProcessInfo> DbManager::getAllProcessesOrderedDesc()
         auto processStart = query.value(6).toString();
         auto processLength = query.value(7).toString();
 
-        ProcessInfo info;
+        ProcessRow info;
+        info.id = id;
         info.productName = productName;
         info.productQuantity = productQuantity;
         info.bacteria = bacteria;
