@@ -31,7 +31,7 @@ public:
     static QList<Sensor> sensors;
     static QMap<QString, Sensor *> mapName;
     static QMap<QString, Sensor *> mapPinName;
-    bool static updateSensor(QString name, double minValue, double maxValue);
+    static bool updateSensor(QString name, double minValue, double maxValue);
 };
 
 #endif // SENSOR_H

@@ -35,6 +35,7 @@ private:
         Status startProcess(grpc::ServerContext *context, const autoklav::StartProcessRequest *request, autoklav::Status *replay) override;
         Status stopProcess(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay) override;
         Status getSensorValues(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::SensorValues *replay) override;
+        Status updateSensor(grpc::ServerContext *context, const autoklav::UpdateSensor *request, autoklav::Status *replay) override;
         Status getStateMachineValues(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::StateMachineValues *replay) override;
         // Custom helper function
         void setStatusReply(autoklav::Status *replay, int code);
@@ -135,6 +136,20 @@ Status GRpcServer::Impl::AutoklavServiceImpl::setVariable(grpc::ServerContext *c
     }
 
     setStatusReply(replay, !succ);
+    return Status::OK;
+}
+
+Status GRpcServer::Impl::AutoklavServiceImpl::updateSensor(grpc::ServerContext *context, const autoklav::UpdateSensor *request, autoklav::Status *replay)
+{
+    Q_UNUSED(context);
+
+    const auto name = QString::fromUtf8(request->name().c_str());
+    const auto minValue = request->minvalue();
+    const auto maxValue = request->maxvalue();
+
+    bool success = Sensor::updateSensor(name, minValue, maxValue);
+    //setStatusReply(replay, !success);
+
     return Status::OK;
 }
 

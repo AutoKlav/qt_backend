@@ -86,7 +86,7 @@ void Sensor::parseSerialData(QString data)
     }
 }
 
-bool updateSensor(QString name, double minValue, double maxValue)
+bool Sensor::updateSensor(QString name, double minValue, double maxValue)
 {
     auto isSensorUpdated = DbManager::instance().updateSensor(name, minValue, maxValue);
     return isSensorUpdated;
