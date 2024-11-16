@@ -212,10 +212,14 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getProcessLogs(grpc::ServerContext
 {
     Q_UNUSED(context);
 
-    const auto id = request->id();
-    const auto procesLogs = ProcessLog::getAllProcessLogsOrderedDesc(id);
+    std::vector<ProcessLogInfoRow> allProcessLogs;
 
-    for (const auto &processLog : procesLogs) {
+    for (const auto &id : request->ids()) {
+        const auto processLogs = ProcessLog::getAllProcessLogsOrderedDesc(id);
+        allProcessLogs.insert(allProcessLogs.end(), processLogs.begin(), processLogs.end());
+    }
+
+    for (const auto &processLog : allProcessLogs) {
         auto processLogInfo = replay->add_processlogs();
 
         processLogInfo->set_id(processLog.processId);

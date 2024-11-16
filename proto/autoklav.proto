@@ -113,7 +113,7 @@ message StartProcessRequest {
 }
 
 message ProcessLogRequest{
-    uint32 id = 1;
+    repeated uint32 ids = 1;
 }
 
 // New message to hold a list of ProcessInfo
