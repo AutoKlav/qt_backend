@@ -148,7 +148,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::updateSensor(grpc::ServerContext *
     const auto maxValue = request->maxvalue();
 
     bool success = Sensor::updateSensor(name, minValue, maxValue);
-    //setStatusReply(replay, !success);
+    setStatusReply(replay, !success);
 
     return Status::OK;
 }
