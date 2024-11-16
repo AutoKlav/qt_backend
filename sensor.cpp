@@ -6,6 +6,7 @@
 #include "globalerrors.h"
 #include "logger.h"
 #include "serial.h"
+#include "dbmanager.h"
 
 qint64 Sensor::lastDataTime = 0;
 QList<Sensor> Sensor::sensors = QList<Sensor>();
@@ -84,3 +85,10 @@ void Sensor::parseSerialData(QString data)
         lastDataTime = QDateTime::currentMSecsSinceEpoch();
     }
 }
+
+bool Sensor::updateSensor(QString name, double minValue, double maxValue)
+{
+    auto isSensorUpdated = DbManager::instance().updateSensor(name, minValue, maxValue);
+    return isSensorUpdated;
+}
+

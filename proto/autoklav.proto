@@ -18,6 +18,7 @@ service Autoklav {
 
     // Sensor
     rpc getSensorValues(Empty) returns (SensorValues);
+    rpc updateSensor(UpdateSensor) returns (Status);
 
     // StateMachine
     rpc getStateMachineValues(Empty) returns (StateMachineValues);
@@ -42,6 +43,12 @@ message Variables {
 message SetVariable {
     string name = 1;
     string value = 2;
+}
+
+message UpdateSensor {
+    string name = 1;
+    double minValue = 2;
+    double maxValue = 3; 
 }
 
 message SensorValues {
@@ -113,7 +120,7 @@ message StartProcessRequest {
 }
 
 message ProcessLogRequest{
-    uint32 id = 1;
+    repeated uint32 ids = 1;
 }
 
 // New message to hold a list of ProcessInfo
