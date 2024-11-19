@@ -18,7 +18,7 @@ service Autoklav {
 
     // Sensor
     rpc getSensorValues(Empty) returns (SensorValues);
-    rpc updateSensor(UpdateSensor) returns (Status);
+    rpc updateSensor(UpdateSensorRequest) returns (Status);
 
     // StateMachine
     rpc getStateMachineValues(Empty) returns (StateMachineValues);
@@ -45,7 +45,7 @@ message SetVariable {
     string value = 2;
 }
 
-message UpdateSensor {
+message UpdateSensorRequest {
     string name = 1;
     double minValue = 2;
     double maxValue = 3; 
