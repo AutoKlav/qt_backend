@@ -6,8 +6,10 @@
 
 // Constructor
 StateMachine::StateMachine(QObject *parent)
-    : QObject(parent), state(READY), timer(new QTimer(this)), process(nullptr), processLog(nullptr) {
-    // Initialization code
+    : QObject(parent), state(READY), timer(nullptr), process(nullptr), processLog(nullptr)
+{
+    timer = new QTimer(this); // Explicitly initialize timer
+    connect(timer, &QTimer::timeout, this, &StateMachine::tick); // Ensure tick is connected
 }
 
 // Definition of getState method
