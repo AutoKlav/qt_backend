@@ -48,9 +48,9 @@ public:
 
     StateMachineValues getValues();
 
-    // If processName is not provided, the function is used by `getStateMachineValues` method
-    // and doesn't require a processName
+    StateMachineValues calculateStateMachineValues();
     StateMachineValues calculateDrFrRValuesFromSensors(int processId);
+    StateMachineValues calculateDrFrRValuesFromSensorsOnTheFly();
     
     static StateMachine &instance();
 
