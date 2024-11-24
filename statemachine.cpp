@@ -76,7 +76,7 @@ StateMachineValues StateMachine::getValues()
     return values;
 }
 
-StateMachineValues StateMachine::calculateDrFrRValuesFromSensors(int processId)
+StateMachineValues StateMachine::calculateStateMachineValues()
 {
     StateMachineValues stateMachineValues;
 
@@ -88,7 +88,7 @@ StateMachineValues StateMachine::calculateDrFrRValuesFromSensors(int processId)
 
     stateMachineValues.dTemp = calculateDeltaTemperature(stateMachineValues.tempK);
 
-    stateMachineValues.Dr = qPow(10,  0.1 * stateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
+    stateMachineValues.Dr = qPow(10, 0.1 * stateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
     stateMachineValues.Fr = qPow(10, -0.1 * stateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
     stateMachineValues.r = 5 * stateMachineValues.Fr;
 
@@ -96,7 +96,6 @@ StateMachineValues StateMachine::calculateDrFrRValuesFromSensors(int processId)
 
     if (isRunning()) {
         stateMachineValues.time = processStart.msecsTo(QDateTime::currentDateTime());
-
         stateMachineValues.sumFr = values.sumFr + stateMachineValues.Fr;
         stateMachineValues.sumr = values.sumr + stateMachineValues.r;
     } else {
@@ -105,9 +104,22 @@ StateMachineValues StateMachine::calculateDrFrRValuesFromSensors(int processId)
         stateMachineValues.sumr = 0;
     }
 
+    return stateMachineValues;
+}
+
+
+StateMachineValues StateMachine::calculateDrFrRValuesFromSensors(int processId)
+{
+    auto stateMachineValues = calculateStateMachineValues();
+
     DbManager::instance().createProcessLog(processId);
 
     return stateMachineValues;
+}
+
+StateMachineValues StateMachine::calculateDrFrRValuesFromSensorsOnTheFly()
+{
+    return calculateStateMachineValues();
 }
 
 void StateMachine::tick()
