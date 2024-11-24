@@ -59,7 +59,7 @@ message SensorValues {
 
 message StateMachineValues {
     uint32 id = 1;
-    uint32 time = 2;
+    double elapsedTime = 2;
     double temp = 3;
     double tempK = 4;
     double dTemp = 5;
@@ -69,7 +69,8 @@ message StateMachineValues {
     double Fr = 9;
     double r = 10;
     double sumFr = 11;
-    double sumr = 12;
+    double sumR = 12;
+    string timestamp = 13;
 }
 
 enum ProcessConfigType {

@@ -238,7 +238,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getProcessLogs(grpc::ServerContext
         auto processLogInfo = replay->add_processlogs();
 
         processLogInfo->set_id(processLog.processId);
-        processLogInfo->set_time(processLog.timestamp.toInt());
+        processLogInfo->set_timestamp(processLog.timestamp.toStdString());
         processLogInfo->set_temp(processLog.temp);
         processLogInfo->set_tempk(processLog.tempK);
         processLogInfo->set_pressure(processLog.pressure);
@@ -247,7 +247,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getProcessLogs(grpc::ServerContext
         processLogInfo->set_fr(processLog.Fr);
         processLogInfo->set_r(processLog.r);
         processLogInfo->set_sumfr(processLog.sumFr);
-        processLogInfo->set_sumr(processLog.sumr);        
+        processLogInfo->set_sumr(processLog.sumr);
     }
 
     return Status::OK;
@@ -285,8 +285,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getStateMachineValues(grpc::Server
 
     const auto stateMachineValues = StateMachine::instance().calculateDrFrRValuesFromSensors(-1);
 
-    replay->set_time(stateMachineValues.time);
-    replay->set_temp(stateMachineValues.temp);
+    replay->set_elapsedtime(stateMachineValues.time);
     replay->set_tempk(stateMachineValues.tempK);
     replay->set_dtemp(stateMachineValues.dTemp);
     replay->set_pressure(stateMachineValues.pressure);
