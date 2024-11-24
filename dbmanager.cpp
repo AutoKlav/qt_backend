@@ -183,16 +183,16 @@ QList<ProcessLogInfoRow> DbManager::getAllProcessLogsOrderedDesc(int processId)
     QList<ProcessLogInfoRow> processLogs;
     while (query.next()) {
         auto id = query.value(0).toInt();
-        auto temp = query.value(2).toDouble();
-        auto tempK = query.value(3).toDouble();
-        auto pressure = query.value(4).toDouble();
-        auto state = query.value(5).toString();
-        auto Dr = query.value(6).toDouble();
-        auto Fr = query.value(7).toDouble();
-        auto r = query.value(8).toDouble();
-        auto sumFr = query.value(9).toDouble();
-        auto sumr = query.value(10).toDouble();
-        auto timestamp = query.value(11).toString();
+        auto temp = query.value(1).toDouble();
+        auto tempK = query.value(2).toDouble();
+        auto pressure = query.value(3).toDouble();
+        auto state = query.value(4).toInt();
+        auto Dr = query.value(5).toDouble();
+        auto Fr = query.value(6).toDouble();
+        auto r = query.value(7).toDouble();
+        auto sumFr = query.value(8).toDouble();
+        auto sumr = query.value(9).toDouble();
+        auto timestamp = query.value(10).toString();
 
         ProcessLogInfoRow log;
         log.processId = id;

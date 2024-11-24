@@ -242,7 +242,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getProcessLogs(grpc::ServerContext
         processLogInfo->set_temp(processLog.temp);
         processLogInfo->set_tempk(processLog.tempK);
         processLogInfo->set_pressure(processLog.pressure);
-        processLogInfo->set_state(processLog.state.toInt());
+        processLogInfo->set_state(processLog.state);
         processLogInfo->set_dr(processLog.Dr);
         processLogInfo->set_fr(processLog.Fr);
         processLogInfo->set_r(processLog.r);
@@ -290,6 +290,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getStateMachineValues(grpc::Server
     replay->set_tempk(stateMachineValues.tempK);
     replay->set_dtemp(stateMachineValues.dTemp);
     replay->set_pressure(stateMachineValues.pressure);
+    replay->set_state(stateMachineValues.state);
     replay->set_dr(stateMachineValues.Dr);
     replay->set_fr(stateMachineValues.Fr);
     replay->set_r(stateMachineValues.r);

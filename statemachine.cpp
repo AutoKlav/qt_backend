@@ -92,6 +92,8 @@ StateMachineValues StateMachine::calculateDrFrRValuesFromSensors(int processId)
     stateMachineValues.Fr = qPow(10, -0.1 * stateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
     stateMachineValues.r = 5 * stateMachineValues.Fr;
 
+    stateMachineValues.state = state;
+
     if (isRunning()) {
         stateMachineValues.time = processStart.msecsTo(QDateTime::currentDateTime());
 
