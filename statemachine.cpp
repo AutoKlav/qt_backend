@@ -124,7 +124,11 @@ StateMachineValues StateMachine::calculateDrFrRValuesFromSensorsOnTheFly()
 
 void StateMachine::tick()
 {
-    values = calculateDrFrRValuesFromSensors(process->getId());
+    if (isRunning()) {
+        values = calculateDrFrRValuesFromSensors(process->getId());
+    } else {
+        values = calculateStateMachineValues();
+    }
 
     switch (state) {
     case State::READY:
