@@ -178,9 +178,20 @@ QList<ProcessRow> DbManager::getAllProcessesOrderedDesc()
 
 QList<ProcessLogInfoRow> DbManager::getAllProcessLogsOrderedDesc(int processId)
 {
-    QSqlQuery query("SELECT * From ProcessLog WHERE processId = 8 ORDER BY timestamp desc", m_db); // WHERE processId = :processId ORDER BY timestamp desc
-    //query.bindValue(":processId", processId);
     QList<ProcessLogInfoRow> processLogs;
+
+    QSqlQuery query(m_db);
+
+    query.prepare("SELECT * FROM ProcessLog WHERE processId = :processId ORDER BY timestamp DESC");
+    query.bindValue(":processId", processId);
+
+    // Guard clause for query execution
+    if (!query.exec()) {
+        Logger::crit(query.lastError().text());
+        Logger::crit("Query: " + query.executedQuery());
+        return processLogs;
+    }
+
     while (query.next()) {
         auto id = query.value(0).toInt();
         auto temp = query.value(1).toDouble();
