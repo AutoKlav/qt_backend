@@ -10,6 +10,15 @@ struct SensorValues {
     double pressure;
 };
 
+struct SensorRelayValues{
+    unsigned short waterFill;
+    unsigned short heating;
+    unsigned short bypass;
+    unsigned short pump;
+    unsigned short inPressure;
+    unsigned short cooling;
+};
+
 class Sensor
 {
 public:
@@ -20,8 +29,10 @@ public:
     void setValue(QString newPinValue);
 
     static SensorValues getValues();
+    static SensorRelayValues getRelayValues();
     static void parseSerialData(QString data);
-
+    static void checkIfDataIsOld();
+    
     QString name, pinName;
     double minValue, maxValue;
     double value;

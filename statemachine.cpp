@@ -59,6 +59,9 @@ bool StateMachine::stop()
     Sensor::mapName["waterFill"]->send(0);
     Sensor::mapName["heating"]->send(0);
     Sensor::mapName["bypass"]->send(0);
+    Sensor::mapName["pump"]->send(0);
+    Sensor::mapName["inPressure"]->send(0);
+    Sensor::mapName["cooling"]->send(0);
 
     state = State::READY;
     values = StateMachineValues();
@@ -72,7 +75,7 @@ inline bool StateMachine::isRunning()
 }
 
 StateMachineValues StateMachine::getValues()
-{
+{    
     return values;
 }
 
@@ -123,7 +126,7 @@ StateMachineValues StateMachine::calculateDrFrRValuesFromSensorsOnTheFly()
 }
 
 void StateMachine::tick()
-{
+{    
     if (isRunning()) {
         values = calculateDrFrRValuesFromSensors(process->getId());
     } else {

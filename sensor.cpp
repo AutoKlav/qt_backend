@@ -19,9 +19,10 @@ Sensor::Sensor(QString name, QString pinName, double minValue, double maxValue)
 
 }
 
-void Sensor::send(double value)
+void Sensor::send(double newValue)
 {
-    uint pinValue = (value - minValue) / (maxValue - minValue) * 1023;
+    value = newValue; // Update the internal value
+    uint pinValue = (newValue - minValue) / (maxValue - minValue) * 1023;
 
     auto data = QString("%1=%2").arg(pinName).arg(pinValue);
 
@@ -30,7 +31,7 @@ void Sensor::send(double value)
 }
 
 void Sensor::setValue(uint newPinValue)
-{
+{    
     pinValue = newPinValue;
     value = (newPinValue / 1023.0) * (maxValue - minValue) + minValue;
 }
@@ -40,19 +41,41 @@ void Sensor::setValue(QString newPinValue)
     setValue(newPinValue.toUInt());
 }
 
-SensorValues Sensor::getValues()
+void Sensor::checkIfDataIsOld()
 {
-    // Check if data is old
     if (lastDataTime && QDateTime::currentMSecsSinceEpoch() - lastDataTime > Globals::serialDataTime)
         GlobalErrors::setError(GlobalErrors::OldDataError);
     else
         GlobalErrors::removeError(GlobalErrors::OldDataError);
+}
 
-    return {
-        .temp = mapName["temp"]->value,
-        .tempK = mapName["tempK"]->value,
-        .pressure = mapName["pressure"]->value,
-    };
+SensorValues Sensor::getValues()
+{
+    checkIfDataIsOld();
+
+    SensorValues values;
+
+    values.temp = mapName["temp"]->value;
+    values.tempK = mapName["tempK"]->value;
+    values.pressure = mapName["pressure"]->value;
+
+    return values;
+}
+
+SensorRelayValues Sensor::getRelayValues()
+{
+    checkIfDataIsOld();
+
+    SensorRelayValues relayValues;
+
+    relayValues.waterFill = mapName["waterFill"]->value;
+    relayValues.heating = mapName["heating"]->value;
+    relayValues.bypass = mapName["bypass"]->value;
+    relayValues.pump = mapName["pump"]->value;
+    relayValues.inPressure = mapName["inPressure"]->value;
+    relayValues.cooling = mapName["cooling"]->value;    
+
+    return relayValues;
 }
 
 void Sensor::parseSerialData(QString data)
