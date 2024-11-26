@@ -75,7 +75,7 @@ inline bool StateMachine::isRunning()
 }
 
 StateMachineValues StateMachine::getValues()
-{
+{    
     return values;
 }
 
@@ -126,7 +126,7 @@ StateMachineValues StateMachine::calculateDrFrRValuesFromSensorsOnTheFly()
 }
 
 void StateMachine::tick()
-{
+{    
     if (isRunning()) {
         values = calculateDrFrRValuesFromSensors(process->getId());
     } else {
