@@ -286,6 +286,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getStateMachineValues(grpc::Server
     const auto stateMachineValues = StateMachine::instance().calculateDrFrRValuesFromSensorsOnTheFly();
 
     replay->set_elapsedtime(stateMachineValues.time);
+    replay->set_temp(stateMachineValues.temp);
     replay->set_tempk(stateMachineValues.tempK);
     replay->set_dtemp(stateMachineValues.dTemp);
     replay->set_pressure(stateMachineValues.pressure);
