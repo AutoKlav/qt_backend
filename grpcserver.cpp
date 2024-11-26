@@ -35,6 +35,7 @@ private:
         Status startProcess(grpc::ServerContext *context, const autoklav::StartProcessRequest *request, autoklav::Status *replay) override;
         Status stopProcess(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay) override;
         Status getSensorValues(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::SensorValues *replay) override;
+        Status getSensorRelayValues(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::SensorRelayValues *replay) override;
         Status updateSensor(grpc::ServerContext *context, const autoklav::UpdateSensorRequest *request, autoklav::Status *replay) override;
         Status getStateMachineValues(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::StateMachineValues *replay) override;
         // Custom helper function
@@ -275,6 +276,34 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getSensorValues(grpc::ServerContex
     replay->set_tempk(sensorValues.tempK);
     replay->set_pressure(sensorValues.pressure);
     
+    return Status::OK;
+}
+
+Status GRpcServer::Impl::AutoklavServiceImpl::getSensorRelayValues(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::SensorRelayValues *replay)
+{
+    Q_UNUSED(context);
+    Q_UNUSED(request);
+    Q_UNUSED(replay);
+
+    const auto sensorRelayValues = Sensor::getRelayValues();
+
+    // Fetch error flags
+    QVector<QString> errorStrings = GlobalErrors::getErrorsString();
+
+    // If there is a serial error, send abort status
+    for(const QString& errorString : errorStrings){
+        if(errorString == GlobalErrors::SERIAL_ERROR){
+            return Status(grpc::StatusCode::ABORTED, GlobalErrors::SERIAL_ERROR.toStdString());
+        }
+    }
+
+    replay->set_waterfill(sensorRelayValues.waterFill);
+    replay->set_heating(sensorRelayValues.heating);
+    replay->set_bypass(sensorRelayValues.bypass);
+    replay->set_pump(sensorRelayValues.pump);
+    replay->set_inpressure(sensorRelayValues.inPressure);
+    replay->set_cooling(sensorRelayValues.cooling);
+
     return Status::OK;
 }
 

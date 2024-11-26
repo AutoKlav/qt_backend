@@ -18,6 +18,7 @@ service Autoklav {
 
     // Sensor
     rpc getSensorValues(Empty) returns (SensorValues);
+    rpc getSensorRelayValues(Empty) returns (SensorRelayValues);
     rpc updateSensor(UpdateSensorRequest) returns (Status);
 
     // StateMachine
@@ -55,6 +56,15 @@ message SensorValues {
     double temp = 1;
     double tempK = 2;
     double pressure = 3;
+}
+
+message SensorRelayValues {
+    uint32 waterFill = 1;
+    uint32 heating = 2;
+    uint32 bypass = 3;
+    uint32 pump = 4;
+    uint32 inPressure = 5;
+    uint32 cooling = 6;
 }
 
 message StateMachineValues {
