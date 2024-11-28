@@ -231,7 +231,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getProcessLogs(grpc::ServerContext
     std::vector<ProcessLogInfoRow> allProcessLogs;
 
     for (const auto &id : request->ids()) {
-        const auto processLogs = ProcessLog::getAllProcessLogsOrderedDesc(id);
+        const auto processLogs = ProcessLog::getAllProcessLogs(id);
         allProcessLogs.insert(allProcessLogs.end(), processLogs.begin(), processLogs.end());
     }
 

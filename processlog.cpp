@@ -18,8 +18,8 @@ QList<StateMachineValues> ProcessLog::getLogs()
     return logs;
 }
 
-QList<ProcessLogInfoRow> ProcessLog::getAllProcessLogsOrderedDesc(int processId)
+QList<ProcessLogInfoRow> ProcessLog::getAllProcessLogs(int processId)
 {
-    auto processLogs = DbManager::instance().getAllProcessLogsOrderedDesc(processId);
+    auto processLogs = DbManager::instance().getAllProcessLogs(processId);
     return processLogs;
 }

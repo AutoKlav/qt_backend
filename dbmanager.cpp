@@ -176,13 +176,13 @@ QList<ProcessRow> DbManager::getAllProcessesOrderedDesc()
     return processes;
 }
 
-QList<ProcessLogInfoRow> DbManager::getAllProcessLogsOrderedDesc(int processId)
+QList<ProcessLogInfoRow> DbManager::getAllProcessLogs(int processId)
 {
     QList<ProcessLogInfoRow> processLogs;
 
     QSqlQuery query(m_db);
 
-    query.prepare("SELECT * FROM ProcessLog WHERE processId = :processId ORDER BY timestamp DESC");
+    query.prepare("SELECT * FROM ProcessLog WHERE processId = :processId ORDER BY timestamp ASC");
     query.bindValue(":processId", processId);
 
     // Guard clause for query execution
@@ -196,19 +196,21 @@ QList<ProcessLogInfoRow> DbManager::getAllProcessLogsOrderedDesc(int processId)
         auto id = query.value(0).toInt();
         auto temp = query.value(1).toDouble();
         auto tempK = query.value(2).toDouble();
-        auto pressure = query.value(3).toDouble();
-        auto state = query.value(4).toInt();
-        auto Dr = query.value(5).toDouble();
-        auto Fr = query.value(6).toDouble();
-        auto r = query.value(7).toDouble();
-        auto sumFr = query.value(8).toDouble();
-        auto sumr = query.value(9).toDouble();
-        auto timestamp = query.value(10).toString();
+        auto dTemp = query.value(3).toDouble();
+        auto pressure = query.value(4).toDouble();
+        auto state = query.value(5).toInt();
+        auto Dr = query.value(6).toDouble();
+        auto Fr = query.value(7).toDouble();
+        auto r = query.value(8).toDouble();
+        auto sumFr = query.value(9).toDouble();
+        auto sumr = query.value(10).toDouble();
+        auto timestamp = query.value(11).toString();
 
         ProcessLogInfoRow log;
         log.processId = id;
         log.temp = temp;
         log.tempK = tempK;
+        log.dTemp = dTemp;
         log.pressure = pressure;
         log.state = state;
         log.Dr = Dr;
@@ -277,11 +279,12 @@ int DbManager::createProcessLog(int processId)
     auto values = stateMachine.getValues();
 
     QSqlQuery query(m_db);
-    query.prepare("INSERT INTO ProcessLog (processId, temp, tempK, pressure, state, Dr, Fr, r, sumFr, sumr, timestamp) "
-                  "VALUES (:processId, :temp, :tempK, :pressure, :state, :Dr, :Fr, :r, :sumFr, :sumr, :timestamp)");
+    query.prepare("INSERT INTO ProcessLog (processId, temp, tempK, dTemp, pressure, state, Dr, Fr, r, sumFr, sumr, timestamp) "
+                  "VALUES (:processId, :temp, :tempK, :dTemp, :pressure, :state, :Dr, :Fr, :r, :sumFr, :sumr, :timestamp)");
     query.bindValue(":processId", processId);
     query.bindValue(":temp", values.temp);
     query.bindValue(":tempK", values.tempK);
+    query.bindValue(":dTemp", values.dTemp);
     query.bindValue(":pressure", values.pressure);
     query.bindValue(":state", currentState);
     query.bindValue(":Dr", values.Dr);

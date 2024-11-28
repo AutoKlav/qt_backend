@@ -57,7 +57,7 @@ public:
 
     QString getName();    
     QList<StateMachineValues> getLogs();
-    static QList<ProcessLogInfoRow> getAllProcessLogsOrderedDesc(int processId);
+    static QList<ProcessLogInfoRow> getAllProcessLogs(int processId);
 
 };
 
