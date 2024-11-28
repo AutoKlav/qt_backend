@@ -10,7 +10,7 @@ struct StateMachineValues {
     double tempK;
     double dTemp;
     double pressure;
-    int state;
+    unsigned short state;
     double Dr;
     double Fr;
     double r;
@@ -29,7 +29,7 @@ struct StateMachineValues {
             .tempK =    splited[2].toDouble(),
             .dTemp =    splited[3].toDouble(),
             .pressure = splited[4].toDouble(),
-            .state = splited[5].toInt(),
+            .state = splited[5].toUShort(),
             .Dr =       splited[6].toDouble(),
             .Fr =       splited[7].toDouble(),
             .r =        splited[8].toDouble(),
@@ -57,7 +57,7 @@ public:
 
     QString getName();    
     QList<StateMachineValues> getLogs();
-    static QList<ProcessLogInfoRow> getAllProcessLogsOrderedDesc(int processId);
+    static QList<ProcessLogInfoRow> getAllProcessLogs(int processId);
 
 };
 
