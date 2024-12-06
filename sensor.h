@@ -29,6 +29,7 @@ public:
     void setValue(QString newPinValue);
 
     static SensorValues getValues();
+    static SensorValues getPinValues();
     static SensorRelayValues getRelayValues();
     static void parseSerialData(QString data);
     static void checkIfDataIsOld();

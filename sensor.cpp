@@ -49,6 +49,9 @@ void Sensor::checkIfDataIsOld()
         GlobalErrors::removeError(GlobalErrors::OldDataError);
 }
 
+/**
+ * @brief Representing the sensor values mapped to virtual values. 
+ */
 SensorValues Sensor::getValues()
 {
     checkIfDataIsOld();
@@ -62,6 +65,26 @@ SensorValues Sensor::getValues()
     return values;
 }
 
+/** 
+ * @brief Represents the raw values obtained from the sensor.
+ */
+SensorValues Sensor::getPinValues()
+{
+    checkIfDataIsOld();
+
+    SensorValues values;
+
+    values.temp = mapName["temp"]->pinValue;
+    values.tempK = mapName["tempK"]->pinValue;
+    values.pressure = mapName["pressure"]->pinValue;
+
+    return values;
+}
+
+/**
+ * @brief Structure representing the relay values of a sensor. Check void Sensor::setValue(uint newPinValue)
+    * for more information.
+ */
 SensorRelayValues Sensor::getRelayValues()
 {
     checkIfDataIsOld();
@@ -78,6 +101,10 @@ SensorRelayValues Sensor::getRelayValues()
     return relayValues;
 }
 
+/**
+ * @brief Parses the serial data received from the sensor and updates the corresponding sensor values.  
+ * @param data The serial data received from the sensor.
+ */
 void Sensor::parseSerialData(QString data)
 {
     // Parse data
