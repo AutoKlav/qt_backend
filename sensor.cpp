@@ -102,14 +102,7 @@ SensorRelayValues Sensor::getRelayValues()
 }
 
 /**
- * @brief Parses the serial data received from the sensor and updates the corresponding sensor values.
- * 
- * This function takes a QString parameter containing the serial data received from the sensor. 
- * It splits the data by sensors and iterates over each sensor. For each sensor, it splits the sensor data 
- * by name and value. If the sensor data is valid (contains both name and value), it updates the sensor value 
- * in the mapPinName container. If the sensor does not exist in the container, it logs an error message and 
- * sets a global error flag. Finally, it updates the lastDataTime variable with the current timestamp.
- * 
+ * @brief Parses the serial data received from the sensor and updates the corresponding sensor values.  
  * @param data The serial data received from the sensor.
  */
 void Sensor::parseSerialData(QString data)
