@@ -62,6 +62,19 @@ SensorValues Sensor::getValues()
     return values;
 }
 
+SensorValues Sensor::getPinValues()
+{
+    checkIfDataIsOld();
+
+    SensorValues values;
+
+    values.temp = mapName["temp"]->pinValue;
+    values.tempK = mapName["tempK"]->pinValue;
+    values.pressure = mapName["pressure"]->pinValue;
+
+    return values;
+}
+
 SensorRelayValues Sensor::getRelayValues()
 {
     checkIfDataIsOld();
