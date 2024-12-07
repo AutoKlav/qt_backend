@@ -37,6 +37,7 @@ bool StateMachine::start(ProcessConfig processConfig, ProcessInfo processInfo)
         return false;
 
     this->processConfig = processConfig;
+    this->processInfo = processInfo;
     state = State::STARTING;
 
     processStart = QDateTime::currentDateTime();
@@ -178,7 +179,7 @@ void StateMachine::tick()
 
         // Continue heating until the target F value or time is reached
         if (processConfig.mode == Mode::TARGETF) {
-            if (values.sumFr < processConfig.targetF)
+            if (values.sumFr < processInfo.targetF.toDouble())
                 break;
         } else if (processConfig.mode == Mode::TIME) {
             if (values.time < processConfig.targetTime)

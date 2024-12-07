@@ -150,7 +150,8 @@ QList<ProcessRow> DbManager::getAllProcessesOrderedDesc()
         auto bacteria = query.value(4).toString();
         auto description = query.value(5).toString();
         auto processStart = query.value(6).toString();
-        auto processLength = query.value(7).toString();
+        auto targetF = query.value(7).toString();
+        auto processLength = query.value(8).toString();
 
         ProcessRow info;
         info.id = id;
@@ -159,6 +160,7 @@ QList<ProcessRow> DbManager::getAllProcessesOrderedDesc()
         info.bacteria = bacteria;
         info.description = description;
         info.processStart = processStart;
+        info.targetF = targetF;
         info.processLength = processLength;
 
         processes.append(info);
@@ -218,16 +220,17 @@ QList<ProcessLogInfoRow> DbManager::getAllProcessLogs(int processId)
 }
 
 int DbManager::createProcess(QString name, ProcessInfo info)
-{
+{    
     QSqlQuery query(m_db);
-    query.prepare("INSERT INTO Process (name, productName, productQuantity, bacteria, description, processStart, processLength) "
-                  "VALUES (:name, :productName, :productQuantity, :bacteria, :description, :processStart, :processLength)");
+    query.prepare("INSERT INTO Process (name, productName, productQuantity, bacteria, description, processStart, targetF, processLength) "
+                  "VALUES (:name, :productName, :productQuantity, :bacteria, :description, :processStart, :targetF, :processLength)");
     query.bindValue(":name", name);
     query.bindValue(":productName", info.productName);
     query.bindValue(":productQuantity", info.productQuantity);
     query.bindValue(":bacteria", info.bacteria);
     query.bindValue(":description", info.description);
     query.bindValue(":processStart", info.processStart);
+    query.bindValue(":targetF", info.targetF);
     query.bindValue(":processLength", info.processLength);
 
     if (!query.exec()) {
