@@ -161,12 +161,11 @@ Status GRpcServer::Impl::AutoklavServiceImpl::updateSensor(grpc::ServerContext *
 Status GRpcServer::Impl::AutoklavServiceImpl::startProcess(grpc::ServerContext *context, const autoklav::StartProcessRequest *request, autoklav::Status *replay)
 {
     Q_UNUSED(context);
-
+    
     const StateMachine::ProcessConfig processConfig = {
         .type = static_cast<StateMachine::Type>(request->processconfig().type()),
         .customTemp = request->processconfig().customtemp(),
         .mode = static_cast<StateMachine::Mode>(request->processconfig().mode()),
-        .targetF = request->processconfig().targetf(),
         .targetTime = request->processconfig().targettime(),
         .maintainTemp = request->processconfig().maintaintemp(),
         .maintainPressure = request->processconfig().maintainpressure(),
@@ -175,11 +174,12 @@ Status GRpcServer::Impl::AutoklavServiceImpl::startProcess(grpc::ServerContext *
 
     const ProcessInfo processInfo = {
         .productName = QString::fromUtf8(request->processinfo().productname()),
-        .productQuantity = QString::fromUtf8(request->processinfo().productquantity()),
-        .bacteria = QString::fromUtf8(request->processinfo().bacteria()),
-        .description = QString::fromUtf8(request->processinfo().description()),
+        .productQuantity = QString::fromUtf8(request->processinfo().productquantity()),        
+        .bacteria = QString::fromUtf8(request->processinfo().bacteria()),        
+        .description = QString::fromUtf8(request->processinfo().description()),        
         .processStart = QString::fromUtf8(request->processinfo().processstart()),
         .processLength = QString::fromUtf8(request->processinfo().processlength()),
+        .targetF = QString::fromUtf8(request->processinfo().targetf())
     };
 
     bool succ = StateMachine::instance().start(processConfig, processInfo);
@@ -216,6 +216,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getAllProcesses(grpc::ServerContex
         processInfo->set_bacteria(process.bacteria.toStdString());
         processInfo->set_description(process.description.toStdString());
         processInfo->set_processstart(process.processStart.toStdString());
+        processInfo->set_targetf(process.targetF.toStdString());
         processInfo->set_processlength(process.processLength.toStdString());
     }
 

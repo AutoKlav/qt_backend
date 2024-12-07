@@ -11,6 +11,7 @@ struct ProcessInfo {
     QString bacteria;
     QString description;
     QString processStart, processLength;
+    QString targetF;
 };
 
 struct ProcessRow : ProcessInfo {

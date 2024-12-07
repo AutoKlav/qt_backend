@@ -33,8 +33,7 @@ public:
     struct ProcessConfig {
         Type type;
         double customTemp;
-        Mode mode;
-        double targetF;
+        Mode mode;        
         uint targetTime;
         double maintainTemp;
         double maintainPressure;
@@ -64,6 +63,7 @@ private:
     QDateTime processStart;
     StateMachineValues values;
     ProcessConfig processConfig;
+    ProcessInfo processInfo;
 
     quint64 id;
 
