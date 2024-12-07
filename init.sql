@@ -22,16 +22,22 @@ INSERT INTO Sensor VALUES ( "inPressure", "IO_4", 0, 1 );
 INSERT INTO Sensor VALUES ( "cooling", "IO_5", 0, 1 );
 
 -- Process
-CREATE TABLE Process (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT UNIQUE,
-    productName TEXT,
+create table Process
+(
+    id              INTEGER
+        primary key autoincrement,
+    name            TEXT
+        unique,
+    productName     TEXT,
     productQuantity TEXT,
-    bacteria TEXT,
-    description TEXT,
-    processStart DATETIME,
-    processLength TEXT
+    bacteria        TEXT,
+    description     TEXT,
+    processStart    DATETIME,
+    targetF         TEXT,
+    processLength   TEXT
 );
+
+INSERT INTO Process (id, name, productName, productQuantity, bacteria, description, processStart, processLength, targetF) VALUES (55, '2024-11-28T17:28:53', 'Testni podaci', 'sint aliqua do laborum', 'nulla do laborum laboris labore', 'reprehenderit magna eiusmod et', '2024-11-28T17:28:53', '56363634654', null);
 
 CREATE INDEX idx_process_start ON Process(processStart);
 
