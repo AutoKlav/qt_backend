@@ -44,7 +44,6 @@ QVector<QString> GlobalErrors::getErrorsString()
 
     // Db error
     if (errors.testFlag(Error::DbError)) err.push_back(DB_ERROR);
-    if (errors.testFlag(Error::DbTargetKError)) err.push_back(DB_GLOBAL_TARGET_K_LOAD_FAILED);
     if (errors.testFlag(Error::DbSerialDataTimeError)) err.push_back(DB_GLOBAL_SERIAL_DATA_TIME_LOAD_FAILED);
     if (errors.testFlag(Error::DbStateMachineTickError)) err.push_back(DB_GLOBAL_STATE_MACHINE_TICK_LOAD_FAILED);
     if (errors.testFlag(Error::DbSterilizationTempError)) err.push_back(DB_GLOBAL_STERILIZATION_TEMP_LOAD_FAILED);

@@ -108,7 +108,6 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getVariables(grpc::ServerContext *
 
     auto variables = Globals::getVariables();
 
-    replay->set_targetk(variables.targetK);
     replay->set_serialdatatime(variables.serialDataTime);
     replay->set_statemachinetick(variables.stateMachineTick);
     replay->set_sterilizationtemp(variables.sterilizationTemp);
@@ -125,9 +124,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::setVariable(grpc::ServerContext *c
     const auto value = QString::fromUtf8(request->value().c_str());
 
     bool succ = false;
-    if (name == "targetK") {
-        succ = Globals::setTargetK(value.toDouble());
-    } else if (name == "serialDataTime") {
+    if (name == "serialDataTime") {
         succ = Globals::setSerialDataTime(value.toInt());
     } else if (name == "stateMachineTick") {
         succ = Globals::setStateMachineTick(value.toInt());

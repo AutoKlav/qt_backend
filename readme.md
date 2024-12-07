@@ -103,10 +103,6 @@ Use QJsonDocument for communication
   "action": "setVariable",
   "data": [
     {
-      "name": "targetK",
-      "value": "5.5"
-    },
-    {
       "name": "cooldown temperature",
       "value": "70"
     }
@@ -158,12 +154,6 @@ Use QJsonDocument for communication
                 "originalValue": 1023
             }
         ],
-        "variables": [
-            {
-                "name": "targetK",
-                "value": 5.5
-            }
-        ],
         "process": {
             "state": 0,
             "name": "ready",
@@ -190,7 +180,6 @@ Use QJsonDocument for communication
         "mode": "steril",
         "logName": "Pasteta 3",
         "data": {
-            "targetK": 5.5,
             "currentK": 3,
         },
         "history": [

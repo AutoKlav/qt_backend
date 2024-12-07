@@ -2,20 +2,6 @@
 
 #include "dbmanager.h"
 
-bool Globals::setTargetK(double value)
-{
-    if (targetK == value)
-        return true;
-
-    auto& db = DbManager::instance();
-    if (db.updateGlobal("targetK", QString::number(value))) {
-        targetK = value;
-        return true;
-    }
-
-    return false;
-}
-
 bool Globals::setSerialDataTime(int value)
 {
     if (serialDataTime == value)
@@ -75,6 +61,6 @@ bool Globals::setPasterizationTemp(double value)
 Globals::Variables Globals::getVariables()
 {
     return {
-        targetK, serialDataTime, stateMachineTick, sterilizationTemp, pasterizationTemp
+        serialDataTime, stateMachineTick, sterilizationTemp, pasterizationTemp
     };
 }

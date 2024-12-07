@@ -8,7 +8,6 @@ class GlobalErrors
 public:
     enum Error {
         DbError =           0x1,
-        DbTargetKError =    0x2,
         DbSerialDataTimeError = 0x4,
         DbStateMachineTickError = 0x8,
         DbSterilizationTempError = 0x10,
