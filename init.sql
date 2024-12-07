@@ -1,7 +1,6 @@
 -- Globals
 CREATE TABLE Globals ( name TEXT NOT NULL UNIQUE, value TEXT NOT NULL );
 
-INSERT INTO Globals VALUES ( "targetK", "3.5" );
 INSERT INTO Globals VALUES ( "serialDataTime", "3000" );
 INSERT INTO Globals VALUES ( "stateMachineTick", "60000" );
 INSERT INTO Globals VALUES ( "sterilizationTemp", "121.1" );

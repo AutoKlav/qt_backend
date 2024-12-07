@@ -43,15 +43,6 @@ QString DbManager::loadGlobal(QString name)
 
 void DbManager::loadGlobals()
 {
-    QString targetKStr = loadGlobal("targetK");
-    if (!targetKStr.isEmpty()) {
-        Globals::targetK = targetKStr.toDouble();
-    }
-    else {
-        Logger::crit(GlobalErrors::DB_GLOBAL_TARGET_K_LOAD_FAILED);
-        GlobalErrors::setError(GlobalErrors::DbTargetKError);
-    }
-
     QString serialDataTimeStr = loadGlobal("serialDataTime");
     if (!serialDataTimeStr.isEmpty()) {
         Globals::serialDataTime = serialDataTimeStr.toInt();

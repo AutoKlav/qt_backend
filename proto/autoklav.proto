@@ -35,11 +35,10 @@ message Status {
 }
 
 message Variables {
-    double targetK = 1;
-    int32 serialDataTime = 2;
-    int32 stateMachineTick = 3;
-    double sterilizationTemp = 4;
-    double pasterizationTemp = 5;
+    int32 serialDataTime = 1;
+    int32 stateMachineTick = 2;
+    double sterilizationTemp = 3;
+    double pasterizationTemp = 4;
 }
 
 message SetVariable {
