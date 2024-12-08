@@ -269,6 +269,14 @@ QList<QString> DbManager::getDistinctProcessValues(QString columnName)
 {
     QList<QString> filteredValues;
 
+    // Must be checked since any provided literal is true in SQL
+    QList<QString> allowedColumns = {"id", "name", "productName", "productQuantity", "bacteria",
+                                 "description", "processStart"};
+    if (!allowedColumns.contains(columnName)) {
+        Logger::crit("Invalid column name: " + columnName);
+        return QList<QString>();
+    }
+
     QSqlQuery query(m_db);
 
     // Directly concatenate the column name into the SQL query
