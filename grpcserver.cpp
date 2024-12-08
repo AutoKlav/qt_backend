@@ -30,6 +30,7 @@ private:
         Status getStatus(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay) override;
         Status getAllProcesses(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::ProcessInfoList *replay) override;
         Status getDistinctProcessValues(grpc::ServerContext *context, const autoklav::ProcessFilterRequest *request, autoklav::FilteredProcessList *replay) override;
+        Status getFilteredModeValues(grpc::ServerContext *context, const autoklav::ProcessModeFilterRequest *request, autoklav::FilteredModeProcessList *replay) override;
         Status getProcessLogs(grpc::ServerContext *context, const autoklav::ProcessLogRequest *request, autoklav::ProcessLogList *replay) override;
         Status getVariables(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Variables *replay) override;
         Status setVariable(grpc::ServerContext *context, const autoklav::SetVariable *request, autoklav::Status *replay) override;
@@ -237,6 +238,35 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getDistinctProcessValues(grpc::Ser
 
     return Status::OK;
 }
+
+Status GRpcServer::Impl::AutoklavServiceImpl::getFilteredModeValues(grpc::ServerContext *context, const autoklav::ProcessModeFilterRequest *request, autoklav::FilteredModeProcessList *replay)
+{
+    Q_UNUSED(context);
+
+    const auto productName = QString::fromStdString(request->productname());
+    const auto productQuantity = QString::fromStdString(request->productquantity());
+
+    // Call to the function that retrieves the values from the database
+    const auto filteredMap = Process::getFilteredTargetFAndProcessLengthValues(productName, productQuantity);
+
+    // Extract the "targetF" and "processLength" lists from the filteredMap
+    const auto targetFList = filteredMap.value("targetF");
+    const auto processLengthList = filteredMap.value("processLength");
+
+    // Add all targetF values to the replay response
+    for (const auto &targetF : targetFList) {
+        replay->add_targetfvalues(targetF.toStdString());
+    }
+
+    // Add all processLength values to the replay response
+    for (const auto &processLength : processLengthList) {
+        replay->add_processlengthvalues(processLength.toStdString());
+    }
+
+    return grpc::Status::OK;
+}
+
+
 
 Status GRpcServer::Impl::AutoklavServiceImpl::getProcessLogs(grpc::ServerContext *context, const autoklav::ProcessLogRequest *request, autoklav::ProcessLogList *replay)
 {
