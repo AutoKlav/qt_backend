@@ -265,6 +265,31 @@ bool DbManager::updateProcess(int id, ProcessInfo info)
     return true;
 }
 
+QList<QString> DbManager::getDistinctProcessValues(QString columnName)
+{
+    QList<QString> filteredValues;
+
+    QSqlQuery query(m_db);
+
+    // Directly concatenate the column name into the SQL query
+    QString queryStr = QString("SELECT DISTINCT %1 FROM Process ORDER BY id DESC").arg(columnName);
+    query.prepare(queryStr);
+
+    // Guard clause for query execution
+    if (!query.exec()) {
+        Logger::crit(query.lastError().text());
+        Logger::crit("Query: " + query.executedQuery());
+        return QList<QString>();
+    }
+
+    while (query.next()) {
+        auto response = query.value(0).toString();
+        filteredValues.append(response);
+    }
+
+    return filteredValues;
+}
+
 int DbManager::createProcessLog(int processId)
 {
     StateMachine &stateMachine = StateMachine::instance();

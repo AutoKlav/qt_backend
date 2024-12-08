@@ -44,6 +44,7 @@ public:
 
     // Process
     QList<ProcessRow> getAllProcessesOrderedDesc();
+    QList<QString> getDistinctProcessValues(QString columnName);
     int createProcess(QString name, ProcessInfo info);
     bool updateProcess(int id, ProcessInfo info);
 

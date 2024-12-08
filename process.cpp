@@ -48,6 +48,12 @@ bool Process::setInfo(ProcessInfo newInfo)
     return true;
 }
 
+QList<QString> Process::getFilteredProcessValues(QString columnName)
+{
+    QList<QString> filteredValues = DbManager::instance().getDistinctProcessValues(columnName);
+    return filteredValues;
+}
+
 int Process::saveProcess()
 {
     if (id == -1) {

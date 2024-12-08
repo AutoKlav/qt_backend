@@ -30,6 +30,7 @@ public:
     explicit Process();
     explicit Process(QString name, ProcessInfo info, QObject *parent = nullptr);
     static QList<ProcessRow> getAllProcesses();
+    static QList<QString> getFilteredProcessValues(QString columnName);
 
     int getId();
     ProcessInfo getInfo();

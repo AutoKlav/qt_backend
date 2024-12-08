@@ -29,6 +29,7 @@ private:
     public:
         Status getStatus(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay) override;
         Status getAllProcesses(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::ProcessInfoList *replay) override;
+        Status getDistinctProcessValues(grpc::ServerContext *context, const autoklav::ProcessFilterRequest *request, autoklav::FilteredProcessList *replay) override;
         Status getProcessLogs(grpc::ServerContext *context, const autoklav::ProcessLogRequest *request, autoklav::ProcessLogList *replay) override;
         Status getVariables(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Variables *replay) override;
         Status setVariable(grpc::ServerContext *context, const autoklav::SetVariable *request, autoklav::Status *replay) override;
@@ -218,6 +219,20 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getAllProcesses(grpc::ServerContex
         processInfo->set_processstart(process.processStart.toStdString());
         processInfo->set_targetf(process.targetF.toStdString());
         processInfo->set_processlength(process.processLength.toStdString());
+    }
+
+    return Status::OK;
+}
+
+Status GRpcServer::Impl::AutoklavServiceImpl::getDistinctProcessValues(grpc::ServerContext *context, const autoklav::ProcessFilterRequest *request, autoklav::FilteredProcessList *replay)
+{
+    Q_UNUSED(context);
+
+    auto columnName = request->columnname();
+    const auto processes = Process::getFilteredProcessValues(QString::fromStdString(columnName));
+
+    for (const auto &process : processes) {
+        replay->add_values(process.toStdString());
     }
 
     return Status::OK;

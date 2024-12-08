@@ -12,6 +12,7 @@ service Autoklav {
 
     // Process
     rpc getAllProcesses(Empty) returns (ProcessInfoList);
+    rpc getDistinctProcessValues(ProcessFilterRequest) returns (FilteredProcessList);
     rpc getProcessLogs(ProcessLogRequest) returns (ProcessLogList);
     rpc startProcess(StartProcessRequest) returns (Status);
     rpc stopProcess(Empty) returns (Status);
@@ -44,6 +45,10 @@ message Variables {
 message SetVariable {
     string name = 1;
     string value = 2;
+}
+
+message ProcessFilterRequest {
+    string columnName = 1;    
 }
 
 message UpdateSensorRequest {
@@ -132,6 +137,10 @@ message StartProcessRequest {
 
 message ProcessLogRequest{
     repeated uint32 ids = 1;
+}
+
+message FilteredProcessList {
+    repeated string values = 1;
 }
 
 // New message to hold a list of ProcessInfo
