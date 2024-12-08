@@ -31,6 +31,7 @@ public:
     explicit Process(QString name, ProcessInfo info, QObject *parent = nullptr);
     static QList<ProcessRow> getAllProcesses();
     static QList<QString> getFilteredProcessValues(QString columnName);
+    static QMap<QString, QList<QString>> getFilteredTargetFAndProcessLengthValues(QString productName, QString productQuantity);
 
     int getId();
     ProcessInfo getInfo();

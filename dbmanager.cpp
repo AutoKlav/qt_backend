@@ -298,6 +298,53 @@ QList<QString> DbManager::getDistinctProcessValues(QString columnName)
     return filteredValues;
 }
 
+QMap<QString, QList<QString>> DbManager::getFilteredTargetFAndProcessLenghtValues(QString productName, QString productQuantity)
+{
+    QMap<QString, QList<QString>> resultMap; // This will hold targetF and processLength as keys with their respective lists
+
+    QSqlQuery query(m_db);
+
+    // Correct the SQL query with named parameters
+    QString queryStr = "SELECT DISTINCT targetF, processLength FROM Process WHERE productName LIKE :productName AND productQuantity LIKE :productQuantity ORDER BY id DESC";
+    query.prepare(queryStr);
+
+    // Bind the parameters safely with % wildcards for LIKE
+    query.bindValue(":productName", "%" + productName + "%");
+    query.bindValue(":productQuantity", "%" + productQuantity + "%");
+
+    // Guard clause for query execution
+    if (!query.exec()) {
+        Logger::crit(query.lastError().text());
+        Logger::crit("Query: " + query.executedQuery());
+        return resultMap; // Return an empty map
+    }
+
+    // Initialize the lists for targetF and processLength
+    QList<QString> targetFList;
+    QList<QString> processLengthList;
+
+    // Iterate over the result set
+    while (query.next()) {
+        QString targetF = query.value(0).toString();
+        QString processLength = query.value(1).toString();
+
+        // Avoid duplicates if necessary
+        if (!targetFList.contains(targetF)) {
+            targetFList.append(targetF);
+        }
+
+        if (!processLengthList.contains(processLength)) {
+            processLengthList.append(processLength);
+        }
+    }
+
+    // Store the results in the map
+    resultMap["targetF"] = targetFList;
+    resultMap["processLength"] = processLengthList;
+
+    return resultMap;
+}
+
 int DbManager::createProcessLog(int processId)
 {
     StateMachine &stateMachine = StateMachine::instance();

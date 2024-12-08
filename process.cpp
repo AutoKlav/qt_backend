@@ -54,6 +54,12 @@ QList<QString> Process::getFilteredProcessValues(QString columnName)
     return filteredValues;
 }
 
+QMap<QString, QList<QString>> Process::getFilteredTargetFAndProcessLengthValues(QString productName, QString productQuantity)
+{
+    QMap<QString, QList<QString>> map = DbManager::instance().getFilteredTargetFAndProcessLenghtValues(productName, productQuantity);
+    return map;
+}
+
 int Process::saveProcess()
 {
     if (id == -1) {

@@ -13,6 +13,7 @@ service Autoklav {
     // Process
     rpc getAllProcesses(Empty) returns (ProcessInfoList);
     rpc getDistinctProcessValues(ProcessFilterRequest) returns (FilteredProcessList);
+    rpc getFilteredModeValues(ProcessModeFilterRequest) returns (FilteredModeProcessList);
     rpc getProcessLogs(ProcessLogRequest) returns (ProcessLogList);
     rpc startProcess(StartProcessRequest) returns (Status);
     rpc stopProcess(Empty) returns (Status);
@@ -49,6 +50,11 @@ message SetVariable {
 
 message ProcessFilterRequest {
     string columnName = 1;    
+}
+
+message ProcessModeFilterRequest {
+    string productName = 1;
+    string productQuantity = 2;
 }
 
 message UpdateSensorRequest {
@@ -141,6 +147,11 @@ message ProcessLogRequest{
 
 message FilteredProcessList {
     repeated string values = 1;
+}
+
+message FilteredModeProcessList {
+    repeated string targetFValues = 1;
+    repeated string processLengthValues = 2;
 }
 
 // New message to hold a list of ProcessInfo
