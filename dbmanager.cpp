@@ -309,8 +309,8 @@ QMap<QString, QList<QString>> DbManager::getFilteredTargetFAndProcessLengthValue
     query.prepare(queryStr);
 
     // Bind the parameters safely with % wildcards for LIKE
-    query.bindValue(":productName", "%" + productName + "%");
-    query.bindValue(":productQuantity", "%" + productQuantity + "%");
+    query.bindValue(":productName", productName);
+    query.bindValue(":productQuantity", productQuantity);
 
     // Guard clause for query execution
     if (!query.exec()) {
