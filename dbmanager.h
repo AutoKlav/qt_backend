@@ -45,8 +45,11 @@ public:
     // Process
     QList<ProcessRow> getAllProcessesOrderedDesc();
     QList<QString> getDistinctProcessValues(QString columnName);
-    QMap<QString, QList<QString>> getFilteredTargetFAndProcessLenghtValues(QString productName, QString productQuantity);
+    QMap<QString, QList<QString>> getFilteredTargetFAndProcessLengthValues(QString productName, QString productQuantity);
+    QList<ProcessType> getProcessTypes();
 
+    int createProcessType(ProcessType processType);
+    int deleteProcessType(int id);
     int createProcess(QString name, ProcessInfo info);
     bool updateProcess(int id, ProcessInfo info);
 
@@ -56,7 +59,6 @@ public:
     ProcessLog getProcessLog(QString name);
     int createProcessLog(int processId);
 
-    QList<ProcessRow> searchProcesses(ProcessFilters filters);
     QStringList getProcessesNames();
 
     static DbManager& instance();

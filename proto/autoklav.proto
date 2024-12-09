@@ -15,6 +15,9 @@ service Autoklav {
     rpc getDistinctProcessValues(ProcessFilterRequest) returns (FilteredProcessList);
     rpc getFilteredModeValues(ProcessModeFilterRequest) returns (FilteredModeProcessList);
     rpc getProcessLogs(ProcessLogRequest) returns (ProcessLogList);
+    rpc getAllProcessTypes(Empty) returns (ProcessTypesList);
+    rpc createProcessType(ProcessTypeRequest) returns (Status);    
+    rpc deleteProcessType(TypeRequest) returns (Status);
     rpc startProcess(StartProcessRequest) returns (Status);
     rpc stopProcess(Empty) returns (Status);
 
@@ -30,10 +33,37 @@ service Autoklav {
 
 message Empty {}
 
+message TypeRequest {
+    int32 id = 1;
+}
+
 message Status {
     int32 code = 1;
     int32 errors = 2;
     string errorsString = 3;
+}
+
+message ProcessTypeRequest {
+    string name = 1;
+    string type = 2;
+    double customTemp = 3;
+    double finishTemp = 4;
+    double maintainPressure = 5;
+    double pressure = 6;
+}
+
+message ProcessType {
+    int32 id = 1;
+    string name = 2;
+    string type = 3;
+    double customTemp = 4;
+    double finishTemp = 5;
+    double maintainPressure = 6;
+    double pressure = 7;
+}
+
+message ProcessTypesList {
+    repeated ProcessType processTypes = 1;
 }
 
 message Variables {

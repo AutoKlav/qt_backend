@@ -56,8 +56,15 @@ QList<QString> Process::getFilteredProcessValues(QString columnName)
 
 QMap<QString, QList<QString>> Process::getFilteredTargetFAndProcessLengthValues(QString productName, QString productQuantity)
 {
-    QMap<QString, QList<QString>> map = DbManager::instance().getFilteredTargetFAndProcessLenghtValues(productName, productQuantity);
+    QMap<QString, QList<QString>> map = DbManager::instance().getFilteredTargetFAndProcessLengthValues(productName, productQuantity);
     return map;
+}
+
+QList<ProcessType> Process::getProcessTypes()
+{
+    QList<ProcessType> types = DbManager::instance().getProcessTypes();
+    return types;
+
 }
 
 int Process::saveProcess()
@@ -68,4 +75,14 @@ int Process::saveProcess()
     } else {
         return DbManager::instance().updateProcess(id, info);
     }
+}
+
+int Process::createProcessType(ProcessType processType)
+{
+    return DbManager::instance().createProcessType(processType);
+}
+
+int Process::deleteProcessType(int id)
+{
+    return DbManager::instance().deleteProcessType(id);
 }

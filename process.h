@@ -5,6 +5,15 @@
 #include <QList>
 #include <QObject>
 
+struct ProcessType {
+    int id;
+    QString name;
+    QString type;
+    double customTemp;
+    double finishTemp;
+    double maintainPressure;
+    double pressure;
+};
 
 struct ProcessInfo {
     QString productName, productQuantity;
@@ -32,6 +41,9 @@ public:
     static QList<ProcessRow> getAllProcesses();
     static QList<QString> getFilteredProcessValues(QString columnName);
     static QMap<QString, QList<QString>> getFilteredTargetFAndProcessLengthValues(QString productName, QString productQuantity);
+    static QList<ProcessType> getProcessTypes();
+    static int createProcessType(ProcessType processType);
+    static int deleteProcessType(int id);
 
     int getId();
     ProcessInfo getInfo();

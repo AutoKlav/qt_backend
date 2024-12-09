@@ -298,7 +298,7 @@ QList<QString> DbManager::getDistinctProcessValues(QString columnName)
     return filteredValues;
 }
 
-QMap<QString, QList<QString>> DbManager::getFilteredTargetFAndProcessLenghtValues(QString productName, QString productQuantity)
+QMap<QString, QList<QString>> DbManager::getFilteredTargetFAndProcessLengthValues(QString productName, QString productQuantity)
 {
     QMap<QString, QList<QString>> resultMap; // This will hold targetF and processLength as keys with their respective lists
 
@@ -345,6 +345,44 @@ QMap<QString, QList<QString>> DbManager::getFilteredTargetFAndProcessLenghtValue
     return resultMap;
 }
 
+int DbManager::createProcessType(ProcessType processType)
+{
+    QSqlQuery query(m_db);
+    query.prepare("INSERT INTO ProcessType (name, type, customTemp, finishTemp, maintainPressure, pressure) "
+                  "VALUES (:name, :type, :customTemp, :finishTemp, :maintainPressure, :pressure)");
+    query.bindValue(":name", processType.name);
+    query.bindValue(":type", processType.type);
+    query.bindValue(":customTemp", processType.customTemp);
+    query.bindValue(":finishTemp", processType.finishTemp);
+    query.bindValue(":maintainPressure", processType.maintainPressure);
+    query.bindValue(":pressure", processType.pressure);
+
+    if (!query.exec()) {
+        Logger::crit(QString("Database: Unable to create process type %1").arg(processType.name));
+        Logger::crit(QString("SQL error: %1").arg(query.lastError().text()));
+        return -1;
+    }
+
+    Logger::info(QString("Database: Create process type %1").arg(processType.name));
+    return query.lastInsertId().toInt();
+}
+
+int DbManager::deleteProcessType(int id)
+{
+    QSqlQuery query(m_db);
+    query.prepare("DELETE FROM ProcessType WHERE id = :id");
+    query.bindValue(":id", id);
+
+    if (!query.exec()) {
+        Logger::crit(QString("Database: Unable to delete process type %1").arg(id));
+        Logger::crit(QString("SQL error: %1").arg(query.lastError().text()));
+        return -1;
+    }
+
+    Logger::info(QString("Database: Delete process type %1").arg(id));
+    return query.numRowsAffected();
+}
+
 int DbManager::createProcessLog(int processId)
 {
     StateMachine &stateMachine = StateMachine::instance();
@@ -378,36 +416,6 @@ int DbManager::createProcessLog(int processId)
     return query.lastInsertId().toInt();
 }
 
-QList<ProcessRow> DbManager::searchProcesses(ProcessFilters filters)
-{
-    QString queryStr = "SELECT * FROM Process WHERE 1";
-    if (!filters.name.isEmpty()) {
-        queryStr += " AND name LIKE '%" + filters.name + "%'";
-    }
-    if (!filters.minDate.isEmpty() && !filters.maxDate.isEmpty()) {
-        queryStr += " AND processStart BETWEEN '" + filters.minDate + "' AND '" + filters.maxDate + "'";
-    }
-
-    QSqlQuery query(queryStr, m_db);
-    QList<ProcessRow> rows;
-    while (query.next()) {
-        auto id = query.value(0).toInt();
-        // auto name = query.value(1).toString();
-        auto productName = query.value(2).toString();
-        auto productQuantity = query.value(3).toString();
-        auto bacteria = query.value(4).toString();
-        auto description = query.value(5).toString();
-        auto processStart = query.value(6).toString();
-        auto processLength = query.value(7).toString();
-
-        ProcessRow row = {
-            {productName, productQuantity, bacteria, description, processStart, processLength}, id
-        };
-        rows.append(row);
-    }
-    return rows;
-}
-
 QStringList DbManager::getProcessesNames()
 {
     QSqlQuery query("SELECT DISTINCT name FROM Process", m_db);
@@ -416,6 +424,25 @@ QStringList DbManager::getProcessesNames()
         names.append(query.value(0).toString());
     }
     return names;
+}
+
+QList<ProcessType> DbManager::getProcessTypes()
+{
+    QSqlQuery query("SELECT * FROM ProcessType", m_db);
+    QList<ProcessType> types;
+    while (query.next()) {
+        auto id = query.value(0).toInt();
+        auto name = query.value(1).toString();
+        auto type = query.value(2).toString();
+        auto customTemp = query.value(3).toDouble();
+        auto finishTemp = query.value(4).toDouble();
+        auto maintainPressure = query.value(5).toDouble();
+        auto pressure = query.value(6).toDouble();
+
+        types.append({id, name, type, customTemp, finishTemp, maintainPressure, pressure});
+    }
+
+    return types;
 }
 
 DbManager& DbManager::instance()

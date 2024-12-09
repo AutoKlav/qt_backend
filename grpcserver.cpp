@@ -31,9 +31,12 @@ private:
         Status getAllProcesses(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::ProcessInfoList *replay) override;
         Status getDistinctProcessValues(grpc::ServerContext *context, const autoklav::ProcessFilterRequest *request, autoklav::FilteredProcessList *replay) override;
         Status getFilteredModeValues(grpc::ServerContext *context, const autoklav::ProcessModeFilterRequest *request, autoklav::FilteredModeProcessList *replay) override;
+        Status getAllProcessTypes(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::ProcessTypesList *replay) override;
         Status getProcessLogs(grpc::ServerContext *context, const autoklav::ProcessLogRequest *request, autoklav::ProcessLogList *replay) override;
         Status getVariables(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Variables *replay) override;
         Status setVariable(grpc::ServerContext *context, const autoklav::SetVariable *request, autoklav::Status *replay) override;
+        Status createProcessType(grpc::ServerContext *context, const autoklav::ProcessTypeRequest *request, autoklav::Status *replay) override;
+        Status deleteProcessType(grpc::ServerContext *context, const autoklav::TypeRequest *request, autoklav::Status *replay) override;
         Status startProcess(grpc::ServerContext *context, const autoklav::StartProcessRequest *request, autoklav::Status *replay) override;
         Status stopProcess(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay) override;
         Status getSensorValues(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::SensorValues *replay) override;
@@ -190,6 +193,38 @@ Status GRpcServer::Impl::AutoklavServiceImpl::startProcess(grpc::ServerContext *
     return Status::OK;
 }
 
+Status GRpcServer::Impl::AutoklavServiceImpl::createProcessType(grpc::ServerContext *context, const autoklav::ProcessTypeRequest *request, autoklav::Status *replay)
+{
+    Q_UNUSED(context);
+
+    const ProcessType processType = {
+        .name = QString::fromStdString(request->name()),
+        .type = QString::fromStdString(request->type()),
+        .customTemp = request->customtemp(),
+        .finishTemp = request->finishtemp(),
+        .maintainPressure = request->maintainpressure(),
+        .pressure = request->pressure()
+    };
+
+    bool succ = Process::createProcessType(processType);
+
+    setStatusReply(replay, !succ);
+    return Status::OK;
+}
+
+Status GRpcServer::Impl::AutoklavServiceImpl::deleteProcessType(grpc::ServerContext *context, const autoklav::TypeRequest *request, autoklav::Status *replay)
+{
+    Q_UNUSED(context);
+
+    const auto id = request->id();
+
+    bool succ = Process::deleteProcessType(id);
+
+    setStatusReply(replay, !succ);
+    return Status::OK;
+}
+        
+
 Status GRpcServer::Impl::AutoklavServiceImpl::stopProcess(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay)
 {
     Q_UNUSED(context);
@@ -266,7 +301,28 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getFilteredModeValues(grpc::Server
     return grpc::Status::OK;
 }
 
+Status GRpcServer::Impl::AutoklavServiceImpl::getAllProcessTypes(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::ProcessTypesList *replay)
+{
+    Q_UNUSED(context);
+    Q_UNUSED(request);
 
+    const auto processTypes = Process::getProcessTypes();
+
+    for (const auto &processType : processTypes) {
+        auto processTypeInfo = replay->add_processtypes();
+
+        processTypeInfo->set_id(processType.id);
+        processTypeInfo->set_name(processType.name.toStdString());
+        processTypeInfo->set_type(processType.type.toStdString());
+        processTypeInfo->set_customtemp(processType.customTemp);
+        processTypeInfo->set_finishtemp(processType.finishTemp);
+        processTypeInfo->set_maintainpressure(processType.maintainPressure);
+        processTypeInfo->set_pressure(processType.pressure);
+    }
+
+    return Status::OK;
+
+}
 
 Status GRpcServer::Impl::AutoklavServiceImpl::getProcessLogs(grpc::ServerContext *context, const autoklav::ProcessLogRequest *request, autoklav::ProcessLogList *replay)
 {
