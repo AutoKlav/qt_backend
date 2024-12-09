@@ -298,7 +298,7 @@ QList<QString> DbManager::getDistinctProcessValues(QString columnName)
     return filteredValues;
 }
 
-QMap<QString, QList<QString>> DbManager::getFilteredTargetFAndProcessLenghtValues(QString productName, QString productQuantity)
+QMap<QString, QList<QString>> DbManager::getFilteredTargetFAndProcessLengthValues(QString productName, QString productQuantity)
 {
     QMap<QString, QList<QString>> resultMap; // This will hold targetF and processLength as keys with their respective lists
 

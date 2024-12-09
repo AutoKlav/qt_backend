@@ -45,7 +45,7 @@ public:
     // Process
     QList<ProcessRow> getAllProcessesOrderedDesc();
     QList<QString> getDistinctProcessValues(QString columnName);
-    QMap<QString, QList<QString>> getFilteredTargetFAndProcessLenghtValues(QString productName, QString productQuantity);
+    QMap<QString, QList<QString>> getFilteredTargetFAndProcessLengthValues(QString productName, QString productQuantity);
     QList<ProcessType> getProcessTypes();
 
     int createProcess(QString name, ProcessInfo info);
