@@ -41,6 +41,25 @@ INSERT INTO Process (id, name, productName, productQuantity, bacteria, descripti
 
 CREATE INDEX idx_process_start ON Process(processStart);
 
+ CREATE TABLE ProcessType
+(
+    id              INTEGER
+        primary key autoincrement,
+    name TEXT NOT NULL,
+    type TEXT NOT NULL,
+    customTemp REAL NOT NULL,
+    finishTemp REAL NOT NULL,
+    maintainPressure REAL NOT NULL,
+    pressure REAL NOT NULL
+);
+
+INSERT INTO ProcessType (name, type, customTemp, finishTemp, maintainPressure, pressure)
+VALUES ('osnovna sterilizacija', 'sterilizacija', 121.1, 121.1, 1, 1);
+
+-- Insert data for pasteurization
+INSERT INTO ProcessType (name, type, customTemp, finishTemp, maintainPressure, pressure)
+VALUES ('osnovna pasterizacija', 'pasterizacija', 70, 70, 1, 1);
+
 -- ProcessLog
 create table ProcessLog
 (
