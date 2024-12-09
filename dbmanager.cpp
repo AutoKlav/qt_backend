@@ -378,36 +378,6 @@ int DbManager::createProcessLog(int processId)
     return query.lastInsertId().toInt();
 }
 
-QList<ProcessRow> DbManager::searchProcesses(ProcessFilters filters)
-{
-    QString queryStr = "SELECT * FROM Process WHERE 1";
-    if (!filters.name.isEmpty()) {
-        queryStr += " AND name LIKE '%" + filters.name + "%'";
-    }
-    if (!filters.minDate.isEmpty() && !filters.maxDate.isEmpty()) {
-        queryStr += " AND processStart BETWEEN '" + filters.minDate + "' AND '" + filters.maxDate + "'";
-    }
-
-    QSqlQuery query(queryStr, m_db);
-    QList<ProcessRow> rows;
-    while (query.next()) {
-        auto id = query.value(0).toInt();
-        // auto name = query.value(1).toString();
-        auto productName = query.value(2).toString();
-        auto productQuantity = query.value(3).toString();
-        auto bacteria = query.value(4).toString();
-        auto description = query.value(5).toString();
-        auto processStart = query.value(6).toString();
-        auto processLength = query.value(7).toString();
-
-        ProcessRow row = {
-            {productName, productQuantity, bacteria, description, processStart, processLength}, id
-        };
-        rows.append(row);
-    }
-    return rows;
-}
-
 QStringList DbManager::getProcessesNames()
 {
     QSqlQuery query("SELECT DISTINCT name FROM Process", m_db);
@@ -416,6 +386,25 @@ QStringList DbManager::getProcessesNames()
         names.append(query.value(0).toString());
     }
     return names;
+}
+
+QList<ProcessType> DbManager::getProcessTypes()
+{
+    QSqlQuery query("SELECT * FROM ProcessType", m_db);
+    QList<ProcessType> types;
+    while (query.next()) {
+        auto id = query.value(0).toInt();
+        auto name = query.value(1).toString();
+        auto type = query.value(2).toString();
+        auto customTemp = query.value(3).toDouble();
+        auto finishTemp = query.value(4).toDouble();
+        auto maintainPressure = query.value(5).toDouble();
+        auto pressure = query.value(6).toDouble();
+
+        types.append({id, name, type, customTemp, finishTemp, maintainPressure, pressure});
+    }
+
+    return types;
 }
 
 DbManager& DbManager::instance()

@@ -60,6 +60,13 @@ QMap<QString, QList<QString>> Process::getFilteredTargetFAndProcessLengthValues(
     return map;
 }
 
+QList<ProcessType> Process::getProcessTypes()
+{
+    QList<ProcessType> types = DbManager::instance().getProcessTypes();
+    return types;
+
+}
+
 int Process::saveProcess()
 {
     if (id == -1) {
