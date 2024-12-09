@@ -76,3 +76,13 @@ int Process::saveProcess()
         return DbManager::instance().updateProcess(id, info);
     }
 }
+
+int Process::createProcessType(ProcessType processType)
+{
+    return DbManager::instance().createProcessType(processType);
+}
+
+int Process::deleteProcessType(int id)
+{
+    return DbManager::instance().deleteProcessType(id);
+}

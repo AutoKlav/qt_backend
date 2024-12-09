@@ -48,6 +48,8 @@ public:
     QMap<QString, QList<QString>> getFilteredTargetFAndProcessLengthValues(QString productName, QString productQuantity);
     QList<ProcessType> getProcessTypes();
 
+    int createProcessType(ProcessType processType);
+    int deleteProcessType(int id);
     int createProcess(QString name, ProcessInfo info);
     bool updateProcess(int id, ProcessInfo info);
 

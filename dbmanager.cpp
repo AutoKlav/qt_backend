@@ -345,6 +345,44 @@ QMap<QString, QList<QString>> DbManager::getFilteredTargetFAndProcessLengthValue
     return resultMap;
 }
 
+int DbManager::createProcessType(ProcessType processType)
+{
+    QSqlQuery query(m_db);
+    query.prepare("INSERT INTO ProcessType (name, type, customTemp, finishTemp, maintainPressure, pressure) "
+                  "VALUES (:name, :type, :customTemp, :finishTemp, :maintainPressure, :pressure)");
+    query.bindValue(":name", processType.name);
+    query.bindValue(":type", processType.type);
+    query.bindValue(":customTemp", processType.customTemp);
+    query.bindValue(":finishTemp", processType.finishTemp);
+    query.bindValue(":maintainPressure", processType.maintainPressure);
+    query.bindValue(":pressure", processType.pressure);
+
+    if (!query.exec()) {
+        Logger::crit(QString("Database: Unable to create process type %1").arg(processType.name));
+        Logger::crit(QString("SQL error: %1").arg(query.lastError().text()));
+        return -1;
+    }
+
+    Logger::info(QString("Database: Create process type %1").arg(processType.name));
+    return query.lastInsertId().toInt();
+}
+
+int DbManager::deleteProcessType(int id)
+{
+    QSqlQuery query(m_db);
+    query.prepare("DELETE FROM ProcessType WHERE id = :id");
+    query.bindValue(":id", id);
+
+    if (!query.exec()) {
+        Logger::crit(QString("Database: Unable to delete process type %1").arg(id));
+        Logger::crit(QString("SQL error: %1").arg(query.lastError().text()));
+        return -1;
+    }
+
+    Logger::info(QString("Database: Delete process type %1").arg(id));
+    return query.numRowsAffected();
+}
+
 int DbManager::createProcessLog(int processId)
 {
     StateMachine &stateMachine = StateMachine::instance();
