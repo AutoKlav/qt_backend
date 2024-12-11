@@ -49,7 +49,7 @@ message ProcessTypeRequest {
     double customTemp = 3;
     double finishTemp = 4;
     double maintainPressure = 5;
-    double pressure = 6;
+    double maintainTemp = 6;
 }
 
 message ProcessType {
@@ -59,7 +59,7 @@ message ProcessType {
     double customTemp = 4;
     double finishTemp = 5;
     double maintainPressure = 6;
-    double pressure = 7;
+    double maintainTemp = 7;
 }
 
 message ProcessTypesList {

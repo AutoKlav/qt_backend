@@ -348,14 +348,14 @@ QMap<QString, QList<QString>> DbManager::getFilteredTargetFAndProcessLengthValue
 int DbManager::createProcessType(ProcessType processType)
 {
     QSqlQuery query(m_db);
-    query.prepare("INSERT INTO ProcessType (name, type, customTemp, finishTemp, maintainPressure, pressure) "
-                  "VALUES (:name, :type, :customTemp, :finishTemp, :maintainPressure, :pressure)");
+    query.prepare("INSERT INTO ProcessType (name, type, customTemp, finishTemp, maintainPressure, maintainTemp) "
+                  "VALUES (:name, :type, :customTemp, :finishTemp, :maintainPressure, :maintainTemp)");
     query.bindValue(":name", processType.name);
     query.bindValue(":type", processType.type);
     query.bindValue(":customTemp", processType.customTemp);
     query.bindValue(":finishTemp", processType.finishTemp);
     query.bindValue(":maintainPressure", processType.maintainPressure);
-    query.bindValue(":pressure", processType.pressure);
+    query.bindValue(":maintainTemp", processType.maintainTemp);
 
     if (!query.exec()) {
         Logger::crit(QString("Database: Unable to create process type %1").arg(processType.name));
@@ -437,9 +437,9 @@ QList<ProcessType> DbManager::getProcessTypes()
         auto customTemp = query.value(3).toDouble();
         auto finishTemp = query.value(4).toDouble();
         auto maintainPressure = query.value(5).toDouble();
-        auto pressure = query.value(6).toDouble();
+        auto maintainTemp = query.value(6).toDouble();
 
-        types.append({id, name, type, customTemp, finishTemp, maintainPressure, pressure});
+        types.append({id, name, type, customTemp, finishTemp, maintainPressure, maintainTemp});
     }
 
     return types;
