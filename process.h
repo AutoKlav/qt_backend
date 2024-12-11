@@ -12,7 +12,7 @@ struct ProcessType {
     double customTemp;
     double finishTemp;
     double maintainPressure;
-    double pressure;
+    double maintainTemp;
 };
 
 struct ProcessInfo {

@@ -203,7 +203,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::createProcessType(grpc::ServerCont
         .customTemp = request->customtemp(),
         .finishTemp = request->finishtemp(),
         .maintainPressure = request->maintainpressure(),
-        .pressure = request->pressure()
+        .maintainTemp = request->maintaintemp()
     };
 
     bool succ = Process::createProcessType(processType);
@@ -317,7 +317,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getAllProcessTypes(grpc::ServerCon
         processTypeInfo->set_customtemp(processType.customTemp);
         processTypeInfo->set_finishtemp(processType.finishTemp);
         processTypeInfo->set_maintainpressure(processType.maintainPressure);
-        processTypeInfo->set_pressure(processType.pressure);
+        processTypeInfo->set_maintaintemp(processType.maintainTemp);
     }
 
     return Status::OK;
