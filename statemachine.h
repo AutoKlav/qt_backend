@@ -33,8 +33,8 @@ public:
     struct ProcessConfig {
         Type type;
         double customTemp;
-        Mode mode;        
-        uint targetTime;
+        Mode mode;
+        uint64_t targetTime;
         double maintainTemp;
         double maintainPressure;
         double finishTemp;
