@@ -11,10 +11,9 @@
 qint64 Sensor::lastDataTime = 0;
 QList<Sensor> Sensor::sensors = QList<Sensor>();
 QMap<QString, Sensor *> Sensor::mapName = QMap<QString, Sensor *>();
-QMap<QString, Sensor *> Sensor::mapPinName = QMap<QString, Sensor *>();
 
-Sensor::Sensor(QString name, QString pinName, double minValue, double maxValue)
-    : name{name}, pinName{pinName}, minValue{minValue}, maxValue{maxValue}
+Sensor::Sensor(QString name, double minValue, double maxValue)
+    : name{name}, minValue{minValue}, maxValue{maxValue}
 {
 
 }
@@ -24,7 +23,7 @@ void Sensor::send(double newValue)
     value = newValue; // Update the internal value
     uint pinValue = (newValue - minValue) / (maxValue - minValue) * 1023;
 
-    auto data = QString("%1=%2").arg(pinName).arg(pinValue);
+    auto data = QString("%1=%2").arg(name).arg(pinValue);
 
     auto &serial = Serial::instance();
     serial.sendData(data);
@@ -125,8 +124,8 @@ void Sensor::parseSerialData(QString data)
         QString sensorValue = sensorData[1];
 
         // Update sensor value if sensor exists
-        if (mapPinName.contains(sensorName)) {
-            mapPinName[sensorName]->setValue(sensorValue);
+        if (mapName.contains(sensorName)) {
+            mapName[sensorName]->setValue(sensorValue);
         } else {
             Logger::crit(QString("Sensor '%1' not found in database.").arg(sensorName));
             GlobalErrors::setError(GlobalErrors::DbError);

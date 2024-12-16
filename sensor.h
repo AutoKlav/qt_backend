@@ -22,7 +22,7 @@ struct SensorRelayValues{
 class Sensor
 {
 public:
-    Sensor(QString name, QString pinName, double minValue, double maxValue);
+    Sensor(QString name, double minValue, double maxValue);
 
     void send(double value);
     void setValue(uint newPinValue);
@@ -34,15 +34,14 @@ public:
     static void parseSerialData(QString data);
     static void checkIfDataIsOld();
     
-    QString name, pinName;
+    QString name;
     double minValue, maxValue;
     double value;
     uint pinValue;
 
     static qint64 lastDataTime;
     static QList<Sensor> sensors;
-    static QMap<QString, Sensor *> mapName;
-    static QMap<QString, Sensor *> mapPinName;
+    static QMap<QString, Sensor *> mapName;    
     static bool updateSensor(QString name, double minValue, double maxValue);
 };
 

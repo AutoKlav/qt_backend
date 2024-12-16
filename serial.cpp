@@ -3,6 +3,7 @@
 #include "sensor.h"
 #include "logger.h"
 #include "globalerrors.h"
+#include "qthread.h"
 
 #include <QTimer>
 
@@ -111,9 +112,10 @@ void Serial::close()
 
 void Serial::sendData(QString data)
 {
-    data.append(";");
-
+    data.append(";");    
     auto succ = m_serial->write(data.toUtf8());
+    m_serial->flush();
+    QThread::msleep(3000);
 
     if (succ == -1)
         GlobalErrors::setError(GlobalErrors::SerialSendError);
