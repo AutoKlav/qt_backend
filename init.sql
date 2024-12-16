@@ -8,18 +8,23 @@ INSERT INTO Globals VALUES ( "pasterizationTemp", "70.0" );
 
 
 -- Sensor
-CREATE TABLE Sensor ( name TEXT NOT NULL UNIQUE, pinName TEXT NOT NULL UNIQUE, minValue REAL NOT NULL, maxValue REAL NOT NULL );
+create table Sensor
+(
+    name     TEXT not null
+        unique,
+    minValue REAL not null,
+    maxValue REAL not null
+);
 
-INSERT INTO Sensor VALUES ( "temp", "ADC_1", 0, 150 );
-INSERT INTO Sensor VALUES ( "tempK", "ADC_2", 0, 150 );
-INSERT INTO Sensor VALUES ( "pressure", "ADC_3", 0, 3 );
-
-INSERT INTO Sensor VALUES ( "waterFill", "IO_0", 0, 1 );
-INSERT INTO Sensor VALUES ( "heating", "IO_1", 0, 1 );
-INSERT INTO Sensor VALUES ( "bypass", "IO_2", 0, 1 );
-INSERT INTO Sensor VALUES ( "pump", "IO_3", 0, 1 );
-INSERT INTO Sensor VALUES ( "inPressure", "IO_4", 0, 1 );
-INSERT INTO Sensor VALUES ( "cooling", "IO_5", 0, 1 );
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('temp', 0, 150);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('tempK', 0, 150);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('pressure', 0, 3);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('waterFill', 0, 1);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('heating', 0, 1);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('bypass', 0, 1);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('pump', 0, 1);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('inPressure', 0, 1);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('cooling', 0, 1);
 
 -- Process
 create table Process

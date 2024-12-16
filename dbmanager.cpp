@@ -110,13 +110,11 @@ void DbManager::loadSensors()
     QSqlQuery query("SELECT * FROM Sensor", m_db);
     while (query.next()) {
         auto name = query.value(0).toString();
-        auto pinName = query.value(1).toString();
-        auto minValue = query.value(2).toDouble();
-        auto maxValue = query.value(3).toDouble();
+        auto minValue = query.value(1).toDouble();
+        auto maxValue = query.value(2).toDouble();
 
-        Sensor::sensors.append(Sensor(name, pinName, minValue, maxValue));
-        Sensor::mapName.insert(name, &Sensor::sensors.last());
-        Sensor::mapPinName.insert(pinName, &Sensor::sensors.last());
+        Sensor::sensors.append(Sensor(name, minValue, maxValue));
+        Sensor::mapName.insert(name, &Sensor::sensors.last());        
     }
 }
 
