@@ -114,12 +114,24 @@ void Serial::sendData(const QString& data)
 {
     QString protocolData = "{" + data + "}";  // Wrap data in { and }
     Logger::info(QString("Sent data to serial communication: %1").arg(protocolData));
-    auto succ = m_serial->write(protocolData.toUtf8());
-    m_serial->flush();
-    QThread::msleep(1000);
 
-    if (succ == -1)
+    if (!m_serial->isWritable()) {
+        Logger::crit("Serial port is not writable");
         GlobalErrors::setError(GlobalErrors::SerialSendError);
-    else
-        GlobalErrors::removeError(GlobalErrors::SerialSendError);
+        return;
+    }
+
+    auto succ = m_serial->write(protocolData.toUtf8());
+    if (succ == -1) {
+        Logger::crit("Failed to send data via serial");
+        GlobalErrors::setError(GlobalErrors::SerialSendError);
+    } else {
+        if (!m_serial->waitForBytesWritten(1000)) {  // Wait 1000 ms for data to be sent
+            Logger::crit("Failed to send data via serial (timeout)");
+            GlobalErrors::setError(GlobalErrors::SerialSendError);
+        } else {
+            GlobalErrors::removeError(GlobalErrors::SerialSendError);
+        }
+    }
 }
+
