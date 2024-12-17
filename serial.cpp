@@ -89,7 +89,7 @@ Serial &Serial::instance()
 void Serial::open()
 {
     m_serial->setPortName("COM3");
-    m_serial->setBaudRate(QSerialPort::Baud9600);
+    m_serial->setBaudRate(QSerialPort::Baud115200);
     m_serial->setDataBits(QSerialPort::Data8);
     m_serial->setParity(QSerialPort::NoParity);
     m_serial->setStopBits(QSerialPort::OneStop);
@@ -110,12 +110,13 @@ void Serial::close()
     Logger::info("SerialPort closed");
 }
 
-void Serial::sendData(QString data)
+void Serial::sendData(const QString& data)
 {
-    data.append(";");    
-    auto succ = m_serial->write(data.toUtf8());
+    QString protocolData = "{" + data + "}";  // Wrap data in { and }
+    Logger::info(QString("Sent data to serial communication: %1").arg(protocolData));
+    auto succ = m_serial->write(protocolData.toUtf8());
     m_serial->flush();
-    QThread::msleep(3000);
+    QThread::msleep(1000);
 
     if (succ == -1)
         GlobalErrors::setError(GlobalErrors::SerialSendError);
