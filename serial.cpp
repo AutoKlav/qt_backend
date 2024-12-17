@@ -89,7 +89,7 @@ Serial &Serial::instance()
 void Serial::open()
 {
     m_serial->setPortName("COM3");
-    m_serial->setBaudRate(QSerialPort::Baud9600);
+    m_serial->setBaudRate(QSerialPort::Baud115200);
     m_serial->setDataBits(QSerialPort::Data8);
     m_serial->setParity(QSerialPort::NoParity);
     m_serial->setStopBits(QSerialPort::OneStop);
@@ -115,7 +115,7 @@ void Serial::sendData(QString data)
     data.append(";");    
     auto succ = m_serial->write(data.toUtf8());
     m_serial->flush();
-    QThread::msleep(3000);
+    QThread::msleep(1000);
 
     if (succ == -1)
         GlobalErrors::setError(GlobalErrors::SerialSendError);

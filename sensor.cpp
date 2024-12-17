@@ -21,7 +21,7 @@ Sensor::Sensor(QString name, double minValue, double maxValue)
 void Sensor::send(double newValue)
 {
     value = newValue; // Update the internal value
-    uint pinValue = (newValue - minValue) / (maxValue - minValue) * 1023;
+    uint pinValue = newValue;
 
     auto data = QString("%1=%2").arg(name).arg(pinValue);
 
