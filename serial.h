@@ -40,14 +40,14 @@ public:
     /**
      * @brief Closes the serial port.
      */
-    void close();
+    void close();   
 
     /**
      * @brief Sends data over the serial port to arduino.
      * 
      * @param data The data to be sent over the serial port.
      */
-    void sendData(QString data);
+    void sendData(const QString& data);
 
 private:
     /**

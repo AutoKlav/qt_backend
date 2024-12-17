@@ -4,6 +4,7 @@
 #include "globals.h"
 #include "dbmanager.h"
 #include "qthread.h"
+#include "serial.h"
 
 // Constructor
 StateMachine::StateMachine(QObject *parent)
@@ -130,16 +131,25 @@ StateMachineValues StateMachine::calculateDrFrRValuesFromSensorsOnTheFly()
 
 void StateMachine::controlRelays(std::initializer_list<std::pair<const char*, int>> relays)
 {
+    QStringList dataParts;
+
     for (const auto& [name, value] : relays) {
         if (Sensor::mapName.contains(name)) {
-            Sensor::mapName[name]->send(value);
-            Logger::info(QString("Relay '%1' set to %2").arg(name).arg(value));
+            Sensor::mapName[name]->value = value; // Update internal sensor state
+            dataParts.append(QString("%1=%2;").arg(name).arg(value)); // Append the relay data with a semicolon
         } else {
             Logger::warn(QString("Relay '%1' does not exist").arg(name));
         }
     }
-}
 
+    if (!dataParts.isEmpty()) {
+        auto data = dataParts.join("");
+
+        auto& serial = Serial::instance();
+        serial.sendData(data); // Send all relay data as a single message
+    }
+
+}
 void StateMachine::tick()
 {
     auto wait3minInHeatingState = 1;//3*60;

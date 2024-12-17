@@ -110,10 +110,11 @@ void Serial::close()
     Logger::info("SerialPort closed");
 }
 
-void Serial::sendData(QString data)
+void Serial::sendData(const QString& data)
 {
-    data.append(";");    
-    auto succ = m_serial->write(data.toUtf8());
+    QString protocolData = "{" + data + "}";  // Wrap data in { and }
+    Logger::info(QString("Sent data to serial communication: %1").arg(protocolData));
+    auto succ = m_serial->write(protocolData.toUtf8());
     m_serial->flush();
     QThread::msleep(1000);
 
