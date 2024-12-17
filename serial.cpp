@@ -126,12 +126,15 @@ void Serial::sendData(const QString& data)
         Logger::crit("Failed to send data via serial");
         GlobalErrors::setError(GlobalErrors::SerialSendError);
     } else {
-        if (!m_serial->waitForBytesWritten(1000)) {  // Wait 1000 ms for data to be sent
+        if (!m_serial->waitForBytesWritten(2000)) {  // Wait 1000 ms for data to be sent
             Logger::crit("Failed to send data via serial (timeout)");
             GlobalErrors::setError(GlobalErrors::SerialSendError);
         } else {
             GlobalErrors::removeError(GlobalErrors::SerialSendError);
+            // Add a small delay to prevent overwhelming the Arduino
+            QThread::msleep(100); // Adjust the delay as necessary
         }
     }
 }
+
 
