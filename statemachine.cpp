@@ -59,12 +59,12 @@ bool StateMachine::stop()
         return false;
 
     controlRelays({
-        {"waterFill", 0},  // Stop water filling
-        {"heating", 0},    // Stop heating
-        {"bypass", 0},     // Disable bypass
-        {"pump", 0},       // Stop circulation pump
-        {"inPressure", 0}, // Turn off 2 bar pressure
-        {"cooling", 0}     // Stop cooling
+        {"waterFill", 0},
+        {"heating", 0},
+        {"bypass", 0},
+        {"pump", 0},
+        {"inPressure", 0},
+        {"cooling", 0}
     });
 
     state = State::READY;
@@ -146,7 +146,7 @@ void StateMachine::controlRelays(std::initializer_list<std::pair<const char*, in
         auto data = dataParts.join("");
 
         auto& serial = Serial::instance();
-        serial.sendData(data); // Send all relay data as a single message
+        serial.sendData(data); // Send all relay data as a single message        
     }
 
 }
@@ -168,9 +168,12 @@ void StateMachine::tick()
         Logger::info("StateMachine: Starting");
 
         controlRelays({
-            {"waterFill", 1},  // Start water filling
-            {"heating", 1},    // Start heating
-            {"bypass", 1}      // Enable bypass
+            {"waterFill", 1},
+            {"heating", 1},
+            {"bypass", 1},
+            {"pump", 0},
+            {"inPressure", 0},
+            {"cooling", 0}
         });
 
         state = State::FILLING;
@@ -182,10 +185,12 @@ void StateMachine::tick()
             break;
 
         controlRelays({
-            {"waterFill", 0},  // Stop water filling
-            {"bypass", 0},     // Disable bypass
-            {"pump", 1},       // Start circulation pump
-            {"inPressure", 1}  // Set pressure to 2 bars
+            {"waterFill", 0},
+            {"heating", 1},
+            {"bypass", 0},
+            {"pump", 1},
+            {"inPressure", 1},
+            {"cooling", 0}
         });
 
         Logger::info("StateMachine: Filling - Wait 3 min");
@@ -218,10 +223,12 @@ void StateMachine::tick()
         }
 
         controlRelays({
-            {"heating", 0},      // Turn off heating
-            {"inPressure", 0},   // Turn off 2 bar pressure
-            {"cooling", 1},      // Start cooling
-            {"bypass", 1}        // Enable bypass
+            {"waterFill", 0},
+            {"heating", 0},
+            {"bypass", 1},
+            {"pump", 1},
+            {"inPressure", 0},
+            {"cooling", 1}
         });
 
         state = State::COOLING;
@@ -233,9 +240,14 @@ void StateMachine::tick()
             break;
 
         controlRelays({
-            {"cooling", 0},   // Turn off cooling
-            {"bypass", 0}     // Disable bypass
+            {"waterFill", 0},
+            {"heating", 0},
+            {"bypass", 0},
+            {"pump", 1},
+            {"inPressure", 0},
+            {"cooling", 0}
         });
+
 
         state = State::FINISHING;
         Logger::info("StateMachine: Finishing");
@@ -243,7 +255,12 @@ void StateMachine::tick()
 
     case State::FINISHING:
         controlRelays({
-            {"pump", 0}  // Stop circulation pump
+            {"waterFill", 0},
+            {"heating", 0},
+            {"bypass", 0},
+            {"pump", 0},
+            {"inPressure", 0},
+            {"cooling", 0}
         });
 
         state = State::FINISHED;
