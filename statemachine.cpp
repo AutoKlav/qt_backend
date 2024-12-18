@@ -146,7 +146,7 @@ void StateMachine::controlRelays(std::initializer_list<std::pair<const char*, in
         auto data = dataParts.join("");
 
         auto& serial = Serial::instance();
-        serial.sendData(data); // Send all relay data as a single message
+        serial.sendData(data); // Send all relay data as a single message        
     }
 
 }
