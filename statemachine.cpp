@@ -186,11 +186,11 @@ void StateMachine::tick()
 
         controlRelays({
             {"waterFill", 0},
-            {"heating", 1},
+            //{"heating", 1},
             {"bypass", 0},
             {"pump", 1},
             {"inPressure", 1},
-            {"cooling", 0}
+            //{"cooling", 0}
         });
 
         Logger::info("StateMachine: Filling - Wait 3 min");
@@ -223,11 +223,11 @@ void StateMachine::tick()
         }
 
         controlRelays({
-            {"waterFill", 0},
-            {"heating", 0},
+            //{"waterFill", 0},
+            //{"heating", 0},
             {"bypass", 1},
             {"pump", 1},
-            {"inPressure", 0},
+            //{"inPressure", 0},
             {"cooling", 1}
         });
 
@@ -240,11 +240,11 @@ void StateMachine::tick()
             break;
 
         controlRelays({
-            {"waterFill", 0},
-            {"heating", 0},
+            //{"waterFill", 0},
+            //{"heating", 0},
             {"bypass", 0},
-            {"pump", 1},
-            {"inPressure", 0},
+            //{"pump", 1},
+            //{"inPressure", 0},
             {"cooling", 0}
         });
 
@@ -255,12 +255,12 @@ void StateMachine::tick()
 
     case State::FINISHING:
         controlRelays({
-            {"waterFill", 0},
-            {"heating", 0},
-            {"bypass", 0},
+            //{"waterFill", 0},
+            //{"heating", 0},
+            //{"bypass", 0},
             {"pump", 0},
-            {"inPressure", 0},
-            {"cooling", 0}
+            //{"inPressure", 0},
+            //{"cooling", 0}
         });
 
         state = State::FINISHED;
