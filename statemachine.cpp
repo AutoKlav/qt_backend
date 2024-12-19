@@ -244,7 +244,7 @@ void StateMachine::tick()
             //{"heating", 0},
             {"bypass", 0},
             //{"pump", 1},
-            //{"inPressure", 0},
+            {"inPressure", 0},
             {"cooling", 0}
         });
 
