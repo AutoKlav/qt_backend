@@ -46,16 +46,16 @@ INSERT INTO Process (id, name, productName, productQuantity, bacteria, descripti
 
 CREATE INDEX idx_process_start ON Process(processStart);
 
- CREATE TABLE ProcessType
+create table ProcessType
 (
-    id              INTEGER
+    id               INTEGER
         primary key autoincrement,
-    name TEXT NOT NULL,
-    type TEXT NOT NULL,
-    customTemp REAL NOT NULL,
-    finishTemp REAL NOT NULL,
-    maintainPressure REAL NOT NULL,
-    pressure REAL NOT NULL
+    name             TEXT not null,
+    type             TEXT,
+    customTemp       REAL,
+    finishTemp       REAL,
+    maintainPressure REAL,
+    maintainTemp     REAL
 );
 
 INSERT INTO ProcessType (id, name, type, customTemp, finishTemp, maintainPressure, maintainTemp) VALUES (0, 'Sterilizacija', 'sterilizacija', 121.1, 121.1, 5, 5);
