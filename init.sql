@@ -58,12 +58,9 @@ CREATE INDEX idx_process_start ON Process(processStart);
     pressure REAL NOT NULL
 );
 
-INSERT INTO ProcessType (name, type, customTemp, finishTemp, maintainPressure, pressure)
-VALUES ('osnovna sterilizacija', 'sterilizacija', 121.1, 121.1, 1, 1);
-
--- Insert data for pasteurization
-INSERT INTO ProcessType (name, type, customTemp, finishTemp, maintainPressure, pressure)
-VALUES ('osnovna pasterizacija', 'pasterizacija', 70, 70, 1, 1);
+INSERT INTO ProcessType (id, name, type, customTemp, finishTemp, maintainPressure, maintainTemp) VALUES (0, 'Sterilizacija', 'sterilizacija', 121.1, 121.1, 5, 5);
+INSERT INTO ProcessType (id, name, type, customTemp, finishTemp, maintainPressure, maintainTemp) VALUES (1, 'Pasterizacija', 'pasterizacija', 70, 70, 6, 6);
+INSERT INTO ProcessType (id, name, type, customTemp, finishTemp, maintainPressure, maintainTemp) VALUES (2, 'Prilagođeno', null, null, null, null, null);
 
 -- ProcessLog
 create table ProcessLog
