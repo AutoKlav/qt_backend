@@ -4,11 +4,8 @@
 
 // Database errors
 const QString GlobalErrors::DB_ERROR = "Database error occurred";
-const QString GlobalErrors::DB_GLOBAL_TARGET_K_LOAD_FAILED = "Database global target_k load failed, value is empty.";
 const QString GlobalErrors::DB_GLOBAL_SERIAL_DATA_TIME_LOAD_FAILED = "Database global serial data time load failed, value is empty.";
 const QString GlobalErrors::DB_GLOBAL_STATE_MACHINE_TICK_LOAD_FAILED = "Database global state machine tick load failed, value is empty.";
-const QString GlobalErrors::DB_GLOBAL_STERILIZATION_TEMP_LOAD_FAILED = "Database global sterilization temp load failed, value is empty.";
-const QString GlobalErrors::DB_GLOBAL_PASTERIZATION_TEMP_LOAD_FAILED = "Database global pasterization temp load failed, value is empty.";
 
 // Serial errors
 const QString GlobalErrors::SERIAL_ERROR = "Serial error occurred";

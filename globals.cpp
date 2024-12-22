@@ -30,20 +30,6 @@ bool Globals::setStateMachineTick(int value)
     return false;
 }
 
-bool Globals::setSterilizationTemp(double value)
-{
-    if (sterilizationTemp == value)
-        return true;
-
-    auto& db = DbManager::instance();
-    if (db.updateGlobal("sterilizationTemp", QString::number(value))) {
-        sterilizationTemp = value;
-        return true;
-    }
-
-    return false;
-}
-
 Globals::Variables Globals::getVariables()
 {
     return {
