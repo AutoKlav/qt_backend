@@ -26,23 +26,37 @@ INSERT INTO Sensor (name, minValue, maxValue) VALUES ('pump', 0, 1);
 INSERT INTO Sensor (name, minValue, maxValue) VALUES ('inPressure', 0, 1);
 INSERT INTO Sensor (name, minValue, maxValue) VALUES ('cooling', 0, 1);
 
+-- Bacteria
+create table Bacteria 
+( 
+    id INTEGER primary key autoincrement, 
+    name TEXT, 
+    description TEXT,
+    d0 REAL, -- secret values, used in top secret formulas below, d0 --> min, z --> celsius
+    z REAL -- D = k * D0 ( 10^(-1/z))^deltaT, F = (10^(1/z))^deltaT / k*D0, r = (10^(1/z))^deltaT / D0
+);
+
+INSERT INTO Bacteria (id, name, description, d0, z) VALUES (1, 'clostridium botulinum', 'G pozitivna, anaerobna bakterija', 0.2, 10);
+
+
 -- Process
 create table Process
 (
     id              INTEGER
         primary key autoincrement,
+   bacteriaId      INTEGER
+        references Bacteria(id) 
+        on delete set null,        
     name            TEXT
         unique,
     productName     TEXT,
-    productQuantity TEXT,
-    bacteria        TEXT,
-    description     TEXT,
+    productQuantity TEXT,    
     processStart    DATETIME,
     targetF         TEXT,
     processLength   TEXT
 );
 
-INSERT INTO Process (id, name, productName, productQuantity, bacteria, description, processStart, processLength, targetF) VALUES (55, '2024-11-28T17:28:53', 'Testni podaci', 'sint aliqua do laborum', 'nulla do laborum laboris labore', 'reprehenderit magna eiusmod et', '2024-11-28T17:28:53', '56363634654', null);
+INSERT INTO Process (id, bacteriaId, name, productName, productQuantity, processStart, processLength, targetF) VALUES (55,1, '2024-11-28T17:28:53', 'Testni podaci', 'sint aliqua do laborum', '2024-11-28T17:28:53', '56363634654', null);
 
 CREATE INDEX idx_process_start ON Process(processStart);
 
@@ -67,16 +81,16 @@ create table ProcessLog
 (
     processId INTEGER  not null
         references Process,
-    temp      REAL     not null,
-    tempK     REAL     not null,
-    dTemp     REAL     not null,
-    pressure  REAL     not null,
-    state     REAL     not null,
-    Dr        REAL     not null,
-    Fr        REAL     not null,
-    r         REAL     not null,
-    sumFr     REAL     not null,
-    sumr      REAL     not null,
+    temp      REAL,
+    tempK     REAL,
+    dTemp     REAL,
+    pressure  REAL,
+    state     REAL,
+    Dr        REAL,
+    Fr        REAL,
+    r         REAL,
+    sumFr     REAL,
+    sumr      REAL,
     timestamp DATETIME not null
 );
 
