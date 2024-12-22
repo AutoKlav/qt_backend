@@ -38,6 +38,7 @@ public:
         double maintainTemp;
         double maintainPressure;
         double finishTemp;
+        double d0, z;
     };
 
     bool start(ProcessConfig processConfig, ProcessInfo processInfo);

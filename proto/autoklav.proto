@@ -151,15 +151,17 @@ message ProcessConfig {
     double maintainTemp = 5;
     double maintainPressure = 6;
     double finishTemp = 7;
+    double d0 = 8;
+    double z = 9;
 }
 
 message ProcessInfo {
     uint32 id = 1;
     string bacteriaId = 2;
-    string productName = 3;
-    string productQuantity = 4;
-    string bacteria = 5;
-    string description = 6;
+    string bacteriaName = 3;
+    string bacteriaDescription = 4;
+    string productName = 5;
+    string productQuantity = 6;
     string processStart = 7;
     string targetF = 8;
     string processLength = 9;

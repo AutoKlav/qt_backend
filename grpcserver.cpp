@@ -169,12 +169,16 @@ Status GRpcServer::Impl::AutoklavServiceImpl::startProcess(grpc::ServerContext *
         .maintainTemp = request->processconfig().maintaintemp(),
         .maintainPressure = request->processconfig().maintainpressure(),
         .finishTemp = request->processconfig().finishtemp(),
+        .d0 = request->processconfig().d0(),
+        .z = request->processconfig().z()
     };
 
     const ProcessInfo processInfo = {
         .productName = QString::fromUtf8(request->processinfo().productname()).trimmed(),
         .productQuantity = QString::fromUtf8(request->processinfo().productquantity()).trimmed(),
         .bacteriaId = QString::fromUtf8(request->processinfo().bacteriaid()).trimmed(),
+        .bacteriaName = QString::fromUtf8(request->processinfo().bacterianame()).trimmed(),
+        .bacteriaDescription = QString::fromUtf8(request->processinfo().bacteriadescription()).trimmed(),
         .processStart = QString::fromUtf8(request->processinfo().processstart()),
         .processLength = QString::fromUtf8(request->processinfo().processlength()),
         .targetF = QString::fromUtf8(request->processinfo().targetf())

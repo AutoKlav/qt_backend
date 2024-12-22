@@ -13,11 +13,12 @@ struct ProcessType {
     double finishTemp;
     double maintainPressure;
     double maintainTemp;
+    double d0, z;
 };
 
 struct ProcessInfo {
     QString productName, productQuantity;
-    QString bacteriaId;
+    QString bacteriaId, bacteriaName, bacteriaDescription;
     QString processStart, processLength;
     QString targetF;
 };
