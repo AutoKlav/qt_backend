@@ -3,9 +3,6 @@ CREATE TABLE Globals ( name TEXT NOT NULL UNIQUE, value TEXT NOT NULL );
 
 INSERT INTO Globals VALUES ( "serialDataTime", "3000" );
 INSERT INTO Globals VALUES ( "stateMachineTick", "60000" );
-INSERT INTO Globals VALUES ( "sterilizationTemp", "121.1" );
-INSERT INTO Globals VALUES ( "pasterizationTemp", "70.0" );
-
 
 -- Sensor
 create table Sensor

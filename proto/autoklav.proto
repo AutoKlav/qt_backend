@@ -68,9 +68,7 @@ message ProcessTypesList {
 
 message Variables {
     int32 serialDataTime = 1;
-    int32 stateMachineTick = 2;
-    double sterilizationTemp = 3;
-    double pasterizationTemp = 4;
+    int32 stateMachineTick = 2;    
 }
 
 message SetVariable {
@@ -157,13 +155,14 @@ message ProcessConfig {
 
 message ProcessInfo {
     uint32 id = 1;
-    string productName = 2;
-    string productQuantity = 3;
-    string bacteria = 4;
-    string description = 5;
-    string processStart = 6;
-    string targetF = 7;
-    string processLength = 8;
+    string bacteriaId = 2;
+    string productName = 3;
+    string productQuantity = 4;
+    string bacteria = 5;
+    string description = 6;
+    string processStart = 7;
+    string targetF = 8;
+    string processLength = 9;
 }
 
 message StartProcessRequest {

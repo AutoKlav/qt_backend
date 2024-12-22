@@ -67,8 +67,6 @@ private:
 
     quint64 id;
 
-    double calculateDeltaTemperature(double temp);
-
     /**
      * @brief Controls multiple relays at once by specifying relay names and their desired states.
      *

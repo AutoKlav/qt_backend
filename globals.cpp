@@ -44,23 +44,9 @@ bool Globals::setSterilizationTemp(double value)
     return false;
 }
 
-bool Globals::setPasterizationTemp(double value)
-{
-    if (pasterizationTemp == value)
-        return true;
-
-    auto& db = DbManager::instance();
-    if (db.updateGlobal("pasterizationTemp", QString::number(value))) {
-        pasterizationTemp = value;
-        return true;
-    }
-
-    return false;
-}
-
 Globals::Variables Globals::getVariables()
 {
     return {
-        serialDataTime, stateMachineTick, sterilizationTemp, pasterizationTemp
+        serialDataTime, stateMachineTick
     };
 }

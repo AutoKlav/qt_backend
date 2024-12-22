@@ -19,20 +19,6 @@ int StateMachine::getState() {
     return static_cast<int>(state);
 }
 
-double StateMachine::calculateDeltaTemperature(double temp)
-{
-    switch (processConfig.type) {
-    case Type::STERILIZATION:
-        return Globals::sterilizationTemp - temp;
-    case Type::PASTERIZATION:
-        return Globals::pasterizationTemp - temp;
-    case Type::CUSTOM:
-        return processConfig.customTemp - temp;
-    default:
-        return Globals::sterilizationTemp - temp;
-    }
-}
-
 bool StateMachine::start(ProcessConfig processConfig, ProcessInfo processInfo)
 {
     if (isRunning())
@@ -93,7 +79,7 @@ StateMachineValues StateMachine::calculateStateMachineValues()
     stateMachineValues.tempK = sensorValues.tempK;
     stateMachineValues.pressure = sensorValues.pressure;
 
-    stateMachineValues.dTemp = calculateDeltaTemperature(stateMachineValues.tempK);
+    stateMachineValues.dTemp = processConfig.customTemp - stateMachineValues.tempK;
 
     stateMachineValues.Dr = qPow(10, 0.1 * stateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
     stateMachineValues.Fr = qPow(10, -0.1 * stateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);

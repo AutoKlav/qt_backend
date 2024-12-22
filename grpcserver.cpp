@@ -114,9 +114,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getVariables(grpc::ServerContext *
     auto variables = Globals::getVariables();
 
     replay->set_serialdatatime(variables.serialDataTime);
-    replay->set_statemachinetick(variables.stateMachineTick);
-    replay->set_sterilizationtemp(variables.sterilizationTemp);
-    replay->set_pasterizationtemp(variables.pasterizationTemp);
+    replay->set_statemachinetick(variables.stateMachineTick);    
 
     return Status::OK;
 }
@@ -133,10 +131,6 @@ Status GRpcServer::Impl::AutoklavServiceImpl::setVariable(grpc::ServerContext *c
         succ = Globals::setSerialDataTime(value.toInt());
     } else if (name == "stateMachineTick") {
         succ = Globals::setStateMachineTick(value.toInt());
-    } else if (name == "sterilizationTemp") {
-        succ = Globals::setSterilizationTemp(value.toDouble());
-    } else if (name == "pasterizationTemp") {
-        succ = Globals::setPasterizationTemp(value.toDouble());
     }
 
     setStatusReply(replay, !succ);
@@ -180,8 +174,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::startProcess(grpc::ServerContext *
     const ProcessInfo processInfo = {
         .productName = QString::fromUtf8(request->processinfo().productname()).trimmed(),
         .productQuantity = QString::fromUtf8(request->processinfo().productquantity()).trimmed(),
-        .bacteria = QString::fromUtf8(request->processinfo().bacteria()).trimmed(),
-        .description = QString::fromUtf8(request->processinfo().description()).trimmed(),
+        .bacteriaId = QString::fromUtf8(request->processinfo().bacteriaid()).trimmed(),
         .processStart = QString::fromUtf8(request->processinfo().processstart()),
         .processLength = QString::fromUtf8(request->processinfo().processlength()),
         .targetF = QString::fromUtf8(request->processinfo().targetf())
@@ -248,10 +241,9 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getAllProcesses(grpc::ServerContex
         auto processInfo = replay->add_processes();
 
         processInfo->set_id(process.id);
+        processInfo->set_bacteriaid(process.bacteriaId.toStdString());
         processInfo->set_productname(process.productName.toStdString());
-        processInfo->set_productquantity(process.productQuantity.toStdString());
-        processInfo->set_bacteria(process.bacteria.toStdString());
-        processInfo->set_description(process.description.toStdString());
+        processInfo->set_productquantity(process.productQuantity.toStdString());        
         processInfo->set_processstart(process.processStart.toStdString());
         processInfo->set_targetf(process.targetF.toStdString());
         processInfo->set_processlength(process.processLength.toStdString());

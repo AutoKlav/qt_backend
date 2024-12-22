@@ -59,25 +59,7 @@ void DbManager::loadGlobals()
     else {
         Logger::crit(GlobalErrors::DB_GLOBAL_STATE_MACHINE_TICK_LOAD_FAILED);
         GlobalErrors::setError(GlobalErrors::DbStateMachineTickError);
-    }
-
-    QString sterilizationTempStr = loadGlobal("sterilizationTemp");
-    if (!sterilizationTempStr.isEmpty()) {
-        Globals::sterilizationTemp = sterilizationTempStr.toDouble();
-    }
-    else {
-        Logger::crit(GlobalErrors::DB_GLOBAL_STERILIZATION_TEMP_LOAD_FAILED);
-        GlobalErrors::setError(GlobalErrors::DbSterilizationTempError);
-    }
-
-    QString pasterizationTempStr = loadGlobal("pasterizationTemp");
-    if (!pasterizationTempStr.isEmpty()) {
-        Globals::pasterizationTemp = pasterizationTempStr.toDouble();
-    }
-    else {
-        Logger::crit(GlobalErrors::DB_GLOBAL_PASTERIZATION_TEMP_LOAD_FAILED);
-        GlobalErrors::setError(GlobalErrors::DbPasterizationTempError);
-    }
+    }    
 }
 
 bool DbManager::updateGlobal(QString name, QString value)
@@ -142,21 +124,19 @@ QList<ProcessRow> DbManager::getAllProcessesOrderedDesc()
     QList<ProcessRow> processes;
     while (query.next()) {
         auto id = query.value(0).toInt();
-        auto name = query.value(1).toString();
-        auto productName = query.value(2).toString();
-        auto productQuantity = query.value(3).toString();
-        auto bacteria = query.value(4).toString();
-        auto description = query.value(5).toString();
-        auto processStart = query.value(6).toString();
-        auto targetF = query.value(7).toString();
-        auto processLength = query.value(8).toString();
+        auto bacteriaId = query.value(1).toString();
+        auto name = query.value(2).toString();
+        auto productName = query.value(3).toString();
+        auto productQuantity = query.value(4).toString();
+        auto processStart = query.value(5).toString();
+        auto targetF = query.value(6).toString();
+        auto processLength = query.value(7).toString();
 
         ProcessRow info;
         info.id = id;
+        info.bacteriaId = bacteriaId;
         info.productName = productName;
         info.productQuantity = productQuantity;
-        info.bacteria = bacteria;
-        info.description = description;
         info.processStart = processStart;
         info.targetF = targetF;
         info.processLength = processLength;
@@ -220,13 +200,12 @@ QList<ProcessLogInfoRow> DbManager::getAllProcessLogs(int processId)
 int DbManager::createProcess(QString name, ProcessInfo info)
 {    
     QSqlQuery query(m_db);
-    query.prepare("INSERT INTO Process (name, productName, productQuantity, bacteria, description, processStart, targetF, processLength) "
-                  "VALUES (:name, :productName, :productQuantity, :bacteria, :description, :processStart, :targetF, :processLength)");
+    query.prepare("INSERT INTO Process (bacteriaId, name, productName, productQuantity, processStart, targetF, processLength) "
+                  "VALUES (:bacteriaId, :name, :productName, :productQuantity, :processStart, :targetF, :processLength)");
+    query.bindValue(":bacteriaId", info.bacteriaId);
     query.bindValue(":name", name);
     query.bindValue(":productName", info.productName);
     query.bindValue(":productQuantity", info.productQuantity);
-    query.bindValue(":bacteria", info.bacteria);
-    query.bindValue(":description", info.description);
     query.bindValue(":processStart", info.processStart);
     query.bindValue(":targetF", info.targetF);
     query.bindValue(":processLength", info.processLength);
@@ -244,13 +223,12 @@ int DbManager::createProcess(QString name, ProcessInfo info)
 bool DbManager::updateProcess(int id, ProcessInfo info)
 {
     QSqlQuery query(m_db);
-    query.prepare("UPDATE Process SET productName = :productName, productQuantity = :productQuantity, bacteria = :bacteria, "
-                  "description = :description, processLength = :processLength WHERE id = :id");
+    query.prepare("UPDATE Process SET productName = :productName, productQuantity = :productQuantity "
+                  "processLength = :processLength WHERE id = :id");
     query.bindValue(":id", id);
     query.bindValue(":productName", info.productName);
-    query.bindValue(":productQuantity", info.productQuantity);
-    query.bindValue(":bacteria", info.bacteria);
-    query.bindValue(":description", info.description);
+    query.bindValue(":productQuantity", info.productQuantity);    
+
     query.bindValue(":processLength", info.processLength);
 
     if (!query.exec()) {

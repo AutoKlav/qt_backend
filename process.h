@@ -17,8 +17,7 @@ struct ProcessType {
 
 struct ProcessInfo {
     QString productName, productQuantity;
-    QString bacteria;
-    QString description;
+    QString bacteriaId;
     QString processStart, processLength;
     QString targetF;
 };
