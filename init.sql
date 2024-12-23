@@ -24,17 +24,18 @@ INSERT INTO Sensor (name, minValue, maxValue) VALUES ('inPressure', 0, 1);
 INSERT INTO Sensor (name, minValue, maxValue) VALUES ('cooling', 0, 1);
 
 -- Bacteria
-create table Bacteria 
-( 
-    id INTEGER primary key autoincrement, 
-    name TEXT, 
+drop table Bacteria;
+create table Bacteria
+(
+    id INTEGER primary key autoincrement,
+    name TEXT,
     description TEXT,
     d0 REAL, -- secret values, used in top secret formulas below, d0 --> min, z --> celsius
-    z REAL -- D = k * D0 ( 10^(-1/z))^deltaT, F = (10^(1/z))^deltaT / k*D0, r = (10^(1/z))^deltaT / D0
+    z REAL, -- D = k * D0 ( 10^(-1/z))^deltaT, F = (10^(1/z))^deltaT / k*D0, r = (10^(1/z))^deltaT / D0
+    dateCreated DATETIME not null,
+    dateModified DATETIME
 );
-
-INSERT INTO Bacteria (id, name, description, d0, z) VALUES (1, 'clostridium botulinum', 'G pozitivna, anaerobna bakterija', 0.2, 10);
-
+INSERT INTO Bacteria (id, name, description, d0, z, dateCreated, dateModified) VALUES (1, 'clostridium botulinum', 'G pozitivna, anaerobna bakterija', 0.2, 10, CURRENT_TIMESTAMP,null);
 
 -- Process
 create table Process

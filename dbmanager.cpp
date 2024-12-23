@@ -120,26 +120,37 @@ bool DbManager::updateSensor(QString name, double newMinValue, double newMaxValu
 
 QList<ProcessRow> DbManager::getAllProcessesOrderedDesc()
 {
-    QSqlQuery query("SELECT * FROM Process ORDER BY processStart desc", m_db);
+    QSqlQuery query("SELECT process.id as id, process.productName, process.productQuantity, processStart, targetF, processLength, Bacteria.id as bacteriaId, Bacteria.name as bacteriaName, Bacteria.description as bacteriaDescription, d0, z FROM Process LEFT JOIN Bacteria ON Process.bacteriaId = Bacteria.id ORDER BY Process.processStart DESC", m_db);
     QList<ProcessRow> processes;
     while (query.next()) {
         auto id = query.value(0).toInt();
-        auto bacteriaId = query.value(1).toString();
-        auto name = query.value(2).toString();
-        auto productName = query.value(3).toString();
-        auto productQuantity = query.value(4).toString();
-        auto processStart = query.value(5).toString();
-        auto targetF = query.value(6).toString();
-        auto processLength = query.value(7).toString();
+        auto productName = query.value(1).toString();
+        auto productQuantity = query.value(2).toString();
+        auto processStart = query.value(3).toString();
+        auto targetF = query.value(4).toString();
+        auto processLength = query.value(5).toString();
+        auto bacteriaId = query.value(6).toInt();
+        auto bacteriaName = query.value(7).toString();
+        auto bacteriaDescription = query.value(8).toString();
+        auto d0 = query.value(9).toDouble();
+        auto z = query.value(10).toDouble();
+
+        const Bacteria bacteria = {
+            .id = bacteriaId,
+            .name = bacteriaName,
+            .description = bacteriaDescription,
+            .d0 = d0,
+            .z = z
+        };
 
         ProcessRow info;
-        info.id = id;
-        info.bacteriaId = bacteriaId;
+        info.id = id;        
         info.productName = productName;
         info.productQuantity = productQuantity;
         info.processStart = processStart;
         info.targetF = targetF;
         info.processLength = processLength;
+        info.bacteria = bacteria;
 
         processes.append(info);
     }
@@ -202,7 +213,7 @@ int DbManager::createProcess(QString name, ProcessInfo info)
     QSqlQuery query(m_db);
     query.prepare("INSERT INTO Process (bacteriaId, name, productName, productQuantity, processStart, targetF, processLength) "
                   "VALUES (:bacteriaId, :name, :productName, :productQuantity, :processStart, :targetF, :processLength)");
-    query.bindValue(":bacteriaId", info.bacteriaId);
+    query.bindValue(":bacteriaId", info.bacteria.id);
     query.bindValue(":name", name);
     query.bindValue(":productName", info.productName);
     query.bindValue(":productQuantity", info.productQuantity);
@@ -341,6 +352,43 @@ int DbManager::createProcessType(ProcessType processType)
 
     Logger::info(QString("Database: Create process type %1").arg(processType.name));
     return query.lastInsertId().toInt();
+}
+
+int DbManager::createBacteria(Bacteria bacteria)
+{
+    QSqlQuery query(m_db);
+    query.prepare("INSERT INTO Bacteria (name, description, d0, z) "
+                  "VALUES (:name, :description, :d0, :z)");
+    query.bindValue(":name", bacteria.name);
+    query.bindValue(":description", bacteria.description);
+    query.bindValue(":d0", bacteria.d0);
+    query.bindValue(":z", bacteria.z);
+
+    if (!query.exec()) {
+        Logger::crit(QString("Database: Unable to create process type %1").arg(bacteria.name));
+        Logger::crit(QString("SQL error: %1").arg(query.lastError().text()));
+        return -1;
+    }
+
+    Logger::info(QString("Database: Create process type %1").arg(bacteria.name));
+    return query.lastInsertId().toInt();
+}
+
+QList<Bacteria> DbManager::getBacteria()
+{
+    QSqlQuery query("SELECT * FROM Bacteria", m_db);
+    QList<Bacteria> bacterias;
+    while (query.next()) {
+        auto id = query.value(0).toInt();
+        auto name = query.value(1).toString();
+        auto description = query.value(2).toString();
+        auto d0 = query.value(3).toDouble();
+        auto z = query.value(4).toDouble();
+
+        bacterias.append({id, name, description, d0, z});
+    }
+
+    return bacterias;
 }
 
 int DbManager::deleteProcessType(int id)

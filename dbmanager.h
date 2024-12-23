@@ -53,6 +53,10 @@ public:
     int createProcess(QString name, ProcessInfo info);
     bool updateProcess(int id, ProcessInfo info);
 
+    // Bacteria
+    int createBacteria(Bacteria bacteria);
+    QList<Bacteria> getBacteria();
+
     // ProcessLog
     QList<ProcessLogInfoRow> getAllProcessLogs(int processId);
     ProcessLog getProcessLog(int id);

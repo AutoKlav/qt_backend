@@ -35,6 +35,7 @@ private:
         Status getProcessLogs(grpc::ServerContext *context, const autoklav::ProcessLogRequest *request, autoklav::ProcessLogList *replay) override;
         Status getVariables(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Variables *replay) override;
         Status setVariable(grpc::ServerContext *context, const autoklav::SetVariable *request, autoklav::Status *replay) override;
+        Status getBacteria(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::BacteriaList *replay) override;
         Status createProcessType(grpc::ServerContext *context, const autoklav::ProcessTypeRequest *request, autoklav::Status *replay) override;
         Status deleteProcessType(grpc::ServerContext *context, const autoklav::TypeRequest *request, autoklav::Status *replay) override;
         Status startProcess(grpc::ServerContext *context, const autoklav::StartProcessRequest *request, autoklav::Status *replay) override;
@@ -168,20 +169,24 @@ Status GRpcServer::Impl::AutoklavServiceImpl::startProcess(grpc::ServerContext *
         .targetTime = request->processconfig().targettime(),
         .maintainTemp = request->processconfig().maintaintemp(),
         .maintainPressure = request->processconfig().maintainpressure(),
-        .finishTemp = request->processconfig().finishtemp(),
-        .d0 = request->processconfig().d0(),
-        .z = request->processconfig().z()
+        .finishTemp = request->processconfig().finishtemp(),        
+    };
+
+    const Bacteria bacteria = {
+        .id = QString::fromUtf8(request->processinfo().bacteria().bacteriaid()).toInt(),
+        .name = QString::fromUtf8(request->processinfo().bacteria().bacterianame()).trimmed(),
+        .description = QString::fromUtf8(request->processinfo().bacteria().bacteriadescription()).trimmed(),
+        .d0 = request->processinfo().bacteria().d0(),
+        .z = request->processinfo().bacteria().z()
     };
 
     const ProcessInfo processInfo = {
         .productName = QString::fromUtf8(request->processinfo().productname()).trimmed(),
         .productQuantity = QString::fromUtf8(request->processinfo().productquantity()).trimmed(),
-        .bacteriaId = QString::fromUtf8(request->processinfo().bacteriaid()).trimmed(),
-        .bacteriaName = QString::fromUtf8(request->processinfo().bacterianame()).trimmed(),
-        .bacteriaDescription = QString::fromUtf8(request->processinfo().bacteriadescription()).trimmed(),
         .processStart = QString::fromUtf8(request->processinfo().processstart()),
         .processLength = QString::fromUtf8(request->processinfo().processlength()),
-        .targetF = QString::fromUtf8(request->processinfo().targetf())
+        .targetF = QString::fromUtf8(request->processinfo().targetf()),
+        .bacteria = bacteria,
     };
 
     bool succ = StateMachine::instance().start(processConfig, processInfo);
@@ -245,12 +250,34 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getAllProcesses(grpc::ServerContex
         auto processInfo = replay->add_processes();
 
         processInfo->set_id(process.id);
-        processInfo->set_bacteriaid(process.bacteriaId.toStdString());
+        //processInfo->set_ba
         processInfo->set_productname(process.productName.toStdString());
         processInfo->set_productquantity(process.productQuantity.toStdString());        
         processInfo->set_processstart(process.processStart.toStdString());
         processInfo->set_targetf(process.targetF.toStdString());
         processInfo->set_processlength(process.processLength.toStdString());
+    }
+
+    return Status::OK;
+}
+
+
+Status GRpcServer::Impl::AutoklavServiceImpl::getBacteria(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::BacteriaList *replay)
+{
+    Q_UNUSED(context);
+    Q_UNUSED(request);
+
+    const auto bacteria = Process::getBacteria();
+
+    for (const auto &bacterium : bacteria) {
+
+        auto bacteria = replay->add_bacteria();
+
+        bacteria->set_bacteriaid(bacterium.id);
+        bacteria->set_bacterianame(bacterium.name.toStdString());
+        bacteria->set_bacteriadescription(bacterium.description.toStdString());
+        bacteria->set_d0(bacterium.d0);
+        bacteria->set_z(bacterium.z);
     }
 
     return Status::OK;

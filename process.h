@@ -13,14 +13,19 @@ struct ProcessType {
     double finishTemp;
     double maintainPressure;
     double maintainTemp;
+};
+
+struct Bacteria {
+    int id;
+    QString name, description;
     double d0, z;
 };
 
 struct ProcessInfo {
     QString productName, productQuantity;
-    QString bacteriaId, bacteriaName, bacteriaDescription;
     QString processStart, processLength;
     QString targetF;
+    Bacteria bacteria;
 };
 
 struct ProcessRow : ProcessInfo {
@@ -42,6 +47,7 @@ public:
     static QList<QString> getFilteredProcessValues(QString columnName);
     static QMap<QString, QList<QString>> getFilteredTargetFAndProcessLengthValues(QString productName, QString productQuantity);
     static QList<ProcessType> getProcessTypes();
+    static QList<Bacteria> getBacteria();
     static int createProcessType(ProcessType processType);
     static int deleteProcessType(int id);
 

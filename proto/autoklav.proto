@@ -27,6 +27,9 @@ service Autoklav {
     rpc getSensorRelayValues(Empty) returns (SensorRelayValues);
     rpc updateSensor(UpdateSensorRequest) returns (Status);
 
+    // Bacteria
+    rpc getBacteria(Empty) returns (BacteriaList);
+
     // StateMachine
     rpc getStateMachineValues(Empty) returns (StateMachineValues);
 }
@@ -150,21 +153,29 @@ message ProcessConfig {
     uint64 targetTime = 4;
     double maintainTemp = 5;
     double maintainPressure = 6;
-    double finishTemp = 7;
-    double d0 = 8;
-    double z = 9;
+    double finishTemp = 7;    
 }
 
 message ProcessInfo {
     uint32 id = 1;
-    string bacteriaId = 2;
-    string bacteriaName = 3;
-    string bacteriaDescription = 4;
-    string productName = 5;
-    string productQuantity = 6;
-    string processStart = 7;
-    string targetF = 8;
-    string processLength = 9;
+    Bacteria bacteria = 2;
+    string productName = 3;
+    string productQuantity = 4;
+    string processStart = 5;
+    string targetF = 6;
+    string processLength = 7;
+}
+
+message BacteriaList {
+    repeated Bacteria bacteria = 1; 
+}
+
+message Bacteria {
+    string bacteriaId = 1;
+    string bacteriaName = 2;
+    string bacteriaDescription = 3;
+    double d0 = 4;
+    double z = 5;
 }
 
 message StartProcessRequest {
