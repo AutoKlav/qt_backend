@@ -115,7 +115,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getVariables(grpc::ServerContext *
     auto variables = Globals::getVariables();
 
     replay->set_serialdatatime(variables.serialDataTime);
-    replay->set_statemachinetick(variables.stateMachineTick);    
+    replay->set_statemachinetick(variables.stateMachineTick);
 
     return Status::OK;
 }
@@ -161,7 +161,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::updateSensor(grpc::ServerContext *
 Status GRpcServer::Impl::AutoklavServiceImpl::startProcess(grpc::ServerContext *context, const autoklav::StartProcessRequest *request, autoklav::Status *replay)
 {
     Q_UNUSED(context);
-    
+
     const StateMachine::ProcessConfig processConfig = {
         .type = static_cast<StateMachine::Type>(request->processconfig().type()),
         .customTemp = request->processconfig().customtemp(),
@@ -169,7 +169,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::startProcess(grpc::ServerContext *
         .targetTime = request->processconfig().targettime(),
         .maintainTemp = request->processconfig().maintaintemp(),
         .maintainPressure = request->processconfig().maintainpressure(),
-        .finishTemp = request->processconfig().finishtemp(),        
+        .finishTemp = request->processconfig().finishtemp(),
     };
 
     const Bacteria bacteria = {
@@ -225,7 +225,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::deleteProcessType(grpc::ServerCont
     setStatusReply(replay, !succ);
     return Status::OK;
 }
-        
+
 
 Status GRpcServer::Impl::AutoklavServiceImpl::stopProcess(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay)
 {
@@ -245,18 +245,26 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getAllProcesses(grpc::ServerContex
 
     const auto processes = Process::getAllProcesses();
 
-    for (const auto &process : processes) {
-
+    for (const auto& process : processes) {
         auto processInfo = replay->add_processes();
 
         processInfo->set_id(process.id);
-        //processInfo->set_ba
+
+        // Access and populate the nested Bacteria message
+        auto bacteriaMessage = processInfo->mutable_bacteria();
+        bacteriaMessage->set_id(process.bacteria.id);
+        bacteriaMessage->set_name(process.bacteria.name.toStdString());
+        bacteriaMessage->set_description(process.bacteria.description.toStdString());
+        bacteriaMessage->set_d0(process.bacteria.d0);
+        bacteriaMessage->set_z(process.bacteria.z);
+
         processInfo->set_productname(process.productName.toStdString());
-        processInfo->set_productquantity(process.productQuantity.toStdString());        
+        processInfo->set_productquantity(process.productQuantity.toStdString());
         processInfo->set_processstart(process.processStart.toStdString());
         processInfo->set_targetf(process.targetF.toStdString());
         processInfo->set_processlength(process.processLength.toStdString());
     }
+
 
     return Status::OK;
 }
@@ -392,13 +400,13 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getSensorValues(grpc::ServerContex
     for(const QString& errorString : errorStrings){
         if(errorString == GlobalErrors::SERIAL_ERROR){
             return Status(grpc::StatusCode::ABORTED, GlobalErrors::SERIAL_ERROR.toStdString());
-        }        
+        }
     }
-    
+
     replay->set_temp(sensorValues.temp);
     replay->set_tempk(sensorValues.tempK);
     replay->set_pressure(sensorValues.pressure);
-    
+
     return Status::OK;
 }
 
