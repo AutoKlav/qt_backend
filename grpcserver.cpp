@@ -173,9 +173,9 @@ Status GRpcServer::Impl::AutoklavServiceImpl::startProcess(grpc::ServerContext *
     };
 
     const Bacteria bacteria = {
-        .id = QString::fromUtf8(request->processinfo().bacteria().bacteriaid()).toInt(),
-        .name = QString::fromUtf8(request->processinfo().bacteria().bacterianame()).trimmed(),
-        .description = QString::fromUtf8(request->processinfo().bacteria().bacteriadescription()).trimmed(),
+        .id = static_cast<int>(request->processinfo().bacteria().id()),
+        .name = QString::fromUtf8(request->processinfo().bacteria().name()).trimmed(),
+        .description = QString::fromUtf8(request->processinfo().bacteria().description()).trimmed(),
         .d0 = request->processinfo().bacteria().d0(),
         .z = request->processinfo().bacteria().z()
     };
@@ -273,9 +273,9 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getBacteria(grpc::ServerContext *c
 
         auto bacteria = replay->add_bacteria();
 
-        bacteria->set_bacteriaid(bacterium.id);
-        bacteria->set_bacterianame(bacterium.name.toStdString());
-        bacteria->set_bacteriadescription(bacterium.description.toStdString());
+        bacteria->set_id(bacterium.id);
+        bacteria->set_name(bacterium.name.toStdString());
+        bacteria->set_description(bacterium.description.toStdString());
         bacteria->set_d0(bacterium.d0);
         bacteria->set_z(bacterium.z);
     }

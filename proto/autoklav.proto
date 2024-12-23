@@ -171,9 +171,9 @@ message BacteriaList {
 }
 
 message Bacteria {
-    string bacteriaId = 1;
-    string bacteriaName = 2;
-    string bacteriaDescription = 3;
+    uint32 id = 1;
+    string name = 2;
+    string description = 3;
     double d0 = 4;
     double z = 5;
 }

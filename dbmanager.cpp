@@ -357,12 +357,13 @@ int DbManager::createProcessType(ProcessType processType)
 int DbManager::createBacteria(Bacteria bacteria)
 {
     QSqlQuery query(m_db);
-    query.prepare("INSERT INTO Bacteria (name, description, d0, z) "
-                  "VALUES (:name, :description, :d0, :z)");
+    query.prepare("INSERT INTO Bacteria (name, description, d0, z, dateCreated) "
+                  "VALUES (:name, :description, :d0, :z, :dateCreated)");
     query.bindValue(":name", bacteria.name);
     query.bindValue(":description", bacteria.description);
     query.bindValue(":d0", bacteria.d0);
     query.bindValue(":z", bacteria.z);
+    query.bindValue(":dateCreated", QDateTime::currentDateTime());
 
     if (!query.exec()) {
         Logger::crit(QString("Database: Unable to create process type %1").arg(bacteria.name));
