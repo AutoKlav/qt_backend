@@ -120,20 +120,21 @@ bool DbManager::updateSensor(QString name, double newMinValue, double newMaxValu
 
 QList<ProcessRow> DbManager::getAllProcessesOrderedDesc()
 {
-    QSqlQuery query("SELECT process.id as id, process.productName, process.productQuantity, processStart, targetF, processLength, Bacteria.id as bacteriaId, Bacteria.name as bacteriaName, Bacteria.description as bacteriaDescription, d0, z FROM Process LEFT JOIN Bacteria ON Process.bacteriaId = Bacteria.id ORDER BY Process.processStart DESC", m_db);
+    QSqlQuery query("SELECT process.id as id, process.batchLTO, process.productName, process.productQuantity, processStart, targetF, processLength, Bacteria.id as bacteriaId, Bacteria.name as bacteriaName, Bacteria.description as bacteriaDescription, d0, z FROM Process LEFT JOIN Bacteria ON Process.bacteriaId = Bacteria.id ORDER BY Process.processStart DESC", m_db);
     QList<ProcessRow> processes;
     while (query.next()) {
         auto id = query.value(0).toInt();
-        auto productName = query.value(1).toString();
-        auto productQuantity = query.value(2).toString();
-        auto processStart = query.value(3).toString();
-        auto targetF = query.value(4).toString();
-        auto processLength = query.value(5).toString();
-        auto bacteriaId = query.value(6).toInt();
-        auto bacteriaName = query.value(7).toString();
-        auto bacteriaDescription = query.value(8).toString();
-        auto d0 = query.value(9).toDouble();
-        auto z = query.value(10).toDouble();
+        auto batchLTO = query.value(1).toString();
+        auto productName = query.value(2).toString();
+        auto productQuantity = query.value(3).toString();
+        auto processStart = query.value(4).toString();
+        auto targetF = query.value(5).toString();
+        auto processLength = query.value(6).toString();
+        auto bacteriaId = query.value(7).toInt();
+        auto bacteriaName = query.value(8).toString();
+        auto bacteriaDescription = query.value(9).toString();
+        auto d0 = query.value(10).toDouble();
+        auto z = query.value(11).toDouble();        
 
         const Bacteria bacteria = {
             .id = bacteriaId,
@@ -144,7 +145,8 @@ QList<ProcessRow> DbManager::getAllProcessesOrderedDesc()
         };
 
         ProcessRow info;
-        info.id = id;        
+        info.id = id;
+        info.batchLTO = batchLTO;
         info.productName = productName;
         info.productQuantity = productQuantity;
         info.processStart = processStart;
@@ -211,10 +213,11 @@ QList<ProcessLogInfoRow> DbManager::getAllProcessLogs(int processId)
 int DbManager::createProcess(QString name, ProcessInfo info)
 {    
     QSqlQuery query(m_db);
-    query.prepare("INSERT INTO Process (bacteriaId, name, productName, productQuantity, processStart, targetF, processLength) "
-                  "VALUES (:bacteriaId, :name, :productName, :productQuantity, :processStart, :targetF, :processLength)");
+    query.prepare("INSERT INTO Process (bacteriaId, name, batchLTO, productName, productQuantity, processStart, targetF, processLength) "
+                  "VALUES (:bacteriaId, :name, :batchLTO, :productName, :productQuantity, :processStart, :targetF, :processLength)");
     query.bindValue(":bacteriaId", info.bacteria.id);
     query.bindValue(":name", name);
+    query.bindValue(":batchLTO", info.batchLTO);
     query.bindValue(":productName", info.productName);
     query.bindValue(":productQuantity", info.productQuantity);
     query.bindValue(":processStart", info.processStart);

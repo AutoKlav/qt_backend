@@ -158,12 +158,13 @@ message ProcessConfig {
 
 message ProcessInfo {
     uint32 id = 1;
-    Bacteria bacteria = 2;
-    string productName = 3;
-    string productQuantity = 4;
-    string processStart = 5;
-    string targetF = 6;
-    string processLength = 7;
+    string batchLTO = 2;
+    Bacteria bacteria = 3;
+    string productName = 4;
+    string productQuantity = 5;
+    string processStart = 6;
+    string targetF = 7;
+    string processLength = 8;
 }
 
 message BacteriaList {
