@@ -64,7 +64,12 @@ QList<ProcessType> Process::getProcessTypes()
 {
     QList<ProcessType> types = DbManager::instance().getProcessTypes();
     return types;
+}
 
+QList<Bacteria> Process::getBacteria()
+{
+    QList<Bacteria> bacteria = DbManager::instance().getBacteria();
+    return bacteria;
 }
 
 int Process::saveProcess()

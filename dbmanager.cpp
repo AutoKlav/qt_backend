@@ -59,25 +59,7 @@ void DbManager::loadGlobals()
     else {
         Logger::crit(GlobalErrors::DB_GLOBAL_STATE_MACHINE_TICK_LOAD_FAILED);
         GlobalErrors::setError(GlobalErrors::DbStateMachineTickError);
-    }
-
-    QString sterilizationTempStr = loadGlobal("sterilizationTemp");
-    if (!sterilizationTempStr.isEmpty()) {
-        Globals::sterilizationTemp = sterilizationTempStr.toDouble();
-    }
-    else {
-        Logger::crit(GlobalErrors::DB_GLOBAL_STERILIZATION_TEMP_LOAD_FAILED);
-        GlobalErrors::setError(GlobalErrors::DbSterilizationTempError);
-    }
-
-    QString pasterizationTempStr = loadGlobal("pasterizationTemp");
-    if (!pasterizationTempStr.isEmpty()) {
-        Globals::pasterizationTemp = pasterizationTempStr.toDouble();
-    }
-    else {
-        Logger::crit(GlobalErrors::DB_GLOBAL_PASTERIZATION_TEMP_LOAD_FAILED);
-        GlobalErrors::setError(GlobalErrors::DbPasterizationTempError);
-    }
+    }    
 }
 
 bool DbManager::updateGlobal(QString name, QString value)
@@ -138,28 +120,37 @@ bool DbManager::updateSensor(QString name, double newMinValue, double newMaxValu
 
 QList<ProcessRow> DbManager::getAllProcessesOrderedDesc()
 {
-    QSqlQuery query("SELECT * FROM Process ORDER BY processStart desc", m_db);
+    QSqlQuery query("SELECT process.id as id, process.productName, process.productQuantity, processStart, targetF, processLength, Bacteria.id as bacteriaId, Bacteria.name as bacteriaName, Bacteria.description as bacteriaDescription, d0, z FROM Process LEFT JOIN Bacteria ON Process.bacteriaId = Bacteria.id ORDER BY Process.processStart DESC", m_db);
     QList<ProcessRow> processes;
     while (query.next()) {
         auto id = query.value(0).toInt();
-        auto name = query.value(1).toString();
-        auto productName = query.value(2).toString();
-        auto productQuantity = query.value(3).toString();
-        auto bacteria = query.value(4).toString();
-        auto description = query.value(5).toString();
-        auto processStart = query.value(6).toString();
-        auto targetF = query.value(7).toString();
-        auto processLength = query.value(8).toString();
+        auto productName = query.value(1).toString();
+        auto productQuantity = query.value(2).toString();
+        auto processStart = query.value(3).toString();
+        auto targetF = query.value(4).toString();
+        auto processLength = query.value(5).toString();
+        auto bacteriaId = query.value(6).toInt();
+        auto bacteriaName = query.value(7).toString();
+        auto bacteriaDescription = query.value(8).toString();
+        auto d0 = query.value(9).toDouble();
+        auto z = query.value(10).toDouble();
+
+        const Bacteria bacteria = {
+            .id = bacteriaId,
+            .name = bacteriaName,
+            .description = bacteriaDescription,
+            .d0 = d0,
+            .z = z
+        };
 
         ProcessRow info;
-        info.id = id;
+        info.id = id;        
         info.productName = productName;
         info.productQuantity = productQuantity;
-        info.bacteria = bacteria;
-        info.description = description;
         info.processStart = processStart;
         info.targetF = targetF;
         info.processLength = processLength;
+        info.bacteria = bacteria;
 
         processes.append(info);
     }
@@ -220,13 +211,12 @@ QList<ProcessLogInfoRow> DbManager::getAllProcessLogs(int processId)
 int DbManager::createProcess(QString name, ProcessInfo info)
 {    
     QSqlQuery query(m_db);
-    query.prepare("INSERT INTO Process (name, productName, productQuantity, bacteria, description, processStart, targetF, processLength) "
-                  "VALUES (:name, :productName, :productQuantity, :bacteria, :description, :processStart, :targetF, :processLength)");
+    query.prepare("INSERT INTO Process (bacteriaId, name, productName, productQuantity, processStart, targetF, processLength) "
+                  "VALUES (:bacteriaId, :name, :productName, :productQuantity, :processStart, :targetF, :processLength)");
+    query.bindValue(":bacteriaId", info.bacteria.id);
     query.bindValue(":name", name);
     query.bindValue(":productName", info.productName);
     query.bindValue(":productQuantity", info.productQuantity);
-    query.bindValue(":bacteria", info.bacteria);
-    query.bindValue(":description", info.description);
     query.bindValue(":processStart", info.processStart);
     query.bindValue(":targetF", info.targetF);
     query.bindValue(":processLength", info.processLength);
@@ -244,13 +234,12 @@ int DbManager::createProcess(QString name, ProcessInfo info)
 bool DbManager::updateProcess(int id, ProcessInfo info)
 {
     QSqlQuery query(m_db);
-    query.prepare("UPDATE Process SET productName = :productName, productQuantity = :productQuantity, bacteria = :bacteria, "
-                  "description = :description, processLength = :processLength WHERE id = :id");
+    query.prepare("UPDATE Process SET productName = :productName, productQuantity = :productQuantity "
+                  "processLength = :processLength WHERE id = :id");
     query.bindValue(":id", id);
     query.bindValue(":productName", info.productName);
-    query.bindValue(":productQuantity", info.productQuantity);
-    query.bindValue(":bacteria", info.bacteria);
-    query.bindValue(":description", info.description);
+    query.bindValue(":productQuantity", info.productQuantity);    
+
     query.bindValue(":processLength", info.processLength);
 
     if (!query.exec()) {
@@ -363,6 +352,44 @@ int DbManager::createProcessType(ProcessType processType)
 
     Logger::info(QString("Database: Create process type %1").arg(processType.name));
     return query.lastInsertId().toInt();
+}
+
+int DbManager::createBacteria(Bacteria bacteria)
+{
+    QSqlQuery query(m_db);
+    query.prepare("INSERT INTO Bacteria (name, description, d0, z, dateCreated) "
+                  "VALUES (:name, :description, :d0, :z, :dateCreated)");
+    query.bindValue(":name", bacteria.name);
+    query.bindValue(":description", bacteria.description);
+    query.bindValue(":d0", bacteria.d0);
+    query.bindValue(":z", bacteria.z);
+    query.bindValue(":dateCreated", QDateTime::currentDateTime());
+
+    if (!query.exec()) {
+        Logger::crit(QString("Database: Unable to create process type %1").arg(bacteria.name));
+        Logger::crit(QString("SQL error: %1").arg(query.lastError().text()));
+        return -1;
+    }
+
+    Logger::info(QString("Database: Create process type %1").arg(bacteria.name));
+    return query.lastInsertId().toInt();
+}
+
+QList<Bacteria> DbManager::getBacteria()
+{
+    QSqlQuery query("SELECT * FROM Bacteria", m_db);
+    QList<Bacteria> bacterias;
+    while (query.next()) {
+        auto id = query.value(0).toInt();
+        auto name = query.value(1).toString();
+        auto description = query.value(2).toString();
+        auto d0 = query.value(3).toDouble();
+        auto z = query.value(4).toDouble();
+
+        bacterias.append({id, name, description, d0, z});
+    }
+
+    return bacterias;
 }
 
 int DbManager::deleteProcessType(int id)

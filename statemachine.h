@@ -38,6 +38,7 @@ public:
         double maintainTemp;
         double maintainPressure;
         double finishTemp;
+        double d0, z;
     };
 
     bool start(ProcessConfig processConfig, ProcessInfo processInfo);
@@ -66,8 +67,6 @@ private:
     ProcessInfo processInfo;
 
     quint64 id;
-
-    double calculateDeltaTemperature(double temp);
 
     /**
      * @brief Controls multiple relays at once by specifying relay names and their desired states.
