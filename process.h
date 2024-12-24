@@ -22,7 +22,7 @@ struct Bacteria {
 };
 
 struct ProcessInfo {
-    QString productName, productQuantity;
+    QString batchLTO, productName, productQuantity;
     QString processStart, processLength;
     QString targetF;
     Bacteria bacteria;

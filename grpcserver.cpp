@@ -181,6 +181,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::startProcess(grpc::ServerContext *
     };
 
     const ProcessInfo processInfo = {
+        .batchLTO = QString::fromUtf8(request->processinfo().batchlto()).trimmed(),
         .productName = QString::fromUtf8(request->processinfo().productname()).trimmed(),
         .productQuantity = QString::fromUtf8(request->processinfo().productquantity()).trimmed(),
         .processStart = QString::fromUtf8(request->processinfo().processstart()),
@@ -249,6 +250,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getAllProcesses(grpc::ServerContex
         auto processInfo = replay->add_processes();
 
         processInfo->set_id(process.id);
+        processInfo->set_batchlto(process.batchLTO.toStdString());
 
         // Access and populate the nested Bacteria message
         auto bacteriaMessage = processInfo->mutable_bacteria();

@@ -38,6 +38,7 @@ create table Bacteria
 INSERT INTO Bacteria (id, name, description, d0, z, dateCreated, dateModified) VALUES (1, 'clostridium botulinum', 'G pozitivna, anaerobna bakterija', 0.2, 10, CURRENT_TIMESTAMP,null);
 
 -- Process
+drop table Process;
 create table Process
 (
     id              INTEGER
@@ -47,6 +48,7 @@ create table Process
         on delete set null,        
     name            TEXT
         unique,
+    batchLTO        TEXT,
     productName     TEXT,
     productQuantity TEXT,    
     processStart    DATETIME,
@@ -54,7 +56,7 @@ create table Process
     processLength   TEXT
 );
 
-INSERT INTO Process (id, bacteriaId, name, productName, productQuantity, processStart, processLength, targetF) VALUES (55,1, '2024-11-28T17:28:53', 'Testni podaci', 'sint aliqua do laborum', '2024-11-28T17:28:53', '56363634654', null);
+INSERT INTO Process (id, bacteriaId, name, batchLTO, productName, productQuantity, processStart, processLength, targetF) VALUES (55,1, '2024-11-28T17:28:53', 'LTO324325345', 'Testni podaci', 'sint aliqua do laborum', '2024-11-28T17:28:53', '56363634654', null);
 
 CREATE INDEX idx_process_start ON Process(processStart);
 
