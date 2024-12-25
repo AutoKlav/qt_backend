@@ -7,6 +7,7 @@
 #include "logger.h"
 #include "dbmanager.h"
 #include "serial.h"
+#include "constants.h"
 
 qint64 Sensor::lastDataTime = 0;
 QList<Sensor> Sensor::sensors = QList<Sensor>();
@@ -90,9 +91,9 @@ SensorRelayValues Sensor::getRelayValues()
 
     SensorRelayValues relayValues;
 
-    relayValues.heating = mapName["heating"]->value;
-    relayValues.pump = mapName["pump"]->value;
-    relayValues.cooling = mapName["cooling"]->value;
+    relayValues.heating = mapName[CONSTANTS::HEATING]->value;
+    relayValues.pump = mapName[CONSTANTS::PUMP]->value;
+    relayValues.cooling = mapName[CONSTANTS::COOLING]->value;
 
     return relayValues;
 }
