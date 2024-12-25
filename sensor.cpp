@@ -78,12 +78,9 @@ SensorRelayValues Sensor::getRelayValues()
 
     SensorRelayValues relayValues;
 
-    relayValues.waterFill = mapName["waterFill"]->value;
     relayValues.heating = mapName["heating"]->value;
-    relayValues.bypass = mapName["bypass"]->value;
     relayValues.pump = mapName["pump"]->value;
-    relayValues.inPressure = mapName["inPressure"]->value;
-    relayValues.cooling = mapName["cooling"]->value;    
+    relayValues.cooling = mapName["cooling"]->value;
 
     return relayValues;
 }

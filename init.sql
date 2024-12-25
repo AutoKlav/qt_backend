@@ -12,16 +12,31 @@ create table Sensor
     minValue REAL not null,
     maxValue REAL not null
 );
-
+-- Analog Input
 INSERT INTO Sensor (name, minValue, maxValue) VALUES ('temp', 0, 150);
 INSERT INTO Sensor (name, minValue, maxValue) VALUES ('tempK', 0, 150);
 INSERT INTO Sensor (name, minValue, maxValue) VALUES ('pressure', 0, 3);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('waterFill', 0, 1);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('heating', 0, 1);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('bypass', 0, 1);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('pump', 0, 1);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('inPressure', 0, 1);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('steamPressure', 0, 3);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('waterLevel', 0, 1);
+
+-- Digital Output
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('fillTankWithWater', 0, 1);
 INSERT INTO Sensor (name, minValue, maxValue) VALUES ('cooling', 0, 1);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('tankHeating', 0, 1); 
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('coolingHelper', 0, 1);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('autoklavFill', 0, 1);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('waterDrain', 0, 1);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('heating', 0, 1);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('pump', 0, 1);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('electricHeating', 0, 1);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('increasePressure', 0, 1);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('extensionCooling', 0, 1);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('alarmSignal', 0, 1);
+
+-- Digital Input
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('doorClosed', 0, 1);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('burnerFault', 0, 1);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('waterShortage', 0, 1);
 
 -- Bacteria
 drop table Bacteria;

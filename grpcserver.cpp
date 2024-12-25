@@ -455,11 +455,8 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getSensorRelayValues(grpc::ServerC
         }
     }
 
-    replay->set_waterfill(sensorRelayValues.waterFill);
     replay->set_heating(sensorRelayValues.heating);
-    replay->set_bypass(sensorRelayValues.bypass);
     replay->set_pump(sensorRelayValues.pump);
-    replay->set_inpressure(sensorRelayValues.inPressure);
     replay->set_cooling(sensorRelayValues.cooling);
 
     return Status::OK;

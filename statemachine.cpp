@@ -5,6 +5,7 @@
 #include "dbmanager.h"
 #include "qthread.h"
 #include "serial.h"
+#include "constants.h"
 
 // Constructor
 StateMachine::StateMachine(QObject *parent)

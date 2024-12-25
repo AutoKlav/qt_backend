@@ -8,15 +8,23 @@ struct SensorValues {
     double temp;
     double tempK;
     double pressure;
+    double steamPressure;
+    double waterPressure;
 };
-
+   
 struct SensorRelayValues{
-    unsigned short waterFill;
-    unsigned short heating;
-    unsigned short bypass;
-    unsigned short pump;
-    unsigned short inPressure;
-    unsigned short cooling;
+    unsigned int fillTankWithWater;
+    unsigned int cooling;
+    unsigned int tankHeating;
+    unsigned int coolingHelper;
+    unsigned int autoklavFill;
+    unsigned int waterDrain;
+    unsigned int heating;
+    unsigned int pump;
+    unsigned int electricHeating;
+    unsigned int increasePressure;
+    unsigned int extensionCooling;
+    unsigned int alarmSignal;    
 };
 
 class Sensor
