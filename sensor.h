@@ -5,11 +5,17 @@
 #include <QString>
 
 struct SensorValues {
+    // Analog values
     double temp;
     double tempK;
     double pressure;
     double steamPressure;
-    double waterPressure;
+    double waterLevel;
+
+    // Digital input values
+    double doorClosed;
+    double burnerFault;
+    double waterShortage;
 };
    
 struct SensorRelayValues{

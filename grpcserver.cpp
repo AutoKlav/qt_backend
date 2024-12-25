@@ -408,6 +408,12 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getSensorValues(grpc::ServerContex
     replay->set_temp(sensorValues.temp);
     replay->set_tempk(sensorValues.tempK);
     replay->set_pressure(sensorValues.pressure);
+    replay->set_steampressure(sensorValues.steamPressure);
+    replay->set_waterlevel(sensorValues.waterLevel);
+
+    replay->set_doorclosed(sensorValues.doorClosed);
+    replay->set_burnerfault(sensorValues.burnerFault);
+    replay->set_watershortage(sensorValues.waterShortage);
 
     return Status::OK;
 }
@@ -454,11 +460,20 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getSensorRelayValues(grpc::ServerC
             return Status(grpc::StatusCode::ABORTED, GlobalErrors::SERIAL_ERROR.toStdString());
         }
     }
-
+    
+    replay->set_filltankwithwater(sensorRelayValues.fillTankWithWater);
+    replay->set_cooling(sensorRelayValues.cooling);
+    replay->set_tankheating(sensorRelayValues.tankHeating);
+    replay->set_coolinghelper(sensorRelayValues.coolingHelper);
+    replay->set_autoklavfill(sensorRelayValues.autoklavFill);
+    replay->set_waterdrain(sensorRelayValues.waterDrain);
     replay->set_heating(sensorRelayValues.heating);
     replay->set_pump(sensorRelayValues.pump);
-    replay->set_cooling(sensorRelayValues.cooling);
-
+    replay->set_electricheating(sensorRelayValues.electricHeating);
+    replay->set_increasepressure(sensorRelayValues.increasePressure);
+    replay->set_extensioncooling(sensorRelayValues.extensionCooling);
+    replay->set_alarmsignal(sensorRelayValues.alarmSignal);
+    
     return Status::OK;
 }
 
