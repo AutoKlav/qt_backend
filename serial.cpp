@@ -112,7 +112,7 @@ void Serial::close()
 
 void Serial::sendData(const QString& data)
 {
-    QString protocolData = "{" + data + "}";  // Wrap data in { and }
+    QString protocolData = data;
     Logger::info(QString("Sent data to serial communication: %1").arg(protocolData));
 
     if (!m_serial->isWritable()) {
@@ -123,7 +123,7 @@ void Serial::sendData(const QString& data)
 
     auto succ = m_serial->write(protocolData.toUtf8());
     // Add a small delay to prevent overwhelming the Arduino
-    QThread::msleep(5000); // Adjust the delay as necessary
+    QThread::msleep(2000); // Adjust the delay as necessary
 
     if (succ == -1) {
         Logger::crit("Failed to send data via serial");

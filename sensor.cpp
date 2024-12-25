@@ -6,6 +6,7 @@
 #include "globalerrors.h"
 #include "logger.h"
 #include "dbmanager.h"
+#include "serial.h"
 
 qint64 Sensor::lastDataTime = 0;
 QList<Sensor> Sensor::sensors = QList<Sensor>();
@@ -15,6 +16,17 @@ Sensor::Sensor(QString name, double minValue, double maxValue)
     : name{name}, minValue{minValue}, maxValue{maxValue}
 {
 
+}
+
+void Sensor::send(double newValue)
+{
+    value = newValue; // Update the internal value
+    uint pinValue = newValue;
+
+    auto data = QString("%1=%2").arg(name).arg(pinValue);
+
+    auto &serial = Serial::instance();
+    serial.sendData(data);
 }
 
 void Sensor::setValue(uint newPinValue)
