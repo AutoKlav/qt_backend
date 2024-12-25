@@ -98,15 +98,28 @@ message SensorValues {
     double temp = 1;
     double tempK = 2;
     double pressure = 3;
+    double steamPressure = 4;
+    double waterLevel = 5;
+    
+    // Digital input values
+    double doorClosed = 6;
+    double burnerFault = 7;
+    double waterShortage = 8;
 }
 
 message SensorRelayValues {
-    uint32 waterFill = 1;
-    uint32 heating = 2;
-    uint32 bypass = 3;
-    uint32 pump = 4;
-    uint32 inPressure = 5;
-    uint32 cooling = 6;
+    uint32 fillTankWithWater = 1;
+    uint32 cooling = 2;
+    uint32 tankHeating = 3;
+    uint32 coolingHelper = 4;
+    uint32 autoklavFill = 5;
+    uint32 waterDrain = 6;
+    uint32 heating = 7;
+    uint32 pump = 8;
+    uint32 electricHeating = 9;
+    uint32 increasePressure = 10;
+    uint32 extensionCooling = 11;
+    uint32 alarmSignal = 12;
 }
 
 message StateMachineValues {

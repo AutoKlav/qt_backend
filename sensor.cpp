@@ -6,6 +6,8 @@
 #include "globalerrors.h"
 #include "logger.h"
 #include "dbmanager.h"
+#include "serial.h"
+#include "constants.h"
 
 qint64 Sensor::lastDataTime = 0;
 QList<Sensor> Sensor::sensors = QList<Sensor>();
@@ -15,6 +17,17 @@ Sensor::Sensor(QString name, double minValue, double maxValue)
     : name{name}, minValue{minValue}, maxValue{maxValue}
 {
 
+}
+
+void Sensor::send(double newValue)
+{
+    value = newValue; // Update the internal value
+    uint pinValue = newValue;
+
+    auto data = QString("%1=%2").arg(name).arg(pinValue);
+
+    auto &serial = Serial::instance();
+    serial.sendData(data);
 }
 
 void Sensor::setValue(uint newPinValue)
@@ -78,12 +91,9 @@ SensorRelayValues Sensor::getRelayValues()
 
     SensorRelayValues relayValues;
 
-    relayValues.waterFill = mapName["waterFill"]->value;
-    relayValues.heating = mapName["heating"]->value;
-    relayValues.bypass = mapName["bypass"]->value;
-    relayValues.pump = mapName["pump"]->value;
-    relayValues.inPressure = mapName["inPressure"]->value;
-    relayValues.cooling = mapName["cooling"]->value;    
+    relayValues.heating = mapName[CONSTANTS::HEATING]->value;
+    relayValues.pump = mapName[CONSTANTS::PUMP]->value;
+    relayValues.cooling = mapName[CONSTANTS::COOLING]->value;
 
     return relayValues;
 }

@@ -92,6 +92,7 @@ add_executable(NewAutoklav
 
   init.sql
   process.cpp process.h
+  constants.h
 
 )
 

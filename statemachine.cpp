@@ -5,6 +5,7 @@
 #include "dbmanager.h"
 #include "qthread.h"
 #include "serial.h"
+#include "constants.h"
 
 // Constructor
 StateMachine::StateMachine(QObject *parent)
@@ -44,14 +45,9 @@ bool StateMachine::stop()
     if (!isRunning())
         return false;
 
-    controlRelays({
-        {"waterFill", 0},
-        {"heating", 0},
-        {"bypass", 0},
-        {"pump", 0},
-        {"inPressure", 0},
-        {"cooling", 0}
-    });
+    Sensor::mapName[CONSTANTS::FILL_TANK_WITH_WATER]->send(0);
+    Sensor::mapName[CONSTANTS::PUMP]->send(0);
+    Sensor::mapName[CONSTANTS::COOLING]->send(0);
 
     state = State::READY;
     values = StateMachineValues();
@@ -115,27 +111,6 @@ StateMachineValues StateMachine::calculateDrFrRValuesFromSensorsOnTheFly()
     return calculateStateMachineValues();
 }
 
-void StateMachine::controlRelays(std::initializer_list<std::pair<const char*, int>> relays)
-{
-    QStringList dataParts;
-
-    for (const auto& [name, value] : relays) {
-        if (Sensor::mapName.contains(name)) {
-            Sensor::mapName[name]->value = value; // Update internal sensor state
-            dataParts.append(QString("%1=%2;").arg(name).arg(value)); // Append the relay data with a semicolon
-        } else {
-            Logger::warn(QString("Relay '%1' does not exist").arg(name));
-        }
-    }
-
-    if (!dataParts.isEmpty()) {
-        auto data = dataParts.join("");
-
-        auto& serial = Serial::instance();
-        serial.sendData(data); // Send all relay data as a single message        
-    }
-
-}
 void StateMachine::tick()
 {
     auto wait3minInHeatingState = 1;//3*60;
@@ -153,14 +128,9 @@ void StateMachine::tick()
     case State::STARTING:
         Logger::info("StateMachine: Starting");
 
-        controlRelays({
-            {"waterFill", 1},
-            {"heating", 1},
-            {"bypass", 1},
-            {"pump", 0},
-            {"inPressure", 0},
-            {"cooling", 0}
-        });
+        //Sensor::mapName["waterFill"]->send(1);  // Start water filling
+        Sensor::mapName[CONSTANTS::HEATING]->send(1);    // Start heating
+        //Sensor::mapName["bypass"]->send(1);    //
 
         state = State::FILLING;
         Logger::info("StateMachine: Filling");
@@ -170,14 +140,10 @@ void StateMachine::tick()
         if (values.pressure < 0.5)
             break;
 
-        controlRelays({
-            {"waterFill", 0},
-            //{"heating", 1},
-            {"bypass", 0},
-            {"pump", 1},
-            {"inPressure", 1},
-            //{"cooling", 0}
-        });
+        Sensor::mapName[CONSTANTS::FILL_TANK_WITH_WATER]->send(0); // Stop above tank water filling
+        Sensor::mapName[CONSTANTS::COOLING]->send(0);
+        Sensor::mapName[CONSTANTS::PUMP]->send(1);       // Start circulation pump
+        Sensor::mapName[CONSTANTS::INCREASE_PRESSURE]->send(1);       // Start pressure
 
         Logger::info("StateMachine: Filling - Wait 3 min");
         QThread::msleep(wait3minInHeatingState*1000);
@@ -189,15 +155,15 @@ void StateMachine::tick()
     case State::HEATING:
 
         if (values.temp > processConfig.maintainTemp + 1) {
-            controlRelays({{"heating", 0}}); // Turn off heating
+            Sensor::mapName[CONSTANTS::HEATING]->send(0); // Turn off heating
         } else if (values.temp < processConfig.maintainTemp - 1) {
-            controlRelays({{"heating", 1}}); // Turn on heating
+            Sensor::mapName[CONSTANTS::HEATING]->send(1); // Turn on heating
         }
 
         if (values.pressure > processConfig.maintainPressure + 0.05) {
-            controlRelays({{"inPressure", 0}}); // Turn off 2 bar pressure
+            Sensor::mapName[CONSTANTS::INCREASE_PRESSURE]->send(0); // Turn off 2 bar pressure
         } else if (values.pressure < processConfig.maintainPressure - 0.05) {
-            controlRelays({{"inPressure", 1}}); // Turn on 2 bar pressure
+            Sensor::mapName[CONSTANTS::INCREASE_PRESSURE]->send(1); // Turn on 2 bar pressure
         }
 
         if (processConfig.mode == Mode::TARGETF) {
@@ -208,14 +174,10 @@ void StateMachine::tick()
                 break;
         }
 
-        controlRelays({
-            //{"waterFill", 0},
-            //{"heating", 0},
-            {"bypass", 1},
-            {"pump", 1},
-            //{"inPressure", 0},
-            {"cooling", 1}
-        });
+        Sensor::mapName[CONSTANTS::HEATING]->send(0);        // Turn off heating
+        //Sensor::mapName["inPressure"]->send(0);     // Turn off 2 bar pressure
+        Sensor::mapName[CONSTANTS::COOLING]->send(1);        // Start cooling by opening magnetic valve
+        //Sensor::mapName["bypass"]->send(1);
 
         state = State::COOLING;
         Logger::info("StateMachine: Cooling");
@@ -225,29 +187,15 @@ void StateMachine::tick()
         if (values.tempK > processConfig.finishTemp)
             break;
 
-        controlRelays({
-            //{"waterFill", 0},
-            //{"heating", 0},
-            {"bypass", 0},
-            //{"pump", 1},
-            {"inPressure", 0},
-            {"cooling", 0}
-        });
-
+        Sensor::mapName[CONSTANTS::COOLING]->send(0);    // Turn off cooling
+        //Sensor::mapName["bypass"]->send(0);
 
         state = State::FINISHING;
         Logger::info("StateMachine: Finishing");
         break;
 
     case State::FINISHING:
-        controlRelays({
-            //{"waterFill", 0},
-            //{"heating", 0},
-            //{"bypass", 0},
-            {"pump", 0},
-            //{"inPressure", 0},
-            //{"cooling", 0}
-        });
+        Sensor::mapName[CONSTANTS::PUMP]->send(0);   // Stop circulation pump
 
         state = State::FINISHED;
         Logger::info("StateMachine: Finished");
