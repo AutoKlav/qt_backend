@@ -33,7 +33,13 @@ void Sensor::send(double newValue)
 void Sensor::setValue(uint newPinValue)
 {    
     pinValue = newPinValue;
-    value = (newPinValue / 1023.0) * (maxValue - minValue) + minValue;
+
+    // Determine the scaling factor based on the maxValue, analog Values will have maxValues above 1,
+    // in order to scale them properly scaling factor should be 1023
+    double scalingFactor = maxValue > 1 ? 1023.0 : 1.0;
+
+    // Calculate the new value based on the scaling factor and the min/max range
+    value = (newPinValue / scalingFactor) * (maxValue - minValue) + minValue;
 }
 
 void Sensor::setValue(QString newPinValue)
@@ -58,9 +64,15 @@ SensorValues Sensor::getValues()
 
     SensorValues values;
 
-    values.temp = mapName["temp"]->value;
-    values.tempK = mapName["tempK"]->value;
-    values.pressure = mapName["pressure"]->value;
+    values.temp = mapName[CONSTANTS::TEMP]->value;
+    values.tempK = mapName[CONSTANTS::TEMP_K]->value;
+    values.pressure = mapName[CONSTANTS::PRESSURE]->value;
+    values.steamPressure = mapName[CONSTANTS::STEAM_PRESSURE]->value;
+    values.waterLevel = mapName[CONSTANTS::WATER_LEVEL]->value;
+
+    values.doorClosed = mapName[CONSTANTS::DOOR_CLOSED]->value;
+    values.burnerFault = mapName[CONSTANTS::BURNER_FAULT]->value;
+    values.waterShortage = mapName[CONSTANTS::WATER_SHORTAGE]->value;
 
     return values;
 }
@@ -74,9 +86,12 @@ SensorValues Sensor::getPinValues()
 
     SensorValues values;
 
-    values.temp = mapName["temp"]->pinValue;
-    values.tempK = mapName["tempK"]->pinValue;
-    values.pressure = mapName["pressure"]->pinValue;
+    values.temp = mapName[CONSTANTS::TEMP]->value;
+    values.tempK = mapName[CONSTANTS::TEMP_K]->pinValue;
+    values.pressure = mapName[CONSTANTS::PRESSURE]->pinValue;
+
+    values.steamPressure = mapName[CONSTANTS::STEAM_PRESSURE]->pinValue;
+    values.waterLevel = mapName[CONSTANTS::WATER_LEVEL]->pinValue;
 
     return values;
 }
