@@ -88,7 +88,7 @@ Serial &Serial::instance()
 
 void Serial::open()
 {
-    m_serial->setPortName("COM3");
+    m_serial->setPortName("COM4");
     m_serial->setBaudRate(QSerialPort::Baud9600);
     m_serial->setDataBits(QSerialPort::Data8);
     m_serial->setParity(QSerialPort::NoParity);
