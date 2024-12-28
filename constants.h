@@ -6,11 +6,13 @@
 namespace CONSTANTS {
 
 // Analog sensor constants
-inline const QString TEMP = "temp";
-inline const QString TEMP_K = "tempK";
-inline const QString PRESSURE = "pressure";
-inline const QString STEAM_PRESSURE = "steamPressure";
-inline const QString WATER_LEVEL = "waterLevel";
+inline const QString TEMP = "temp"; // Temprature of autoklav
+inline const QString TEMP_PIPE_EXPENSION = "tempPipe"; // Temprature of pipe expension
+inline const QString TEMP_HEATERS = "tempHeaters"; // Temprature of heaters
+inline const QString TEMP_WATER_TANK = "tempWaterTank"; // Temprature of water tank
+inline const QString TEMP_K = "tempK"; // Tempreature of middle of can
+inline const QString WATER_LEVEL = "waterLevel"; // ???
+inline const QString PRESSURE = "pressure"; // Pressure of autoklav
 
 // Digital output constants
 inline const QString FILL_TANK_WITH_WATER = "fillTankWithWater";

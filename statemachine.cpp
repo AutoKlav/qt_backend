@@ -25,6 +25,9 @@ bool StateMachine::start(ProcessConfig processConfig, ProcessInfo processInfo)
     if (isRunning())
         return false;
 
+    if (Sensor::getValues().doorClosed != 1) // Door is not open
+        return false;
+
     this->processConfig = processConfig;
     this->processInfo = processInfo;
     state = State::STARTING;
@@ -77,7 +80,7 @@ StateMachineValues StateMachine::calculateStateMachineValues()
 
     stateMachineValues.dTemp = processConfig.customTemp - stateMachineValues.tempK;
 
-    stateMachineValues.Dr = qPow(10, 0.1 * stateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
+    stateMachineValues.Dr = 5 * bacteria.d0 * qPow(10, (1 / bacteria.) * stateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
     stateMachineValues.Fr = qPow(10, -0.1 * stateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
     stateMachineValues.r = 5 * stateMachineValues.Fr;
 
@@ -96,30 +99,19 @@ StateMachineValues StateMachine::calculateStateMachineValues()
     return stateMachineValues;
 }
 
-
-StateMachineValues StateMachine::calculateDrFrRValuesFromSensors(int processId)
-{
-    auto stateMachineValues = calculateStateMachineValues();
-
-    DbManager::instance().createProcessLog(processId);
-
-    return stateMachineValues;
-}
-
-StateMachineValues StateMachine::calculateDrFrRValuesFromSensorsOnTheFly()
-{
-    return calculateStateMachineValues();
-}
-
 void StateMachine::tick()
 {
-    auto wait3minInHeatingState = 1;//3*60;
+    tickMain(); // Main program tick
+    // tickTank();
+    // tickPipe();
+}
 
+void StateMachine::tickMain()
+{
     if (isRunning()) {
-        values = calculateDrFrRValuesFromSensors(process->getId());
-    } else {
-        values = calculateStateMachineValues();
+        DbManager::instance().createProcessLog(process->getId());
     }
+    values = calculateStateMachineValues();
 
     switch (state) {
     case State::READY:
@@ -128,29 +120,37 @@ void StateMachine::tick()
     case State::STARTING:
         Logger::info("StateMachine: Starting");
 
-        //Sensor::mapName["waterFill"]->send(1);  // Start water filling
-        Sensor::mapName[CONSTANTS::HEATING]->send(1);    // Start heating
-        //Sensor::mapName["bypass"]->send(1);    //
+        Sensor::mapName[CONSTANTS::AUTOKLAV_FILL]->send(1); // Turn on autoklav water fill
 
         state = State::FILLING;
         Logger::info("StateMachine: Filling");
         break;
 
     case State::FILLING:
-        if (values.pressure < 0.5)
+        if (values.time > 3000) // After 3 min
+            Sensor::mapName[CONSTANTS::PUMP]->send(1); // Turn on pump
+
+        Sensor::mapName[CONSTANTS::AUTOKLAV_FILL]->send(0); // Turn off autoklav water fill
+        Sensor::mapName[CONSTANTS::INCREASE_PRESSURE]->send(1); // Turn on pressure increase
+
+        state = State::PRESSURING;
+        Logger::info("StateMachine: Pressuing");
+        break;
+
+    case State::PRESSURING:
+        if (values.pressure < 1.0) // Wait till autoklav pressure is 1bar
             break;
 
-        Sensor::mapName[CONSTANTS::FILL_TANK_WITH_WATER]->send(0); // Stop above tank water filling
-        Sensor::mapName[CONSTANTS::COOLING]->send(0);
-        Sensor::mapName[CONSTANTS::PUMP]->send(1);       // Start circulation pump
-        Sensor::mapName[CONSTANTS::INCREASE_PRESSURE]->send(1);       // Start pressure
+        Sensor::mapName[CONSTANTS::INCREASE_PRESSURE]->send(0); // Turn off pressure increase
+        Sensor::mapName[CONSTANTS::HEATING]->send(1); // Turn on autoklav heating with steem
 
-        Logger::info("StateMachine: Filling - Wait 3 min");
-        QThread::msleep(wait3minInHeatingState*1000);
+        // TODO: Log heating start so we can later save length of heating
+        // auto heatingStarted = datetime.now();
 
         state = State::HEATING;
         Logger::info("StateMachine: Heating");
         break;
+
 
     case State::HEATING:
 
@@ -170,14 +170,15 @@ void StateMachine::tick()
             if (values.sumFr < processInfo.targetF.toDouble())
                 break;
         } else if (processConfig.mode == Mode::TIME) {
-            if (values.time < processConfig.targetTime)
+            // if (datetime.now() - heatingStarted < processConfig.targetHeatingTime) // TODO: Calcualte time of heating, not whole proccess time
                 break;
         }
 
         Sensor::mapName[CONSTANTS::HEATING]->send(0);        // Turn off heating
-        //Sensor::mapName["inPressure"]->send(0);     // Turn off 2 bar pressure
-        Sensor::mapName[CONSTANTS::COOLING]->send(1);        // Start cooling by opening magnetic valve
-        //Sensor::mapName["bypass"]->send(1);
+        Sensor::mapName[CONSTANTS::COOLING]->send(1);        // Turn on main cooling
+        Sensor::mapName[CONSTANTS::COOLING_HELPER]->send(1); // Turn on help cooling
+
+        // process.heatingTime = datetime.now() - heatingStarted;
 
         state = State::COOLING;
         Logger::info("StateMachine: Cooling");

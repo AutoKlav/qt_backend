@@ -19,7 +19,7 @@ public:
     ~StateMachine() = default;
 
     enum State {
-        READY, STARTING, FILLING, HEATING, COOLING, FINISHING, FINISHED
+        READY, STARTING, FILLING, PRESSURING, HEATING, COOLING, FINISHING, FINISHED
     };
 
     enum Type {
@@ -67,6 +67,9 @@ private:
     ProcessInfo processInfo;
 
     quint64 id;
+
+    void tickMain();
+    void tickWaterStorage();
 
 private slots:
     void tick();

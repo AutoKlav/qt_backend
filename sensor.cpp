@@ -86,12 +86,15 @@ SensorValues Sensor::getPinValues()
 
     SensorValues values;
 
-    values.temp = mapName[CONSTANTS::TEMP]->value;
+    values.temp = mapName[CONSTANTS::TEMP]->pinValue;
     values.tempK = mapName[CONSTANTS::TEMP_K]->pinValue;
     values.pressure = mapName[CONSTANTS::PRESSURE]->pinValue;
-
     values.steamPressure = mapName[CONSTANTS::STEAM_PRESSURE]->pinValue;
     values.waterLevel = mapName[CONSTANTS::WATER_LEVEL]->pinValue;
+
+    values.doorClosed = mapName[CONSTANTS::DOOR_CLOSED]->pinValue;
+    values.burnerFault = mapName[CONSTANTS::BURNER_FAULT]->pinValue;
+    values.waterShortage = mapName[CONSTANTS::WATER_SHORTAGE]->pinValue;
 
     return values;
 }
