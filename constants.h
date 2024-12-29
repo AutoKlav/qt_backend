@@ -7,8 +7,12 @@ namespace CONSTANTS {
 
 // Analog sensor constants
 inline const QString TEMP = "temp";
+inline const QString EXPANSION_TEMP = "expansionTemp";
+inline const QString HEATER_TEMP = "heaterTemp";
+inline const QString TANK_TEMP = "tankTemp";
 inline const QString TEMP_K = "tempK";
 inline const QString PRESSURE = "pressure";
+
 inline const QString STEAM_PRESSURE = "steamPressure";
 inline const QString WATER_LEVEL = "waterLevel";
 

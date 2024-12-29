@@ -86,7 +86,7 @@ SensorValues Sensor::getPinValues()
 
     SensorValues values;
 
-    values.temp = mapName[CONSTANTS::TEMP]->value;
+    values.temp = mapName[CONSTANTS::TEMP]->pinValue;
     values.tempK = mapName[CONSTANTS::TEMP_K]->pinValue;
     values.pressure = mapName[CONSTANTS::PRESSURE]->pinValue;
 
