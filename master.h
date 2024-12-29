@@ -21,22 +21,3 @@ private:
 };
 
 #endif // MASTER_H
-
-
-/*
- * TODO:
- *
- * [x] parse data from serial
- * [x] sensor class /w map
- * [x] sensor data in db
- * [x] current sensor state struct
- * [ ] current state struct
- *
- *
- * StateMachine:
- * [x] start/stop
- * [x] QTimer
- * [x] stages
- * [x] current state machine struct
- * [ ] logging
- */
