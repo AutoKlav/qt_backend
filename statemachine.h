@@ -19,7 +19,7 @@ public:
     ~StateMachine() = default;
 
     enum State {
-        READY, STARTING, FILLING, HEATING, COOLING, FINISHING, FINISHED
+        READY, STARTING, FILLING, PRESSURING, HEATING, COOLING, FINISHING, FINISHED
     };
 
     enum Type {
@@ -69,7 +69,7 @@ private:
     quint64 id;
 
 private slots:
-    void tick();
+    void autoklavTickControl();
 };
 
 #endif // STATEMACHINE_H

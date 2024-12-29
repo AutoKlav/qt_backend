@@ -11,7 +11,7 @@ StateMachine::StateMachine(QObject *parent)
     : QObject(parent), state(READY), timer(nullptr), process(nullptr), processLog(nullptr)
 {
     timer = new QTimer(this); // Explicitly initialize timer
-    connect(timer, &QTimer::timeout, this, &StateMachine::tick); // Ensure tick is connected
+    connect(timer, &QTimer::timeout, this, &StateMachine::autoklavTickControl); // Ensure tick is connected
 }
 
 // Definition of getState method
@@ -34,7 +34,9 @@ bool StateMachine::start(ProcessConfig processConfig, ProcessInfo processInfo)
 
     // Start the timer with the state machine tick interval
     QMetaObject::invokeMethod(timer, "start", Qt::AutoConnection, Q_ARG(int, Globals::stateMachineTick));
-    tick();
+    autoklavTickControl();
+    //tankTickControl();
+    //pipeTickControl();
 
     return true;
 }
@@ -47,6 +49,8 @@ bool StateMachine::stop()
     Sensor::mapName[CONSTANTS::FILL_TANK_WITH_WATER]->send(0);
     Sensor::mapName[CONSTANTS::PUMP]->send(0);
     Sensor::mapName[CONSTANTS::COOLING]->send(0);
+
+    // TODO shut down all sensors
 
     state = State::READY;
     values = StateMachineValues();
@@ -76,9 +80,13 @@ StateMachineValues StateMachine::calculateStateMachineValues()
 
     stateMachineValues.dTemp = processConfig.customTemp - stateMachineValues.tempK;
 
-    stateMachineValues.Dr = qPow(10, 0.1 * stateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
-    stateMachineValues.Fr = qPow(10, -0.1 * stateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
-    stateMachineValues.r = 5 * stateMachineValues.Fr;
+    // TODO import from globals
+    const auto k = 1;
+    const auto exp = (Globals::stateMachineTick / 60000.0) / processConfig.z;
+
+    stateMachineValues.Dr = k * processConfig.d0 * qPow(10, -1*exp);
+    stateMachineValues.Fr = qPow(10, exp) / (k * processConfig.d0) ;
+    stateMachineValues.r = qPow(10, exp) / processConfig.d0;
 
     stateMachineValues.state = state;
 
@@ -110,10 +118,8 @@ StateMachineValues StateMachine::calculateDrFrRValuesFromSensorsOnTheFly()
     return calculateStateMachineValues();
 }
 
-void StateMachine::tick()
-{
-    auto wait3minInHeatingState = 1;//3*60;
-
+void StateMachine::autoklavTickControl()
+{    
     if (isRunning()) {
         values = calculateDrFrRValuesFromSensors(process->getId());
     } else {
@@ -127,25 +133,38 @@ void StateMachine::tick()
     case State::STARTING:
         Logger::info("StateMachine: Starting");
 
-        //Sensor::mapName["waterFill"]->send(1);  // Start water filling
-        Sensor::mapName[CONSTANTS::HEATING]->send(1);    // Start heating
-        //Sensor::mapName["bypass"]->send(1);    //
+        Sensor::mapName[CONSTANTS::AUTOKLAV_FILL]->send(1); // Turn on autoklav water fill
+        Sensor::mapName[CONSTANTS::HEATING]->send(1);    // Start heating        
 
         state = State::FILLING;
         Logger::info("StateMachine: Filling");
         break;
 
     case State::FILLING:
-        if (values.pressure < 0.5)
+        if (values.time > 3000) // After 3 min
+            Sensor::mapName[CONSTANTS::PUMP]->send(1); // Turn on pump
+
+        Sensor::mapName[CONSTANTS::AUTOKLAV_FILL]->send(0); // Turn off autoklav water fill
+        Sensor::mapName[CONSTANTS::INCREASE_PRESSURE]->send(1); // Turn on pressure increase
+
+        state = State::PRESSURING;
+        Logger::info("StateMachine: Pressuing");
+        break;
+
+    case State::PRESSURING:
+        if (values.pressure < 1.0) // Wait till autoklav pressure is 1bar
             break;
+
+        Sensor::mapName[CONSTANTS::INCREASE_PRESSURE]->send(0); // Turn off pressure increase
+        Sensor::mapName[CONSTANTS::HEATING]->send(1); // Turn on autoklav heating with steem
+
+        // TODO: Log heating start so we can later save length of heating
+        // auto heatingStarted = datetime.now();
 
         Sensor::mapName[CONSTANTS::FILL_TANK_WITH_WATER]->send(0); // Stop above tank water filling
         Sensor::mapName[CONSTANTS::COOLING]->send(0);
         Sensor::mapName[CONSTANTS::PUMP]->send(1);       // Start circulation pump
-        Sensor::mapName[CONSTANTS::INCREASE_PRESSURE]->send(1);       // Start pressure
-
-        Logger::info("StateMachine: Filling - Wait 3 min");
-        QThread::msleep(wait3minInHeatingState*1000);
+        Sensor::mapName[CONSTANTS::INCREASE_PRESSURE]->send(1);       // Start pressure       
 
         state = State::HEATING;
         Logger::info("StateMachine: Heating");
@@ -169,14 +188,15 @@ void StateMachine::tick()
             if (values.sumFr < processInfo.targetF.toDouble())
                 break;
         } else if (processConfig.mode == Mode::TIME) {
-            if (values.time < processConfig.targetTime)
-                break;
+            // if (datetime.now() - heatingStarted < processConfig.targetHeatingTime)
+            // TODO: Calcualte time of heating, not whole proccess time
         }
 
         Sensor::mapName[CONSTANTS::HEATING]->send(0);        // Turn off heating
-        //Sensor::mapName["inPressure"]->send(0);     // Turn off 2 bar pressure
-        Sensor::mapName[CONSTANTS::COOLING]->send(1);        // Start cooling by opening magnetic valve
-        //Sensor::mapName["bypass"]->send(1);
+        Sensor::mapName[CONSTANTS::COOLING]->send(1);        // Turn on main cooling
+        Sensor::mapName[CONSTANTS::COOLING_HELPER]->send(1); // Turn on help cooling
+
+        // process.heatingTime = datetime.now() - heatingStarted;
 
         state = State::COOLING;
         Logger::info("StateMachine: Cooling");
