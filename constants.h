@@ -11,9 +11,15 @@ inline const QString EXPANSION_TEMP = "expansionTemp";
 inline const QString HEATER_TEMP = "heaterTemp";
 inline const QString TANK_TEMP = "tankTemp";
 inline const QString TEMP_K = "tempK";
+inline const QString TANK_WATER_LEVEL = "tankWaterLevel";
 inline const QString PRESSURE = "pressure";
-
 inline const QString STEAM_PRESSURE = "steamPressure";
+
+// Digital input constants
+inline const QString DOOR_CLOSED = "doorClosed";
+inline const QString BURNER_FAULT = "burnerFault";
+inline const QString WATER_SHORTAGE = "waterShortage";
+
 inline const QString WATER_LEVEL = "waterLevel";
 
 // Digital output constants
@@ -29,11 +35,6 @@ inline const QString ELECTRIC_HEATING = "electricHeating";
 inline const QString INCREASE_PRESSURE = "increasePressure";
 inline const QString EXTENSION_COOLING = "extensionCooling";
 inline const QString ALARM_SIGNAL = "alarmSignal";
-
-// Digital input constants
-inline const QString DOOR_CLOSED = "doorClosed";
-inline const QString BURNER_FAULT = "burnerFault";
-inline const QString WATER_SHORTAGE = "waterShortage";
 
 } // namespace CONSTANTS
 

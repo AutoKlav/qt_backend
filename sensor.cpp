@@ -63,17 +63,20 @@ SensorValues Sensor::getValues()
     checkIfDataIsOld();
 
     SensorValues values;
-
+    
     values.temp = mapName[CONSTANTS::TEMP]->value;
+    values.expansionTemp = mapName[CONSTANTS::EXPANSION_TEMP]->value;
+    values.heaterTemp = mapName[CONSTANTS::HEATER_TEMP]->value;
+    values.tankTemp = mapName[CONSTANTS::TANK_TEMP]->value;
     values.tempK = mapName[CONSTANTS::TEMP_K]->value;
+    values.tankWaterLevel = mapName[CONSTANTS::TANK_WATER_LEVEL]->value;
     values.pressure = mapName[CONSTANTS::PRESSURE]->value;
     values.steamPressure = mapName[CONSTANTS::STEAM_PRESSURE]->value;
-    values.waterLevel = mapName[CONSTANTS::WATER_LEVEL]->value;
 
     values.doorClosed = mapName[CONSTANTS::DOOR_CLOSED]->value;
     values.burnerFault = mapName[CONSTANTS::BURNER_FAULT]->value;
     values.waterShortage = mapName[CONSTANTS::WATER_SHORTAGE]->value;
-
+    
     return values;
 }
 
@@ -87,11 +90,17 @@ SensorValues Sensor::getPinValues()
     SensorValues values;
 
     values.temp = mapName[CONSTANTS::TEMP]->pinValue;
+    values.expansionTemp = mapName[CONSTANTS::EXPANSION_TEMP]->pinValue;
+    values.heaterTemp = mapName[CONSTANTS::HEATER_TEMP]->pinValue;
+    values.tankTemp = mapName[CONSTANTS::TANK_TEMP]->pinValue;
     values.tempK = mapName[CONSTANTS::TEMP_K]->pinValue;
+    values.tankWaterLevel = mapName[CONSTANTS::TANK_WATER_LEVEL]->pinValue;
     values.pressure = mapName[CONSTANTS::PRESSURE]->pinValue;
-
     values.steamPressure = mapName[CONSTANTS::STEAM_PRESSURE]->pinValue;
-    values.waterLevel = mapName[CONSTANTS::WATER_LEVEL]->pinValue;
+
+    values.doorClosed = mapName[CONSTANTS::DOOR_CLOSED]->pinValue;
+    values.burnerFault = mapName[CONSTANTS::BURNER_FAULT]->pinValue;
+    values.waterShortage = mapName[CONSTANTS::WATER_SHORTAGE]->pinValue;
 
     return values;
 }
@@ -105,11 +114,20 @@ SensorRelayValues Sensor::getRelayValues()
     checkIfDataIsOld();
 
     SensorRelayValues relayValues;
-
+    
+    relayValues.fillTankWithWater = mapName[CONSTANTS::FILL_TANK_WITH_WATER]->value;
+    relayValues.cooling = mapName[CONSTANTS::COOLING]->value;
+    relayValues.tankHeating = mapName[CONSTANTS::TANK_HEATING]->value;
+    relayValues.coolingHelper = mapName[CONSTANTS::COOLING_HELPER]->value;
+    relayValues.autoklavFill = mapName[CONSTANTS::AUTOKLAV_FILL]->value;
+    relayValues.waterDrain = mapName[CONSTANTS::WATER_DRAIN]->value;
     relayValues.heating = mapName[CONSTANTS::HEATING]->value;
     relayValues.pump = mapName[CONSTANTS::PUMP]->value;
-    relayValues.cooling = mapName[CONSTANTS::COOLING]->value;
-
+    relayValues.electricHeating = mapName[CONSTANTS::ELECTRIC_HEATING]->value;
+    relayValues.increasePressure = mapName[CONSTANTS::INCREASE_PRESSURE]->value;
+    relayValues.extensionCooling = mapName[CONSTANTS::EXTENSION_COOLING]->value;
+    relayValues.alarmSignal = mapName[CONSTANTS::ALARM_SIGNAL]->value;
+    
     return relayValues;
 }
 
