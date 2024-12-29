@@ -40,7 +40,6 @@ private:
         Status deleteProcessType(grpc::ServerContext *context, const autoklav::TypeRequest *request, autoklav::Status *replay) override;
         Status startProcess(grpc::ServerContext *context, const autoklav::StartProcessRequest *request, autoklav::Status *replay) override;
         Status stopProcess(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay) override;
-        Status getSensorValues(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::SensorValues *replay) override;
         Status getSensorPinValues(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::SensorValues *replay) override;
         Status getSensorRelayValues(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::SensorRelayValues *replay) override;
         Status updateSensor(grpc::ServerContext *context, const autoklav::UpdateSensorRequest *request, autoklav::Status *replay) override;
@@ -387,37 +386,6 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getProcessLogs(grpc::ServerContext
     return Status::OK;
 }
 
-Status GRpcServer::Impl::AutoklavServiceImpl::getSensorValues(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::SensorValues *replay)
-{
-    Q_UNUSED(context);
-    Q_UNUSED(request);
-    Q_UNUSED(replay);
-
-    const auto sensorValues = Sensor::getValues();
-
-    // Fetch error flags
-    QVector<QString> errorStrings = GlobalErrors::getErrorsString();
-
-    // If there is a serial error, send abort status
-    for(const QString& errorString : errorStrings){
-        if(errorString == GlobalErrors::SERIAL_ERROR){
-            return Status(grpc::StatusCode::ABORTED, GlobalErrors::SERIAL_ERROR.toStdString());
-        }
-    }
-
-    replay->set_temp(sensorValues.temp);
-    replay->set_tempk(sensorValues.tempK);
-    replay->set_pressure(sensorValues.pressure);
-    replay->set_steampressure(sensorValues.steamPressure);
-    replay->set_waterlevel(sensorValues.waterLevel);
-
-    replay->set_doorclosed(sensorValues.doorClosed);
-    replay->set_burnerfault(sensorValues.burnerFault);
-    replay->set_watershortage(sensorValues.waterShortage);
-
-    return Status::OK;
-}
-
 Status GRpcServer::Impl::AutoklavServiceImpl::getSensorPinValues(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::SensorValues *replay)
 {
     Q_UNUSED(context);
@@ -483,6 +451,16 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getStateMachineValues(grpc::Server
     Q_UNUSED(request);
 
     const auto stateMachineValues = StateMachine::instance().calculateDrFrRValuesFromSensorsOnTheFly();
+
+    // replay->set_temp(sensorValues.temp);
+    // replay->set_tempk(sensorValues.tempK);
+    // replay->set_pressure(sensorValues.pressure);
+    // replay->set_steampressure(sensorValues.steamPressure);
+    // replay->set_waterlevel(sensorValues.waterLevel);
+
+    // replay->set_doorclosed(sensorValues.doorClosed);
+    // replay->set_burnerfault(sensorValues.burnerFault);
+    // replay->set_watershortage(sensorValues.waterShortage);
 
     replay->set_elapsedtime(stateMachineValues.time);
     replay->set_temp(stateMachineValues.temp);

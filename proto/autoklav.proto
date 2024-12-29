@@ -22,7 +22,6 @@ service Autoklav {
     rpc stopProcess(Empty) returns (Status);
 
     // Sensor
-    rpc getSensorValues(Empty) returns (SensorValues);
     rpc getSensorPinValues(Empty) returns (SensorValues);
     rpc getSensorRelayValues(Empty) returns (SensorRelayValues);
     rpc updateSensor(UpdateSensorRequest) returns (Status);
