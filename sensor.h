@@ -7,10 +7,13 @@
 struct SensorValues {
     // Analog values
     double temp;
+    double expansionTemp;
+    double heaterTemp;
+    double tankTemp;
     double tempK;
+    double tankWaterLevel;
     double pressure;
     double steamPressure;
-    double waterLevel;
 
     // Digital input values
     double doorClosed;

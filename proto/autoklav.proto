@@ -120,21 +120,26 @@ message SensorRelayValues {
     uint32 extensionCooling = 11;
     uint32 alarmSignal = 12;
 }
-
+ 
 message StateMachineValues {
     uint32 id = 1;
     double elapsedTime = 2;
     double temp = 3;
     double tempK = 4;
-    double dTemp = 5;
     double pressure = 6;
-    uint32 state = 7;
-    double Dr = 8;
-    double Fr = 9;
-    double r = 10;
-    double sumFr = 11;
-    double sumR = 12;
-    string timestamp = 13;
+    double steamPressure = 7; 
+    uint32 waterLevel = 8;
+    uint32 doorClosed = 9;
+    uint32 burnerFault = 10;
+    uint32 waterShortage = 11;
+    double dTemp = 12;
+    uint32 state = 13;
+    double Dr = 14;
+    double Fr = 15;
+    double r = 16;
+    double sumFr = 17;
+    double sumR = 18;
+    string timestamp = 19;
 }
 
 enum ProcessConfigType {

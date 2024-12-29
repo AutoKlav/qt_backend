@@ -12,12 +12,23 @@ create table Sensor
     minValue REAL not null,
     maxValue REAL not null
 );
+
 -- Analog Input
 INSERT INTO Sensor (name, minValue, maxValue) VALUES ('temp', 0, 150);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('expansionTemp', 0, 150);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('heaterTemp', 0, 150);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('tankTemp', 0, 150);
 INSERT INTO Sensor (name, minValue, maxValue) VALUES ('tempK', 0, 150);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('tankWaterLevel', 0, 1);
 INSERT INTO Sensor (name, minValue, maxValue) VALUES ('pressure', 0, 3);
 INSERT INTO Sensor (name, minValue, maxValue) VALUES ('steamPressure', 0, 3);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('waterLevel', 0, 1);
+
+-- Digital Input
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('doorClosed', 0, 1);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('burnerFault', 0, 1);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('waterShortage', 0, 1);
+
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('waterLevel', 0, 3);
 
 -- Digital Output
 INSERT INTO Sensor (name, minValue, maxValue) VALUES ('fillTankWithWater', 0, 1);
@@ -32,11 +43,6 @@ INSERT INTO Sensor (name, minValue, maxValue) VALUES ('electricHeating', 0, 1);
 INSERT INTO Sensor (name, minValue, maxValue) VALUES ('increasePressure', 0, 1);
 INSERT INTO Sensor (name, minValue, maxValue) VALUES ('extensionCooling', 0, 1);
 INSERT INTO Sensor (name, minValue, maxValue) VALUES ('alarmSignal', 0, 1);
-
--- Digital Input
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('doorClosed', 0, 1);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('burnerFault', 0, 1);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('waterShortage', 0, 1);
 
 -- Bacteria
 drop table Bacteria;
