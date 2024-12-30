@@ -5,6 +5,7 @@
 #include "dbmanager.h"
 #include "constants.h"
 
+
 // Constructor
 StateMachine::StateMachine(QObject *parent)
     : QObject(parent), state(READY), timer(nullptr), process(nullptr), processLog(nullptr)
@@ -101,7 +102,7 @@ StateMachineValues StateMachine::calculateStateMachineValues()
     stateMachineValues.dTemp = processConfig.customTemp - stateMachineValues.tempK;
 
     // TODO import from globals
-    const auto k = 1;
+    const auto k = Globals::k;
     const auto exp = (Globals::stateMachineTick / 60000.0) / processConfig.z;
 
     stateMachineValues.Dr = k * processConfig.d0 * qPow(10, -1*exp);

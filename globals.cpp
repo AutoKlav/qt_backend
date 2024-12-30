@@ -30,6 +30,21 @@ bool Globals::setStateMachineTick(int value)
     return false;
 }
 
+bool Globals::setK(double value)
+{
+    if (k == value)
+        return true;
+
+    auto& db = DbManager::instance();
+    if (db.updateGlobal("k", QString::number(value))) {
+        k = value;
+        return true;
+    }
+
+    return false;
+}
+
+
 Globals::Variables Globals::getVariables()
 {
     return {
