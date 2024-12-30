@@ -3,7 +3,6 @@
 #include "sensor.h"
 #include "globals.h"
 #include "dbmanager.h"
-#include "qthread.h"
 #include "constants.h"
 
 // Constructor
