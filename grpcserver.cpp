@@ -401,7 +401,6 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getSensorPinValues(grpc::ServerCon
 {
     Q_UNUSED(context);
     Q_UNUSED(request);
-    Q_UNUSED(replay);
 
     const auto sensorValues = Sensor::getPinValues();
 
@@ -416,8 +415,17 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getSensorPinValues(grpc::ServerCon
     }
 
     replay->set_temp(sensorValues.temp);
+    replay->set_expansiontemp(sensorValues.expansionTemp);
+    replay->set_heatertemp(sensorValues.heaterTemp);
+    replay->set_tanktemp(sensorValues.tankTemp);
     replay->set_tempk(sensorValues.tempK);
+    replay->set_tankwaterlevel(sensorValues.tankWaterLevel);
     replay->set_pressure(sensorValues.pressure);
+    replay->set_steampressure(sensorValues.steamPressure);
+
+    replay->set_doorclosed(sensorValues.doorClosed);
+    replay->set_burnerfault(sensorValues.burnerFault);
+    replay->set_watershortage(sensorValues.waterShortage);
 
     return Status::OK;
 }
