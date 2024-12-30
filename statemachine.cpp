@@ -68,6 +68,11 @@ StateMachineValues StateMachine::getValues()
     return values;
 }
 
+StateMachineValues StateMachine::getStateMachineValuesOnTheFly()
+{
+    return calculateStateMachineValues();
+}
+
 StateMachineValues StateMachine::calculateStateMachineValues()
 {
     StateMachineValues stateMachineValues;
@@ -75,8 +80,17 @@ StateMachineValues StateMachine::calculateStateMachineValues()
     auto sensorValues = Sensor::getValues();
 
     stateMachineValues.temp = sensorValues.temp;
+    stateMachineValues.expansionTemp = sensorValues.expansionTemp;
+    stateMachineValues.heaterTemp = sensorValues.heaterTemp;
+    stateMachineValues.tankTemp = sensorValues.tankTemp;
     stateMachineValues.tempK = sensorValues.tempK;
-    stateMachineValues.pressure = sensorValues.pressure;    
+    stateMachineValues.tankWaterLevel = sensorValues.tankWaterLevel;
+    stateMachineValues.pressure = sensorValues.pressure;
+    stateMachineValues.steamPressure = sensorValues.steamPressure;
+
+    stateMachineValues.doorClosed = sensorValues.doorClosed;
+    stateMachineValues.burnerFault = sensorValues.burnerFault;
+    stateMachineValues.waterShortage = sensorValues.waterShortage;
 
     stateMachineValues.dTemp = processConfig.customTemp - stateMachineValues.tempK;
 
@@ -113,16 +127,11 @@ StateMachineValues StateMachine::calculateDrFrRValuesFromSensors(int processId)
     return stateMachineValues;
 }
 
-StateMachineValues StateMachine::calculateDrFrRValuesFromSensorsOnTheFly()
-{
-    return calculateStateMachineValues();
-}
-
 void StateMachine::autoklavTickControl()
 {    
     if (isRunning()) {
         values = calculateDrFrRValuesFromSensors(process->getId());
-    } else {
+    } else {        
         values = calculateStateMachineValues();
     }
 

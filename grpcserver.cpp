@@ -372,9 +372,20 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getProcessLogs(grpc::ServerContext
 
         processLogInfo->set_id(processLog.processId);
         processLogInfo->set_timestamp(processLog.timestamp.toStdString());
-        processLogInfo->set_temp(processLog.temp);
-        processLogInfo->set_tempk(processLog.tempK);
-        processLogInfo->set_pressure(processLog.pressure);
+        
+        auto sensorValues = processLogInfo->mutable_sensorvalues();
+        sensorValues->set_temp(processLog.temp);
+        sensorValues->set_expansiontemp(processLog.expansionTemp);
+        sensorValues->set_heatertemp(processLog.heaterTemp);
+        sensorValues->set_tanktemp(processLog.tankTemp);
+        sensorValues->set_tempk(processLog.tempK);
+        sensorValues->set_tankwaterlevel(processLog.tankWaterLevel);
+        sensorValues->set_pressure(processLog.pressure);
+        sensorValues->set_steampressure(processLog.steamPressure);
+        sensorValues->set_doorclosed(processLog.doorClosed);
+        sensorValues->set_burnerfault(processLog.burnerFault);
+        sensorValues->set_watershortage(processLog.waterShortage);                
+
         processLogInfo->set_state(processLog.state);
         processLogInfo->set_dr(processLog.Dr);
         processLogInfo->set_fr(processLog.Fr);
@@ -404,9 +415,9 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getSensorPinValues(grpc::ServerCon
         }
     }
 
-    //replay->set_temp(sensorValues.temp);
-    //replay->set_tempk(sensorValues.tempK);
-    //replay->set_pressure(sensorValues.pressure);
+    replay->set_temp(sensorValues.temp);
+    replay->set_tempk(sensorValues.tempK);
+    replay->set_pressure(sensorValues.pressure);
 
     return Status::OK;
 }
@@ -450,19 +461,22 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getStateMachineValues(grpc::Server
     Q_UNUSED(context);
     Q_UNUSED(request);
 
-    const auto stateMachineValues = StateMachine::instance().calculateDrFrRValuesFromSensorsOnTheFly();
-
+    const auto stateMachineValues = StateMachine::instance().getStateMachineValuesOnTheFly();
+     
     replay->set_elapsedtime(stateMachineValues.time);
-    
-    replay->set_temp(stateMachineValues.temp);
-    replay->set_tempk(stateMachineValues.tempK);
-    replay->set_pressure(stateMachineValues.pressure);
-    replay->set_steampressure(stateMachineValues.steamPressure);
-    replay->set_waterlevel(stateMachineValues.tankWaterLevel);
-    
-    replay->set_doorclosed(stateMachineValues.doorClosed);    
-    replay->set_burnerfault(stateMachineValues.burnerFault);
-    replay->set_watershortage(stateMachineValues.waterShortage);
+
+    auto sensorValues = replay->mutable_sensorvalues();
+    sensorValues->set_temp(stateMachineValues.temp);
+    sensorValues->set_expansiontemp(stateMachineValues.expansionTemp);
+    sensorValues->set_heatertemp(stateMachineValues.heaterTemp);
+    sensorValues->set_tanktemp(stateMachineValues.tankTemp);
+    sensorValues->set_tempk(stateMachineValues.tempK);
+    sensorValues->set_tankwaterlevel(stateMachineValues.tankWaterLevel);
+    sensorValues->set_pressure(stateMachineValues.pressure);
+    sensorValues->set_steampressure(stateMachineValues.steamPressure);
+    sensorValues->set_doorclosed(stateMachineValues.doorClosed);
+    sensorValues->set_burnerfault(stateMachineValues.burnerFault);
+    sensorValues->set_watershortage(stateMachineValues.waterShortage);
 
     replay->set_dtemp(stateMachineValues.dTemp);
     replay->set_state(stateMachineValues.state);

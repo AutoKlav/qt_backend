@@ -50,7 +50,7 @@ public:
 
     StateMachineValues calculateStateMachineValues();
     StateMachineValues calculateDrFrRValuesFromSensors(int processId);
-    StateMachineValues calculateDrFrRValuesFromSensorsOnTheFly();
+    StateMachineValues getStateMachineValuesOnTheFly();
     
     static StateMachine &instance();
 
