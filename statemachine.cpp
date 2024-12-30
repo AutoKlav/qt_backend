@@ -47,10 +47,17 @@ bool StateMachine::stop()
         return false;
 
     Sensor::mapName[CONSTANTS::FILL_TANK_WITH_WATER]->send(0);
-    Sensor::mapName[CONSTANTS::PUMP]->send(0);
     Sensor::mapName[CONSTANTS::COOLING]->send(0);
-
-    // TODO shut down all sensors
+    Sensor::mapName[CONSTANTS::TANK_HEATING]->send(0);
+    Sensor::mapName[CONSTANTS::COOLING_HELPER]->send(0);
+    Sensor::mapName[CONSTANTS::AUTOKLAV_FILL]->send(0);
+    Sensor::mapName[CONSTANTS::WATER_DRAIN]->send(0);
+    Sensor::mapName[CONSTANTS::HEATING]->send(0);
+    Sensor::mapName[CONSTANTS::PUMP]->send(0);
+    Sensor::mapName[CONSTANTS::ELECTRIC_HEATING]->send(0);
+    Sensor::mapName[CONSTANTS::INCREASE_PRESSURE]->send(0);
+    Sensor::mapName[CONSTANTS::EXTENSION_COOLING]->send(0);
+    Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(0);
 
     state = State::READY;
     values = StateMachineValues();
