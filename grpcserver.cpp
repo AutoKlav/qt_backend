@@ -482,6 +482,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getStateMachineValues(grpc::Server
     sensorValues->set_tankwaterlevel(stateMachineValues.tankWaterLevel);
     sensorValues->set_pressure(stateMachineValues.pressure);
     sensorValues->set_steampressure(stateMachineValues.steamPressure);
+
     sensorValues->set_doorclosed(stateMachineValues.doorClosed);
     sensorValues->set_burnerfault(stateMachineValues.burnerFault);
     sensorValues->set_watershortage(stateMachineValues.waterShortage);
