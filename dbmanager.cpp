@@ -59,7 +59,16 @@ void DbManager::loadGlobals()
     else {
         Logger::crit(GlobalErrors::DB_GLOBAL_STATE_MACHINE_TICK_LOAD_FAILED);
         GlobalErrors::setError(GlobalErrors::DbStateMachineTickError);
-    }    
+    }
+
+    QString k = loadGlobal("k");
+    if (!stateMachineTickStr.isEmpty()) {
+        Globals::k = k.toDouble();
+    }
+    else {
+        Logger::crit(GlobalErrors::DB_GLOBAL_K_LOAD_FAILED);
+        GlobalErrors::setError(GlobalErrors::DbKError);
+    }
 }
 
 bool DbManager::updateGlobal(QString name, QString value)

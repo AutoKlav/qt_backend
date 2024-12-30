@@ -131,6 +131,8 @@ Status GRpcServer::Impl::AutoklavServiceImpl::setVariable(grpc::ServerContext *c
         succ = Globals::setSerialDataTime(value.toInt());
     } else if (name == "stateMachineTick") {
         succ = Globals::setStateMachineTick(value.toInt());
+    } else if (name == "k"){
+        succ = Globals::setK(value.toDouble());
     }
 
     setStatusReply(replay, !succ);

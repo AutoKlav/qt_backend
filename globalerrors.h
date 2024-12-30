@@ -10,9 +10,10 @@ public:
         DbError =           0x1,
         DbSerialDataTimeError = 0x4,
         DbStateMachineTickError = 0x8,
-        SerialError =       0x10,
-        OldDataError =      0x20,
-        SerialSendError =   0x100,        
+        DbKError = 0x10,
+        SerialError =       0x20,
+        OldDataError =      0x100,
+        SerialSendError =  0x200        
     };
     Q_DECLARE_FLAGS(Errors, Error);
 
@@ -20,6 +21,7 @@ public:
     static const QString DB_ERROR;
     static const QString DB_GLOBAL_SERIAL_DATA_TIME_LOAD_FAILED;
     static const QString DB_GLOBAL_STATE_MACHINE_TICK_LOAD_FAILED;
+    static const QString DB_GLOBAL_K_LOAD_FAILED;
     
     // Serial errors
     static const QString SERIAL_ERROR;
