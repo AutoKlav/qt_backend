@@ -204,15 +204,13 @@ void StateMachine::autoklavTickControl()
         if (values.time > 3000) // After 3 min
             Sensor::mapName[CONSTANTS::PUMP]->send(1); // Turn on pump
 
-        // TODO Turn off autoklav_fill based on tankWaterLevel, pressure
-        Sensor::mapName[CONSTANTS::AUTOKLAV_FILL]->send(0); // Turn off autoklav water fill
-        Sensor::mapName[CONSTANTS::INCREASE_PRESSURE]->send(1); // Turn on pressure increase
 
-        state = State::PRESSURING;
-        Logger::info("StateMachine: Pressuing");
-        break;
+        // TODO Expand if below
+        if(values.pressure < 0.5 && values.tankWaterLevel == 0.5){
+            Sensor::mapName[CONSTANTS::AUTOKLAV_FILL]->send(0); // Turn off autoklav water fill
+            Sensor::mapName[CONSTANTS::INCREASE_PRESSURE]->send(1); // Turn on pressure increase
+        }
 
-    case State::PRESSURING:
         if (values.pressure < 1.0) // Wait till autoklav pressure is 1bar
             break;
 
@@ -234,13 +232,6 @@ void StateMachine::autoklavTickControl()
             Sensor::mapName[CONSTANTS::HEATING]->send(1); // Turn on heating
         }
 
-        // should not be used
-        //if (values.pressure > processConfig.maintainPressure + 0.05) {
-        //   Sensor::mapName[CONSTANTS::INCREASE_PRESSURE]->send(0); // Turn off 2 bar pressure
-        //} else if (values.pressure < processConfig.maintainPressure - 0.05) {
-        //    Sensor::mapName[CONSTANTS::INCREASE_PRESSURE]->send(1); // Turn on 2 bar pressure
-        //}
-
         if (processConfig.mode == Mode::TARGETF) {
             if (values.sumFr < processInfo.targetF.toDouble())
                 break;
@@ -249,26 +240,47 @@ void StateMachine::autoklavTickControl()
             // TODO: Calcualte time of heating, not whole proccess time
         }
 
+        // process.heatingTime = datetime.now() - heatingStarted;
+
+        // tank container A3, should be mantained at 95
+
+        // 4.2
         Sensor::mapName[CONSTANTS::HEATING]->send(0);        // Turn off heating
         Sensor::mapName[CONSTANTS::COOLING]->send(1);        // Turn on main cooling
         Sensor::mapName[CONSTANTS::COOLING_HELPER]->send(1); // Turn on help cooling
+        // wait 2sec,
 
-        //6. postizanje F ili vrijeme, UKLJUCITI DO 23 I DO27 ZECE 2I4 TE nakon
+        Sensor::mapName[CONSTANTS::AUTOKLAV_FILL]->send(1);
 
-        // 2sec ukljuciti do21, fillTankWithWater, nakon dopune na 40% ukljuciti DO 25 tankHeating,
-        // odrzavati AI tankTemp na 95,
+        Sensor::mapName[CONSTANTS::TANK_HEATING]->send(1);
 
-        // na 85% iskljuciti 21, fillTankWithWater
+        // TODO change this value
+        if(values.tankWaterLevel < 2)
+            break;
 
-        // process.heatingTime = datetime.now() - heatingStarted;
+        // 4.2
+        // finishTemp = 95
+
+        // mantain tank temperature
+        if(values.tankTemp < 95){
+            Sensor::mapName[CONSTANTS::TANK_HEATING]->send(1);
+        }
+        else if(values.tankTemp > 95){
+            Sensor::mapName[CONSTANTS::TANK_HEATING]->send(0);
+        }
+
+        // 80%
+        if(values.tankWaterLevel < 3){
+            break;
+        }
+
+        Sensor::mapName[CONSTANTS::FILL_TANK_WITH_WATER]->send(0);
 
         state = State::COOLING;
         Logger::info("StateMachine: Cooling");
         break;
 
     case State::COOLING:
-
-        // tank container A3, should be mantained at 95
 
         if (values.tempK > processConfig.finishTemp)
             break;
