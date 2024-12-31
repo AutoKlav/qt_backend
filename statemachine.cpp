@@ -20,8 +20,8 @@ StateMachine::StateMachine(QObject *parent)
     // Connect tank timer
     connect(tankTimer, &QTimer::timeout, this, &StateMachine::tankTickControl);
 
-    // Start tank timer to tick every 10 seconds TODO replace with global
-    //QMetaObject::invokeMethod(tankTimer, "start", Qt::AutoConnection, Q_ARG(int, 10000)); // 10 seconds
+    // Start tank timer to tick every 10 seconds TODO replace with global TODO fix this, when enabled it overflows serial communication
+    //QMetaObject::invokeMethod(tankTimer, "start", Qt::AutoConnection, Q_ARG(int, 1000)); // 10 seconds
     //tankTickControl();
 }
 
