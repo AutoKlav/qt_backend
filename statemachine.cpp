@@ -8,10 +8,44 @@
 
 // Constructor
 StateMachine::StateMachine(QObject *parent)
-    : QObject(parent), state(READY), timer(nullptr), process(nullptr), processLog(nullptr)
+    : QObject(parent), state(READY), autoklavTimer(nullptr), tankTimer(nullptr), process(nullptr), processLog(nullptr)
 {
-    timer = new QTimer(this); // Explicitly initialize timer
-    connect(timer, &QTimer::timeout, this, &StateMachine::autoklavTickControl); // Ensure tick is connected
+    // Initialize timers
+    autoklavTimer = new QTimer(this);
+    tankTimer = new QTimer(this);
+
+    // Connect autoklav timer
+    connect(autoklavTimer, &QTimer::timeout, this, &StateMachine::autoklavTickControl);
+
+    // Connect tank timer
+    connect(tankTimer, &QTimer::timeout, this, &StateMachine::tankTickControl);
+
+    // Start tank timer to tick every 10 seconds TODO replace with global TODO fix this, when enabled it overflows serial communication
+    //QMetaObject::invokeMethod(tankTimer, "start", Qt::AutoConnection, Q_ARG(int, 1000)); // 10 seconds
+    //tankTickControl();
+}
+
+void StateMachine::tankTickControl()
+{
+    // 11. control extension pipe, separate function
+    if(values.expansionTemp > 90){
+        Sensor::mapName[CONSTANTS::EXTENSION_COOLING]->send(0);
+    }
+    else if (values.expansionTemp < 90){
+        Sensor::mapName[CONSTANTS::EXTENSION_COOLING]->send(1);
+    }
+
+    // 12. steam generator control
+    if(values.doorClosed == 1 ||
+        values.burnerFault == 1 ||
+        values.waterShortage == 1 ){
+        Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(1);
+
+        // Use QTimer::singleShot to wait for 5 seconds and then turn off the alarm
+        QTimer::singleShot(5000, this, [this]() {
+            Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(0);
+        });
+    }
 }
 
 // Definition of getState method
@@ -21,8 +55,18 @@ int StateMachine::getState() {
 
 bool StateMachine::start(ProcessConfig processConfig, ProcessInfo processInfo)
 {
-    if (isRunning())
+    if (isRunning()){
+        Logger::info("Autoklav is already running");
         return false;
+    }
+
+    // Fetch first time values and abort start if door is not closed
+    values = calculateStateMachineValues();
+
+    if (!values.doorClosed){
+        Logger::info("Door is not closed");
+        return false;
+    }
 
     this->processConfig = processConfig;
     this->processInfo = processInfo;
@@ -33,10 +77,8 @@ bool StateMachine::start(ProcessConfig processConfig, ProcessInfo processInfo)
     values = StateMachineValues();
 
     // Start the timer with the state machine tick interval
-    QMetaObject::invokeMethod(timer, "start", Qt::AutoConnection, Q_ARG(int, Globals::stateMachineTick));
-    autoklavTickControl();
-    //tankTickControl();
-    //pipeTickControl();
+    QMetaObject::invokeMethod(autoklavTimer, "start", Qt::AutoConnection, Q_ARG(int, Globals::stateMachineTick));
+    autoklavTickControl();    
 
     return true;
 }
@@ -101,7 +143,6 @@ StateMachineValues StateMachine::calculateStateMachineValues()
 
     stateMachineValues.dTemp = processConfig.customTemp - stateMachineValues.tempK;
 
-    // TODO import from globals
     const auto k = Globals::k;
     const auto exp = (Globals::stateMachineTick / 60000.0) / processConfig.z;
 
@@ -149,25 +190,27 @@ void StateMachine::autoklavTickControl()
     case State::STARTING:
         Logger::info("StateMachine: Starting");
 
-        Sensor::mapName[CONSTANTS::AUTOKLAV_FILL]->send(1); // Turn on autoklav water fill
-        Sensor::mapName[CONSTANTS::HEATING]->send(1);    // Start heating        
+        Sensor::mapName[CONSTANTS::AUTOKLAV_FILL]->send(1); // Turn on autoklav water fill        
 
         state = State::FILLING;
         Logger::info("StateMachine: Filling");
         break;
 
     case State::FILLING:
+
+        // TODO What is condition for ending filling
+
+        // TODO Wait 3min after condition
         if (values.time > 3000) // After 3 min
             Sensor::mapName[CONSTANTS::PUMP]->send(1); // Turn on pump
 
-        Sensor::mapName[CONSTANTS::AUTOKLAV_FILL]->send(0); // Turn off autoklav water fill
-        Sensor::mapName[CONSTANTS::INCREASE_PRESSURE]->send(1); // Turn on pressure increase
 
-        state = State::PRESSURING;
-        Logger::info("StateMachine: Pressuing");
-        break;
+        // TODO Expand if below
+        if(values.pressure < 0.5 && values.tankWaterLevel == 0.5){
+            Sensor::mapName[CONSTANTS::AUTOKLAV_FILL]->send(0); // Turn off autoklav water fill
+            Sensor::mapName[CONSTANTS::INCREASE_PRESSURE]->send(1); // Turn on pressure increase
+        }
 
-    case State::PRESSURING:
         if (values.pressure < 1.0) // Wait till autoklav pressure is 1bar
             break;
 
@@ -176,11 +219,6 @@ void StateMachine::autoklavTickControl()
 
         // TODO: Log heating start so we can later save length of heating
         // auto heatingStarted = datetime.now();
-
-        Sensor::mapName[CONSTANTS::FILL_TANK_WITH_WATER]->send(0); // Stop above tank water filling
-        Sensor::mapName[CONSTANTS::COOLING]->send(0);
-        Sensor::mapName[CONSTANTS::PUMP]->send(1);       // Start circulation pump
-        Sensor::mapName[CONSTANTS::INCREASE_PRESSURE]->send(1);       // Start pressure       
 
         state = State::HEATING;
         Logger::info("StateMachine: Heating");
@@ -194,12 +232,6 @@ void StateMachine::autoklavTickControl()
             Sensor::mapName[CONSTANTS::HEATING]->send(1); // Turn on heating
         }
 
-        if (values.pressure > processConfig.maintainPressure + 0.05) {
-            Sensor::mapName[CONSTANTS::INCREASE_PRESSURE]->send(0); // Turn off 2 bar pressure
-        } else if (values.pressure < processConfig.maintainPressure - 0.05) {
-            Sensor::mapName[CONSTANTS::INCREASE_PRESSURE]->send(1); // Turn on 2 bar pressure
-        }
-
         if (processConfig.mode == Mode::TARGETF) {
             if (values.sumFr < processInfo.targetF.toDouble())
                 break;
@@ -208,22 +240,65 @@ void StateMachine::autoklavTickControl()
             // TODO: Calcualte time of heating, not whole proccess time
         }
 
+        // process.heatingTime = datetime.now() - heatingStarted;
+
+        // tank container A3, should be mantained at 95
+
+        // 4.2
         Sensor::mapName[CONSTANTS::HEATING]->send(0);        // Turn off heating
         Sensor::mapName[CONSTANTS::COOLING]->send(1);        // Turn on main cooling
         Sensor::mapName[CONSTANTS::COOLING_HELPER]->send(1); // Turn on help cooling
+        // wait 2sec,
 
-        // process.heatingTime = datetime.now() - heatingStarted;
+        Sensor::mapName[CONSTANTS::AUTOKLAV_FILL]->send(1);
+
+        Sensor::mapName[CONSTANTS::TANK_HEATING]->send(1);
+
+        // TODO change this value
+        if(values.tankWaterLevel < 2)
+            break;
+
+        // 4.2
+        // finishTemp = 95
+
+        // mantain tank temperature
+        if(values.tankTemp < 95){
+            Sensor::mapName[CONSTANTS::TANK_HEATING]->send(1);
+        }
+        else if(values.tankTemp > 95){
+            Sensor::mapName[CONSTANTS::TANK_HEATING]->send(0);
+        }
+
+        // 80%
+        if(values.tankWaterLevel < 3){
+            break;
+        }
+
+        Sensor::mapName[CONSTANTS::FILL_TANK_WITH_WATER]->send(0);
 
         state = State::COOLING;
         Logger::info("StateMachine: Cooling");
         break;
 
     case State::COOLING:
+
         if (values.tempK > processConfig.finishTemp)
             break;
 
         Sensor::mapName[CONSTANTS::COOLING]->send(0);    // Turn off cooling
-        //Sensor::mapName["bypass"]->send(0);
+
+        //10.
+        if(values.temp <= 30 || values.tempK <= 30){
+            Sensor::mapName[CONSTANTS::COOLING_HELPER]->send(0);
+
+            // turn on after 10min
+            Sensor::mapName[CONSTANTS::WATER_DRAIN]->send(1);
+
+            // end sterilization process,
+            Sensor::mapName[CONSTANTS::PUMP]->send(1);
+            // TODO should I turn on water drain
+            Sensor::mapName[CONSTANTS::WATER_DRAIN]->send(1);
+        }
 
         state = State::FINISHING;
         Logger::info("StateMachine: Finishing");
@@ -237,7 +312,7 @@ void StateMachine::autoklavTickControl()
         break;
 
     case State::FINISHED:
-        timer->stop();
+        autoklavTimer->stop();
 
         Logger::info("StateMachine: Ready");
 
