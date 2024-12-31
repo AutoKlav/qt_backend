@@ -32,11 +32,11 @@ public:
 
     struct ProcessConfig {
         Type type;
-        double customTemp;
+        double customTemp; // do we need delta temp
         Mode mode;
         uint64_t targetTime;
         double maintainTemp;
-        double maintainPressure;
+        double maintainPressure; // not used
         double finishTemp;
         double d0, z;
     };
@@ -57,7 +57,8 @@ public:
 private:
     explicit StateMachine(QObject *parent = nullptr);
 
-    QTimer *timer;
+    QTimer *autoklavTimer;
+    QTimer *tankTimer;
     Process *process;
     ProcessLog *processLog;
     State state;
@@ -70,6 +71,7 @@ private:
 
 private slots:
     void autoklavTickControl();
+    void tankTickControl();
 };
 
 #endif // STATEMACHINE_H
