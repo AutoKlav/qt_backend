@@ -60,6 +60,7 @@ bool StateMachine::start(ProcessConfig processConfig, ProcessInfo processInfo)
         return false;
     }
 
+    // Fetch first time values and abort start if door is not closed
     values = calculateStateMachineValues();
 
     if (!values.doorClosed){
