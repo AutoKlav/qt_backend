@@ -8,34 +8,33 @@
 
 // Constructor
 StateMachine::StateMachine(QObject *parent)
-    : QObject(parent), state(READY), autoklavTimer(nullptr), tankTimer(nullptr), process(nullptr), processLog(nullptr)
+    : QObject(parent), state(READY), timer(nullptr), process(nullptr), processLog(nullptr)
 {
-    // Initialize timers
-    autoklavTimer = new QTimer(this);
-    tankTimer = new QTimer(this);
-
-    // Connect autoklav timer
-    connect(autoklavTimer, &QTimer::timeout, this, &StateMachine::autoklavTickControl);
-
-    // Connect tank timer
-    connect(tankTimer, &QTimer::timeout, this, &StateMachine::tankTickControl);
-
-    // Start tank timer to tick every 10 seconds TODO replace with global TODO fix this, when enabled it overflows serial communication
-    //QMetaObject::invokeMethod(tankTimer, "start", Qt::AutoConnection, Q_ARG(int, 1000)); // 10 seconds
-    //tankTickControl();
+    timer = new QTimer(this); // Explicitly initialize timer
+    connect(timer, &QTimer::timeout, this, &StateMachine::tick); // Ensure tick is connected
 }
 
-void StateMachine::tankTickControl()
+
+void StateMachine::tick()
 {
-    // 11. control extension pipe, separate function
-    if(values.expansionTemp > 90){
-        Sensor::mapName[CONSTANTS::EXTENSION_COOLING]->send(0);
-    }
-    else if (values.expansionTemp < 90){
+    mainTick();
+    tankTick();
+    expansionTick();
+}
+
+void StateMachine::expansionTick()
+{
+    // Todo import from globals
+    if(values.expansionTemp >= 95){
         Sensor::mapName[CONSTANTS::EXTENSION_COOLING]->send(1);
     }
+    else {
+        Sensor::mapName[CONSTANTS::EXTENSION_COOLING]->send(0);
+    }
+}
 
-    // 12. steam generator control
+void StateMachine::tankTick()
+{
     if(values.doorClosed == 1 ||
         values.burnerFault == 1 ||
         values.waterShortage == 1 ){
@@ -45,6 +44,17 @@ void StateMachine::tankTickControl()
         QTimer::singleShot(5000, this, [this]() {
             Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(0);
         });
+    }
+
+    if(values.tankWaterLevel > 40){
+        if(values.tankTemp > 96){
+            Sensor::mapName[CONSTANTS::TANK_HEATING]->send(1);
+        } else if(values.tankTemp < 94){
+            Sensor::mapName[CONSTANTS::TANK_HEATING]->send(0);
+        }
+    }
+    else{
+        Sensor::mapName[CONSTANTS::TANK_HEATING]->send(0);
     }
 }
 
@@ -77,8 +87,8 @@ bool StateMachine::start(ProcessConfig processConfig, ProcessInfo processInfo)
     values = StateMachineValues();
 
     // Start the timer with the state machine tick interval
-    QMetaObject::invokeMethod(autoklavTimer, "start", Qt::AutoConnection, Q_ARG(int, Globals::stateMachineTick));
-    autoklavTickControl();    
+    QMetaObject::invokeMethod(timer, "start", Qt::AutoConnection, Q_ARG(int, Globals::stateMachineTick));
+    mainTick();
 
     return true;
 }
@@ -144,11 +154,17 @@ StateMachineValues StateMachine::calculateStateMachineValues()
     stateMachineValues.dTemp = processConfig.customTemp - stateMachineValues.tempK;
 
     const auto k = Globals::k;
-    const auto exp = (Globals::stateMachineTick / 60000.0) / processConfig.z;
+    const auto exp = stateMachineValues.dTemp / processConfig.z;
 
-    stateMachineValues.Dr = k * processConfig.d0 * qPow(10, -1*exp);
-    stateMachineValues.Fr = qPow(10, exp) / (k * processConfig.d0) ;
-    stateMachineValues.r = qPow(10, exp) / processConfig.d0;
+    // Old autoklav
+    //stateMachineValues.Dr = qPow(10, 0.1 * stateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
+    //stateMachineValues.Fr = qPow(10, -0.1 * stateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
+    //stateMachineValues.r = 5 * stateMachineValues.Fr;
+
+    // TODO check if correct
+    stateMachineValues.Dr = k * processConfig.d0 * qPow(10, -1*exp) * (Globals::stateMachineTick / 60000.0);
+    stateMachineValues.Fr = (qPow(10, exp) * (Globals::stateMachineTick / 60000.0)) / (k * processConfig.d0);
+    stateMachineValues.r = (qPow(10, exp) * (Globals::stateMachineTick / 60000.0)) / processConfig.d0 ;
 
     stateMachineValues.state = state;
 
@@ -175,7 +191,7 @@ StateMachineValues StateMachine::calculateDrFrRValuesFromSensors(int processId)
     return stateMachineValues;
 }
 
-void StateMachine::autoklavTickControl()
+void StateMachine::mainTick()
 {    
     if (isRunning()) {
         values = calculateDrFrRValuesFromSensors(process->getId());
@@ -198,8 +214,7 @@ void StateMachine::autoklavTickControl()
 
     case State::FILLING:
 
-        // TODO What is condition for ending filling
-
+        // 2.1
         // TODO Wait 3min after condition
         if (values.time > 3000) // After 3 min
             Sensor::mapName[CONSTANTS::PUMP]->send(1); // Turn on pump
@@ -312,7 +327,7 @@ void StateMachine::autoklavTickControl()
         break;
 
     case State::FINISHED:
-        autoklavTimer->stop();
+        timer->stop();
 
         Logger::info("StateMachine: Ready");
 
