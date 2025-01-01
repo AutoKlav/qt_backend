@@ -29,10 +29,10 @@ void StateMachine::tankTickControl()
 {
     // 11. control extension pipe, separate function
     if(values.expansionTemp > 90){
-        Sensor::mapName[CONSTANTS::EXTENSION_COOLING]->send(0);
+        Sensor::mapName[CONSTANTS::EXTENSION_COOLING]->send(1);
     }
     else if (values.expansionTemp < 90){
-        Sensor::mapName[CONSTANTS::EXTENSION_COOLING]->send(1);
+        Sensor::mapName[CONSTANTS::EXTENSION_COOLING]->send(0);
     }
 
     // 12. steam generator control
@@ -198,8 +198,7 @@ void StateMachine::autoklavTickControl()
 
     case State::FILLING:
 
-        // TODO What is condition for ending filling
-
+        // 2.1
         // TODO Wait 3min after condition
         if (values.time > 3000) // After 3 min
             Sensor::mapName[CONSTANTS::PUMP]->send(1); // Turn on pump
