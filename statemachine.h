@@ -57,8 +57,7 @@ public:
 private:
     explicit StateMachine(QObject *parent = nullptr);
 
-    QTimer *autoklavTimer;
-    QTimer *tankTimer;
+    QTimer *timer;
     Process *process;
     ProcessLog *processLog;
     State state;
@@ -70,8 +69,10 @@ private:
     quint64 id;
 
 private slots:
-    void autoklavTickControl();
-    void tankTickControl();
+    void mainTick();
+    void tankTick();
+    void tick();
+    void expansionTick();
 };
 
 #endif // STATEMACHINE_H
