@@ -69,6 +69,24 @@ void DbManager::loadGlobals()
         Logger::crit(GlobalErrors::DB_GLOBAL_K_LOAD_FAILED);
         GlobalErrors::setError(GlobalErrors::DbKError);
     }
+
+    QString coolingThreshold = loadGlobal("coolingThreshold");
+    if (!stateMachineTickStr.isEmpty()) {
+        Globals::coolingThreshold = coolingThreshold.toDouble();
+    }
+    else {
+        Logger::crit(GlobalErrors::DB_GLOBAL_COOLING_THRESHOLD_LOAD_FAILED);
+        GlobalErrors::setError(GlobalErrors::DbCoolingThresholdError);
+    }
+
+    QString expansionTemp = loadGlobal("expansionTemp");
+    if (!stateMachineTickStr.isEmpty()) {
+        Globals::expansionTemp = expansionTemp.toDouble();
+    }
+    else {
+        Logger::crit(GlobalErrors::DB_GLOBAL_EXPANSION_TEMP_LOAD_FAILED);
+        GlobalErrors::setError(GlobalErrors::DbExpansionTempError);
+    }
 }
 
 bool DbManager::updateGlobal(QString name, QString value)
@@ -129,7 +147,7 @@ bool DbManager::updateSensor(QString name, double newMinValue, double newMaxValu
 
 QList<ProcessRow> DbManager::getAllProcessesOrderedDesc()
 {
-    QSqlQuery query("SELECT process.id as id, process.batchLTO, process.productName, process.productQuantity, processStart, targetF, processLength, Bacteria.id as bacteriaId, Bacteria.name as bacteriaName, Bacteria.description as bacteriaDescription, d0, z FROM Process LEFT JOIN Bacteria ON Process.bacteriaId = Bacteria.id ORDER BY Process.processStart DESC", m_db);
+    QSqlQuery query("SELECT process.id as id, process.batchLTO, process.productName, process.productQuantity, processStart, targetF, processLength, Bacteria.id as bacteriaId, Bacteria.name as bacteriaName, Bacteria.description as bacteriaDescription, d0, z, targetHeatingTime, targetCoolingTime FROM Process LEFT JOIN Bacteria ON Process.bacteriaId = Bacteria.id ORDER BY Process.processStart DESC", m_db);
     QList<ProcessRow> processes;
     while (query.next()) {
         auto id = query.value(0).toInt();
@@ -143,7 +161,9 @@ QList<ProcessRow> DbManager::getAllProcessesOrderedDesc()
         auto bacteriaName = query.value(8).toString();
         auto bacteriaDescription = query.value(9).toString();
         auto d0 = query.value(10).toDouble();
-        auto z = query.value(11).toDouble();        
+        auto z = query.value(11).toDouble();
+        auto targetHeatingTime = query.value(12).toString();
+        auto targetCoolingTime = query.value(13).toString();
 
         const Bacteria bacteria = {
             .id = bacteriaId,
@@ -162,6 +182,8 @@ QList<ProcessRow> DbManager::getAllProcessesOrderedDesc()
         info.targetF = targetF;
         info.processLength = processLength;
         info.bacteria = bacteria;
+        info.targetHeatingTime = targetHeatingTime;
+        info.targetCoolingTime = targetCoolingTime;
 
         processes.append(info);
     }
@@ -188,23 +210,39 @@ QList<ProcessLogInfoRow> DbManager::getAllProcessLogs(int processId)
     while (query.next()) {
         auto id = query.value(0).toInt();
         auto temp = query.value(1).toDouble();
-        auto tempK = query.value(2).toDouble();
-        auto dTemp = query.value(3).toDouble();
-        auto pressure = query.value(4).toDouble();
-        auto state = query.value(5).toInt();
-        auto Dr = query.value(6).toDouble();
-        auto Fr = query.value(7).toDouble();
-        auto r = query.value(8).toDouble();
-        auto sumFr = query.value(9).toDouble();
-        auto sumr = query.value(10).toDouble();
-        auto timestamp = query.value(11).toString();
+        auto expansionTemp = query.value(2).toDouble();
+        auto heaterTemp = query.value(3).toDouble();
+        auto tankTemp = query.value(4).toDouble();
+        auto tempK = query.value(5).toDouble();
+        auto tankWaterLevel = query.value(6).toDouble();
+        auto pressure = query.value(7).toDouble();
+        auto steamPressure = query.value(8).toDouble();
+        auto doorClosed = query.value(9).toDouble();
+        auto burnerFault = query.value(10).toDouble();
+        auto waterShortage = query.value(11).toDouble();
+        auto dTemp = query.value(12).toDouble();
+        auto state = query.value(13).toInt();
+        auto Dr = query.value(14).toDouble();
+        auto Fr = query.value(15).toDouble();
+        auto r = query.value(16).toDouble();
+        auto sumFr = query.value(17).toDouble();
+        auto sumr = query.value(18).toDouble();
+        auto timestamp = query.value(19).toString();
 
         ProcessLogInfoRow log;
         log.processId = id;
         log.temp = temp;
+        log.expansionTemp = expansionTemp;
+        log.heaterTemp = heaterTemp;
+        log.tankTemp = tankTemp;
         log.tempK = tempK;
-        log.dTemp = dTemp;
+        log.tankWaterLevel = tankWaterLevel;
         log.pressure = pressure;
+        log.steamPressure = steamPressure;
+        log.doorClosed = doorClosed;
+        log.burnerFault = burnerFault;
+        log.waterShortage = waterShortage;
+        log.dTemp = dTemp;
         log.state = state;
         log.Dr = Dr;
         log.Fr = Fr;
@@ -222,15 +260,17 @@ QList<ProcessLogInfoRow> DbManager::getAllProcessLogs(int processId)
 int DbManager::createProcess(QString name, ProcessInfo info)
 {    
     QSqlQuery query(m_db);
-    query.prepare("INSERT INTO Process (bacteriaId, name, batchLTO, productName, productQuantity, processStart, targetF, processLength) "
-                  "VALUES (:bacteriaId, :name, :batchLTO, :productName, :productQuantity, :processStart, :targetF, :processLength)");
+    query.prepare("INSERT INTO Process (bacteriaId, name, batchLTO, productName, productQuantity, processStart, targetF, targetHeatingTime, targetCoolingTime, processLength) "
+                  "VALUES (:bacteriaId, :name, :batchLTO, :productName, :productQuantity, :processStart, :targetF, :targetHeatingTime, :targetCoolingTime, :processLength)");
     query.bindValue(":bacteriaId", info.bacteria.id);
     query.bindValue(":name", name);
     query.bindValue(":batchLTO", info.batchLTO);
     query.bindValue(":productName", info.productName);
     query.bindValue(":productQuantity", info.productQuantity);
     query.bindValue(":processStart", info.processStart);
-    query.bindValue(":targetF", info.targetF);
+    query.bindValue(":targetF", info.targetF);    
+    query.bindValue(":targetHeatingTime", info.targetHeatingTime);
+    query.bindValue(":targetCoolingTime", info.targetCoolingTime);
     query.bindValue(":processLength", info.processLength);
 
     if (!query.exec()) {
@@ -347,13 +387,12 @@ QMap<QString, QList<QString>> DbManager::getFilteredTargetFAndProcessLengthValue
 int DbManager::createProcessType(ProcessType processType)
 {
     QSqlQuery query(m_db);
-    query.prepare("INSERT INTO ProcessType (name, type, customTemp, finishTemp, maintainPressure, maintainTemp) "
-                  "VALUES (:name, :type, :customTemp, :finishTemp, :maintainPressure, :maintainTemp)");
+    query.prepare("INSERT INTO ProcessType (name, type, customTemp, finishTemp, maintainTemp) "
+                  "VALUES (:name, :type, :customTemp, :finishTemp, :maintainTemp)");
     query.bindValue(":name", processType.name);
     query.bindValue(":type", processType.type);
     query.bindValue(":customTemp", processType.customTemp);
-    query.bindValue(":finishTemp", processType.finishTemp);
-    query.bindValue(":maintainPressure", processType.maintainPressure);
+    query.bindValue(":finishTemp", processType.finishTemp);    
     query.bindValue(":maintainTemp", processType.maintainTemp);
 
     if (!query.exec()) {
@@ -428,13 +467,25 @@ int DbManager::createProcessLog(int processId)
     auto values = stateMachine.getValues();
 
     QSqlQuery query(m_db);
-    query.prepare("INSERT INTO ProcessLog (processId, temp, tempK, dTemp, pressure, state, Dr, Fr, r, sumFr, sumr, timestamp) "
-                  "VALUES (:processId, :temp, :tempK, :dTemp, :pressure, :state, :Dr, :Fr, :r, :sumFr, :sumr, :timestamp)");
+    query.prepare(
+        "INSERT INTO ProcessLog (processId, temp, expansionTemp, heaterTemp, tankTemp, tempK, tankWaterLevel, pressure, steamPressure, "
+        "doorClosed, burnerFault, waterShortage, dTemp, state, Dr, Fr, r, sumFr, sumr, timestamp) "
+        "VALUES (:processId, :temp, :expansionTemp, :heaterTemp, :tankTemp, :tempK, :tankWaterLevel, :pressure, :steamPressure, "
+        ":doorClosed, :burnerFault, :waterShortage, :dTemp, :state, :Dr, :Fr, :r, :sumFr, :sumr, :timestamp)");
+
     query.bindValue(":processId", processId);
     query.bindValue(":temp", values.temp);
+    query.bindValue(":expansionTemp", values.expansionTemp);
+    query.bindValue(":heaterTemp", values.heaterTemp);
+    query.bindValue(":tankTemp", values.tankTemp);
     query.bindValue(":tempK", values.tempK);
-    query.bindValue(":dTemp", values.dTemp);
+    query.bindValue(":tankWaterLevel", values.tankWaterLevel);
     query.bindValue(":pressure", values.pressure);
+    query.bindValue(":steamPressure", values.steamPressure);
+    query.bindValue(":doorClosed", values.doorClosed);
+    query.bindValue(":burnerFault", values.burnerFault);
+    query.bindValue(":waterShortage", values.waterShortage);
+    query.bindValue(":dTemp", values.dTemp);
     query.bindValue(":state", currentState);
     query.bindValue(":Dr", values.Dr);
     query.bindValue(":Fr", values.Fr);
@@ -442,6 +493,7 @@ int DbManager::createProcessLog(int processId)
     query.bindValue(":sumFr", values.sumFr);
     query.bindValue(":sumr", values.sumr);
     query.bindValue(":timestamp", QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"));
+
 
     if (!query.exec()) {
         Logger::crit(QString("Database: Unable to create process log"));
@@ -473,10 +525,9 @@ QList<ProcessType> DbManager::getProcessTypes()
         auto type = query.value(2).toString();
         auto customTemp = query.value(3).toDouble();
         auto finishTemp = query.value(4).toDouble();
-        auto maintainPressure = query.value(5).toDouble();
         auto maintainTemp = query.value(6).toDouble();
 
-        types.append({id, name, type, customTemp, finishTemp, maintainPressure, maintainTemp});
+        types.append({id, name, type, customTemp, finishTemp, maintainTemp});
     }
 
     return types;

@@ -133,6 +133,10 @@ Status GRpcServer::Impl::AutoklavServiceImpl::setVariable(grpc::ServerContext *c
         succ = Globals::setStateMachineTick(value.toInt());
     } else if (name == "k"){
         succ = Globals::setK(value.toDouble());
+    } else if (name == "coolingThreshold"){
+        succ = Globals::setCoolingThreshold(value.toDouble());
+    } else if (name == "expansionTemp"){
+        succ = Globals::setExpansionTemp(value.toDouble());
     }
 
     setStatusReply(replay, !succ);
@@ -163,13 +167,12 @@ Status GRpcServer::Impl::AutoklavServiceImpl::startProcess(grpc::ServerContext *
 {
     Q_UNUSED(context);
 
+    //TODO   add target heating time
     const StateMachine::ProcessConfig processConfig = {
         .type = static_cast<StateMachine::Type>(request->processconfig().type()),
         .customTemp = request->processconfig().customtemp(),
-        .mode = static_cast<StateMachine::Mode>(request->processconfig().mode()),
-        .targetTime = request->processconfig().targettime(),
+        .mode = static_cast<StateMachine::Mode>(request->processconfig().mode()),        
         .maintainTemp = request->processconfig().maintaintemp(),
-        .maintainPressure = request->processconfig().maintainpressure(),
         .finishTemp = request->processconfig().finishtemp(),
     };
 
@@ -187,8 +190,10 @@ Status GRpcServer::Impl::AutoklavServiceImpl::startProcess(grpc::ServerContext *
         .productQuantity = QString::fromUtf8(request->processinfo().productquantity()).trimmed(),
         .processStart = QString::fromUtf8(request->processinfo().processstart()),
         .processLength = QString::fromUtf8(request->processinfo().processlength()),
-        .targetF = QString::fromUtf8(request->processinfo().targetf()),
-        .bacteria = bacteria,
+        .targetHeatingTime = QString::fromUtf8(request->processinfo().targetheatingtime()),
+        .targetCoolingTime = QString::fromUtf8(request->processinfo().targetcoolingtime()),
+        .targetF = QString::fromUtf8(request->processinfo().targetf()),        
+        .bacteria = bacteria,        
     };
 
     bool succ = StateMachine::instance().start(processConfig, processInfo);
@@ -206,7 +211,6 @@ Status GRpcServer::Impl::AutoklavServiceImpl::createProcessType(grpc::ServerCont
         .type = QString::fromStdString(request->type()),
         .customTemp = request->customtemp(),
         .finishTemp = request->finishtemp(),
-        .maintainPressure = request->maintainpressure(),
         .maintainTemp = request->maintaintemp()
     };
 
@@ -350,7 +354,6 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getAllProcessTypes(grpc::ServerCon
         processTypeInfo->set_type(processType.type.toStdString());
         processTypeInfo->set_customtemp(processType.customTemp);
         processTypeInfo->set_finishtemp(processType.finishTemp);
-        processTypeInfo->set_maintainpressure(processType.maintainPressure);
         processTypeInfo->set_maintaintemp(processType.maintainTemp);
     }
 

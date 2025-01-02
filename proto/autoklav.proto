@@ -50,8 +50,7 @@ message ProcessTypeRequest {
     string type = 2;
     double customTemp = 3;
     double finishTemp = 4;
-    double maintainPressure = 5;
-    double maintainTemp = 6;
+    double maintainTemp = 5;
 }
 
 message ProcessType {
@@ -60,8 +59,7 @@ message ProcessType {
     string type = 3;
     double customTemp = 4;
     double finishTemp = 5;
-    double maintainPressure = 6;
-    double maintainTemp = 7;
+    double maintainTemp = 6;
 }
 
 message ProcessTypesList {
@@ -162,11 +160,9 @@ enum ProcessConfigMode {
 message ProcessConfig {
     ProcessConfigType type = 1;
     double customTemp = 2;
-    ProcessConfigMode mode = 3;    
-    uint64 targetTime = 4;
-    double maintainTemp = 5;
-    double maintainPressure = 6;
-    double finishTemp = 7;    
+    ProcessConfigMode mode = 3;       
+    double maintainTemp = 4;
+    double finishTemp = 5;    
 }
 
 message ProcessInfo {
@@ -177,7 +173,9 @@ message ProcessInfo {
     string productQuantity = 5;
     string processStart = 6;
     string targetF = 7;
-    string processLength = 8;
+    string targetHeatingTime = 8;
+    string targetCoolingTime = 9;
+    string processLength = 10;     
 }
 
 message BacteriaList {

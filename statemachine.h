@@ -32,11 +32,9 @@ public:
 
     struct ProcessConfig {
         Type type;
-        double customTemp; // do we need delta temp
-        Mode mode;
-        uint64_t targetTime;
+        double customTemp;
+        Mode mode;        
         double maintainTemp;
-        double maintainPressure; // not used
         double finishTemp;
         double d0, z;
     };
@@ -62,6 +60,9 @@ private:
     ProcessLog *processLog;
     State state;
     QDateTime processStart;
+    QDateTime heatingStart;
+    QDateTime stopwatch1;
+    uint heatingTime;
     StateMachineValues values;
     ProcessConfig processConfig;
     ProcessInfo processInfo;
@@ -69,10 +70,11 @@ private:
     quint64 id;
 
 private slots:
-    void mainTick();
-    void tankTick();
     void tick();
-    void expansionTick();
+    void autoklavControl();
+    void tankControl();
+    void pipeControl();
+    void verificationControl();
 };
 
 #endif // STATEMACHINE_H
