@@ -263,8 +263,8 @@ void StateMachine::autoklavControl()
         if (processConfig.mode == Mode::TARGETF) {
             if (values.sumFr < processInfo.targetF.toDouble())
                 break;
-        } else if (processConfig.mode == Mode::TIME) {            
-            if (heatingStart.msecsTo(QDateTime::currentDateTime()) < processConfig.targetHeatingTime)
+        } else if (processConfig.mode == Mode::TIME) {
+            if (heatingStart.msecsTo(QDateTime::currentDateTime()) < processInfo.targetHeatingTime.toDouble())
                 break;
         }
 

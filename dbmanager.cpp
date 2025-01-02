@@ -147,7 +147,7 @@ bool DbManager::updateSensor(QString name, double newMinValue, double newMaxValu
 
 QList<ProcessRow> DbManager::getAllProcessesOrderedDesc()
 {
-    QSqlQuery query("SELECT process.id as id, process.batchLTO, process.productName, process.productQuantity, processStart, targetF, processLength, Bacteria.id as bacteriaId, Bacteria.name as bacteriaName, Bacteria.description as bacteriaDescription, d0, z FROM Process LEFT JOIN Bacteria ON Process.bacteriaId = Bacteria.id ORDER BY Process.processStart DESC", m_db);
+    QSqlQuery query("SELECT process.id as id, process.batchLTO, process.productName, process.productQuantity, processStart, targetF, processLength, Bacteria.id as bacteriaId, Bacteria.name as bacteriaName, Bacteria.description as bacteriaDescription, d0, z, targetHeatingTime, targetCoolingTime FROM Process LEFT JOIN Bacteria ON Process.bacteriaId = Bacteria.id ORDER BY Process.processStart DESC", m_db);
     QList<ProcessRow> processes;
     while (query.next()) {
         auto id = query.value(0).toInt();
@@ -161,7 +161,9 @@ QList<ProcessRow> DbManager::getAllProcessesOrderedDesc()
         auto bacteriaName = query.value(8).toString();
         auto bacteriaDescription = query.value(9).toString();
         auto d0 = query.value(10).toDouble();
-        auto z = query.value(11).toDouble();        
+        auto z = query.value(11).toDouble();
+        auto targetHeatingTime = query.value(12).toString();
+        auto targetCoolingTime = query.value(13).toString();
 
         const Bacteria bacteria = {
             .id = bacteriaId,
@@ -180,6 +182,8 @@ QList<ProcessRow> DbManager::getAllProcessesOrderedDesc()
         info.targetF = targetF;
         info.processLength = processLength;
         info.bacteria = bacteria;
+        info.targetHeatingTime = targetHeatingTime;
+        info.targetCoolingTime = targetCoolingTime;
 
         processes.append(info);
     }

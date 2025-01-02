@@ -33,9 +33,7 @@ public:
     struct ProcessConfig {
         Type type;
         double customTemp;
-        Mode mode;
-        uint64_t targetHeatingTime;
-        uint64_t targetCoolingTime;
+        Mode mode;        
         double maintainTemp;
         double finishTemp;
         double d0, z;
