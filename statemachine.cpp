@@ -300,11 +300,20 @@ void StateMachine::autoklavTick()
 
 
         if(values.temp > processConfig.finishTemp && values.tempK > processConfig.finishTemp){
+            stopwatch1 = QDateTime::currentDateTime().addSecs(600); // 10 minutes
             break;
         }
 
         Sensor::mapName[CONSTANTS::COOLING_HELPER]->send(0);
+
+        // sleep(10min)
+        if(QDateTime::currentDateTime() < stopwatch1){
+            Logger::info("Sleep 10min");
+            break;
+        }
+
         Sensor::mapName[CONSTANTS::WATER_DRAIN]->send(1);
+        stopwatch1 = QDateTime::currentDateTime().addSecs(600); // 10 minutes
 
         state = State::FINISHING;
         Logger::info("StateMachine: Finishing");
@@ -313,6 +322,9 @@ void StateMachine::autoklavTick()
     case State::FINISHING:
 
         // sleep(10min)
+        if(QDateTime::currentDateTime() < stopwatch1){
+            break;
+        }
 
         Sensor::mapName[CONSTANTS::WATER_DRAIN]->send(0);
         Sensor::mapName[CONSTANTS::PUMP]->send(0);

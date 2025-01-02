@@ -64,6 +64,7 @@ private:
     State state;
     QDateTime processStart;
     QDateTime heatingStart;
+    QDateTime stopwatch1;
     uint heatingTime;
     StateMachineValues values;
     ProcessConfig processConfig;
