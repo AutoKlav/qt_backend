@@ -59,8 +59,6 @@ public:
 
     // ProcessLog
     QList<ProcessLogInfoRow> getAllProcessLogs(int processId);
-    ProcessLog getProcessLog(int id);
-    ProcessLog getProcessLog(QString name);
     int createProcessLog(int processId);
 
     QStringList getProcessesNames();
