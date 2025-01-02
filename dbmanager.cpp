@@ -445,13 +445,25 @@ int DbManager::createProcessLog(int processId)
     auto values = stateMachine.getValues();
 
     QSqlQuery query(m_db);
-    query.prepare("INSERT INTO ProcessLog (processId, temp, tempK, dTemp, pressure, state, Dr, Fr, r, sumFr, sumr, timestamp) "
-                  "VALUES (:processId, :temp, :tempK, :dTemp, :pressure, :state, :Dr, :Fr, :r, :sumFr, :sumr, :timestamp)");
+    query.prepare(
+        "INSERT INTO ProcessLog (processId, temp, expansionTemp, heaterTemp, tankTemp, tempK, tankWaterLevel, pressure, steamPressure, "
+        "doorClosed, burnerFault, waterShortage, dTemp, state, Dr, Fr, r, sumFr, sumr, timestamp) "
+        "VALUES (:processId, :temp, :expansionTemp, :heaterTemp, :tankTemp, :tempK, :tankWaterLevel, :pressure, :steamPressure, "
+        ":doorClosed, :burnerFault, :waterShortage, :dTemp, :state, :Dr, :Fr, :r, :sumFr, :sumr, :timestamp)");
+
     query.bindValue(":processId", processId);
     query.bindValue(":temp", values.temp);
+    query.bindValue(":expansionTemp", values.expansionTemp);
+    query.bindValue(":heaterTemp", values.heaterTemp);
+    query.bindValue(":tankTemp", values.tankTemp);
     query.bindValue(":tempK", values.tempK);
-    query.bindValue(":dTemp", values.dTemp);
+    query.bindValue(":tankWaterLevel", values.tankWaterLevel);
     query.bindValue(":pressure", values.pressure);
+    query.bindValue(":steamPressure", values.steamPressure);
+    query.bindValue(":doorClosed", values.doorClosed);
+    query.bindValue(":burnerFault", values.burnerFault);
+    query.bindValue(":waterShortage", values.waterShortage);
+    query.bindValue(":dTemp", values.dTemp);
     query.bindValue(":state", currentState);
     query.bindValue(":Dr", values.Dr);
     query.bindValue(":Fr", values.Fr);
@@ -459,6 +471,7 @@ int DbManager::createProcessLog(int processId)
     query.bindValue(":sumFr", values.sumFr);
     query.bindValue(":sumr", values.sumr);
     query.bindValue(":timestamp", QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"));
+
 
     if (!query.exec()) {
         Logger::crit(QString("Database: Unable to create process log"));
