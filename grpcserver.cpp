@@ -133,6 +133,10 @@ Status GRpcServer::Impl::AutoklavServiceImpl::setVariable(grpc::ServerContext *c
         succ = Globals::setStateMachineTick(value.toInt());
     } else if (name == "k"){
         succ = Globals::setK(value.toDouble());
+    } else if (name == "coolingThreshold"){
+        succ = Globals::setCoolingThreshold(value.toDouble());
+    } else if (name == "expansionTemp"){
+        succ = Globals::setExpansionTemp(value.toDouble());
     }
 
     setStatusReply(replay, !succ);

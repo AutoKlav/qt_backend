@@ -78,6 +78,15 @@ void DbManager::loadGlobals()
         Logger::crit(GlobalErrors::DB_GLOBAL_COOLING_THRESHOLD_LOAD_FAILED);
         GlobalErrors::setError(GlobalErrors::DbCoolingThresholdError);
     }
+
+    QString expansionTemp = loadGlobal("expansionTemp");
+    if (!stateMachineTickStr.isEmpty()) {
+        Globals::expansionTemp = expansionTemp.toDouble();
+    }
+    else {
+        Logger::crit(GlobalErrors::DB_GLOBAL_EXPANSION_TEMP_LOAD_FAILED);
+        GlobalErrors::setError(GlobalErrors::DbExpansionTempError);
+    }
 }
 
 bool DbManager::updateGlobal(QString name, QString value)

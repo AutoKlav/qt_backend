@@ -8,16 +8,21 @@ public:
         int serialDataTime;
         int stateMachineTick;
         double k;
+        double coolingThreshold;
+        double expansionTemp;
     };
 
     inline static int serialDataTime = 0;
     inline static int stateMachineTick = 0;
     inline static double k = 1;
     inline static double coolingThreshold = 50;
+    inline static double expansionTemp = 95;
 
     static bool setSerialDataTime(int value);
     static bool setStateMachineTick(int value);
     static bool setK(double value);
+    static bool setCoolingThreshold(double value);
+    static bool setExpansionTemp(double value);
     
     static Variables getVariables();
 };
