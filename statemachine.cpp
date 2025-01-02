@@ -18,9 +18,9 @@ StateMachine::StateMachine(QObject *parent)
 void StateMachine::tick()
 {
     verificationControl();
-    autoklavControl();
-    tankControl();
-    pipeControl();
+    //autoklavControl();
+    //tankControl();
+    //pipeControl();
 }
 
 void StateMachine::pipeControl()
@@ -289,8 +289,7 @@ void StateMachine::autoklavControl()
 
     case State::COOLING:
 
-        // TODO Import from globals
-        if (values.tempK > 50)
+        if (values.tempK > Globals::coolingThreshold)
             break;
 
         Sensor::mapName[CONSTANTS::COOLING]->send(0);    // Turn off cooling

@@ -50,8 +50,7 @@ message ProcessTypeRequest {
     string type = 2;
     double customTemp = 3;
     double finishTemp = 4;
-    double maintainPressure = 5;
-    double maintainTemp = 6;
+    double maintainTemp = 5;
 }
 
 message ProcessType {
@@ -60,8 +59,7 @@ message ProcessType {
     string type = 3;
     double customTemp = 4;
     double finishTemp = 5;
-    double maintainPressure = 6;
-    double maintainTemp = 7;
+    double maintainTemp = 6;
 }
 
 message ProcessTypesList {
@@ -165,8 +163,7 @@ message ProcessConfig {
     ProcessConfigMode mode = 3;    
     uint64 targetTime = 4;
     double maintainTemp = 5;
-    double maintainPressure = 6;
-    double finishTemp = 7;    
+    double finishTemp = 6;    
 }
 
 message ProcessInfo {

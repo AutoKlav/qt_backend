@@ -11,7 +11,6 @@ struct ProcessType {
     QString type;
     double customTemp;
     double finishTemp;
-    double maintainPressure;
     double maintainTemp;
 };
 

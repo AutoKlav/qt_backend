@@ -170,7 +170,6 @@ Status GRpcServer::Impl::AutoklavServiceImpl::startProcess(grpc::ServerContext *
         .mode = static_cast<StateMachine::Mode>(request->processconfig().mode()),
         .targetTime = request->processconfig().targettime(),
         .maintainTemp = request->processconfig().maintaintemp(),
-        .maintainPressure = request->processconfig().maintainpressure(),
         .finishTemp = request->processconfig().finishtemp(),
     };
 
@@ -207,7 +206,6 @@ Status GRpcServer::Impl::AutoklavServiceImpl::createProcessType(grpc::ServerCont
         .type = QString::fromStdString(request->type()),
         .customTemp = request->customtemp(),
         .finishTemp = request->finishtemp(),
-        .maintainPressure = request->maintainpressure(),
         .maintainTemp = request->maintaintemp()
     };
 
@@ -351,7 +349,6 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getAllProcessTypes(grpc::ServerCon
         processTypeInfo->set_type(processType.type.toStdString());
         processTypeInfo->set_customtemp(processType.customTemp);
         processTypeInfo->set_finishtemp(processType.finishTemp);
-        processTypeInfo->set_maintainpressure(processType.maintainPressure);
         processTypeInfo->set_maintaintemp(processType.maintainTemp);
     }
 

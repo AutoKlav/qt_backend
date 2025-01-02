@@ -4,6 +4,7 @@ CREATE TABLE Globals ( name TEXT NOT NULL UNIQUE, value TEXT NOT NULL );
 INSERT INTO Globals VALUES ( "serialDataTime", "3000" );
 INSERT INTO Globals VALUES ( "stateMachineTick", "60000" );
 INSERT INTO Globals VALUES ( "k", "1" );
+INSERT INTO Globals VALUES ( "coolingThreshold", "50" );
 
 -- Sensor
 create table Sensor
@@ -82,6 +83,7 @@ INSERT INTO Process (id, bacteriaId, name, batchLTO, productName, productQuantit
 
 CREATE INDEX idx_process_start ON Process(processStart);
 
+drop table ProcessType;
 create table ProcessType
 (
     id               INTEGER
@@ -89,14 +91,13 @@ create table ProcessType
     name             TEXT not null,
     type             TEXT,
     customTemp       REAL,
-    finishTemp       REAL,
-    maintainPressure REAL,
+    finishTemp       REAL,    
     maintainTemp     REAL
 );
 
-INSERT INTO ProcessType (id, name, type, customTemp, finishTemp, maintainPressure, maintainTemp) VALUES (0, 'Sterilizacija', 'sterilizacija', 121.1, 121.1, 5, 5);
-INSERT INTO ProcessType (id, name, type, customTemp, finishTemp, maintainPressure, maintainTemp) VALUES (1, 'Pasterizacija', 'pasterizacija', 70, 70, 6, 6);
-INSERT INTO ProcessType (id, name, type, customTemp, finishTemp, maintainPressure, maintainTemp) VALUES (2, 'Prilagođeno', null, null, null, null, null);
+INSERT INTO ProcessType (id, name, type, customTemp, finishTemp, maintainTemp) VALUES (0, 'Sterilizacija', 'sterilizacija', 121.1, 121.1, 5);
+INSERT INTO ProcessType (id, name, type, customTemp, finishTemp, maintainTemp) VALUES (1, 'Pasterizacija', 'pasterizacija', 70, 70, 6);
+INSERT INTO ProcessType (id, name, type, customTemp, finishTemp, maintainTemp) VALUES (2, 'Prilagođeno', null, null, null, null);
 
 -- ProcessLog
 create table ProcessLog

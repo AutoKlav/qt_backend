@@ -69,6 +69,15 @@ void DbManager::loadGlobals()
         Logger::crit(GlobalErrors::DB_GLOBAL_K_LOAD_FAILED);
         GlobalErrors::setError(GlobalErrors::DbKError);
     }
+
+    QString coolingThreshold = loadGlobal("coolingThreshold");
+    if (!stateMachineTickStr.isEmpty()) {
+        Globals::coolingThreshold = coolingThreshold.toDouble();
+    }
+    else {
+        Logger::crit(GlobalErrors::DB_GLOBAL_COOLING_THRESHOLD_LOAD_FAILED);
+        GlobalErrors::setError(GlobalErrors::DbCoolingThresholdError);
+    }
 }
 
 bool DbManager::updateGlobal(QString name, QString value)
@@ -347,13 +356,12 @@ QMap<QString, QList<QString>> DbManager::getFilteredTargetFAndProcessLengthValue
 int DbManager::createProcessType(ProcessType processType)
 {
     QSqlQuery query(m_db);
-    query.prepare("INSERT INTO ProcessType (name, type, customTemp, finishTemp, maintainPressure, maintainTemp) "
-                  "VALUES (:name, :type, :customTemp, :finishTemp, :maintainPressure, :maintainTemp)");
+    query.prepare("INSERT INTO ProcessType (name, type, customTemp, finishTemp, maintainTemp) "
+                  "VALUES (:name, :type, :customTemp, :finishTemp, :maintainTemp)");
     query.bindValue(":name", processType.name);
     query.bindValue(":type", processType.type);
     query.bindValue(":customTemp", processType.customTemp);
-    query.bindValue(":finishTemp", processType.finishTemp);
-    query.bindValue(":maintainPressure", processType.maintainPressure);
+    query.bindValue(":finishTemp", processType.finishTemp);    
     query.bindValue(":maintainTemp", processType.maintainTemp);
 
     if (!query.exec()) {
@@ -473,10 +481,9 @@ QList<ProcessType> DbManager::getProcessTypes()
         auto type = query.value(2).toString();
         auto customTemp = query.value(3).toDouble();
         auto finishTemp = query.value(4).toDouble();
-        auto maintainPressure = query.value(5).toDouble();
         auto maintainTemp = query.value(6).toDouble();
 
-        types.append({id, name, type, customTemp, finishTemp, maintainPressure, maintainTemp});
+        types.append({id, name, type, customTemp, finishTemp, maintainTemp});
     }
 
     return types;

@@ -37,7 +37,6 @@ public:
         uint64_t targetTime;
         uint64_t targetHeatingTime;
         double maintainTemp;
-        double maintainPressure; // not used
         double finishTemp;
         double d0, z;
     };
