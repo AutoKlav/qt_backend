@@ -286,13 +286,17 @@ int DbManager::createProcess(QString name, ProcessInfo info)
 bool DbManager::updateProcess(int id, ProcessInfo info)
 {
     QSqlQuery query(m_db);
-    query.prepare("UPDATE Process SET productName = :productName, productQuantity = :productQuantity "
-                  "processLength = :processLength WHERE id = :id");
+    query.prepare(
+        "UPDATE Process SET productName = :productName, productQuantity = :productQuantity, "
+        "processLength = :processLength, targetHeatingTime = :targetHeatingTime, "
+        "targetCoolingTime = :targetCoolingTime WHERE id = :id"
+        );
     query.bindValue(":id", id);
     query.bindValue(":productName", info.productName);
-    query.bindValue(":productQuantity", info.productQuantity);    
-
+    query.bindValue(":productQuantity", info.productQuantity);
     query.bindValue(":processLength", info.processLength);
+    query.bindValue(":targetHeatingTime", info.targetHeatingTime);
+    query.bindValue(":targetCoolingTime", info.targetCoolingTime);
 
     if (!query.exec()) {
         Logger::crit(QString("Database: Unable to update process log %1").arg(id));

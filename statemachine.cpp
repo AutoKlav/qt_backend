@@ -282,7 +282,10 @@ void StateMachine::autoklavControl()
         if(values.tankWaterLevel < 40)
             Sensor::mapName[CONSTANTS::FILL_TANK_WITH_WATER]->send(1);
 
+        coolingStart = QDateTime::currentDateTime();
+
         state = State::COOLING;
+
         Logger::info("StateMachine: Cooling");
         break;
 
@@ -299,6 +302,7 @@ void StateMachine::autoklavControl()
 
         if(values.temp > processConfig.finishTemp && values.tempK > processConfig.finishTemp){
             stopwatch1 = QDateTime::currentDateTime().addSecs(600); // 10 minutes
+            coolingTime = coolingStart.msecsTo(QDateTime::currentDateTime());
             break;
         }
 
@@ -339,6 +343,8 @@ void StateMachine::autoklavControl()
         if (process) {
             auto processInfo = process->getInfo();
             processInfo.processLength = QString::number(values.time);
+            processInfo.targetCoolingTime = QString::number(coolingTime);
+            processInfo.targetHeatingTime = QString::number(heatingTime);
             process->setInfo(processInfo);
         }
 
