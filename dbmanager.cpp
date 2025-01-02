@@ -286,13 +286,17 @@ int DbManager::createProcess(QString name, ProcessInfo info)
 bool DbManager::updateProcess(int id, ProcessInfo info)
 {
     QSqlQuery query(m_db);
-    query.prepare("UPDATE Process SET productName = :productName, productQuantity = :productQuantity "
-                  "processLength = :processLength WHERE id = :id");
+    query.prepare(
+        "UPDATE Process SET productName = :productName, productQuantity = :productQuantity, "
+        "processLength = :processLength, targetHeatingTime = :targetHeatingTime, "
+        "targetCoolingTime = :targetCoolingTime WHERE id = :id"
+        );
     query.bindValue(":id", id);
     query.bindValue(":productName", info.productName);
-    query.bindValue(":productQuantity", info.productQuantity);    
-
+    query.bindValue(":productQuantity", info.productQuantity);
     query.bindValue(":processLength", info.processLength);
+    query.bindValue(":targetHeatingTime", info.targetHeatingTime);
+    query.bindValue(":targetCoolingTime", info.targetCoolingTime);
 
     if (!query.exec()) {
         Logger::crit(QString("Database: Unable to update process log %1").arg(id));
@@ -310,7 +314,7 @@ QList<QString> DbManager::getDistinctProcessValues(QString columnName)
 
     // Must be checked since any provided literal is true in SQL
     QList<QString> allowedColumns = {"id", "name", "productName", "productQuantity", "bacteria",
-                                 "description", "processStart"};
+                                 "description", "processStart", "targetHeatingTime", "targetCoolingTime" };
     if (!allowedColumns.contains(columnName)) {
         Logger::crit("Invalid column name: " + columnName);
         return QList<QString>();
@@ -344,7 +348,7 @@ QMap<QString, QList<QString>> DbManager::getFilteredTargetFAndProcessLengthValue
     QSqlQuery query(m_db);
 
     // Correct the SQL query with named parameters
-    QString queryStr = "SELECT DISTINCT targetF, processLength FROM Process WHERE productName LIKE :productName AND productQuantity LIKE :productQuantity ORDER BY id DESC";
+    QString queryStr = "SELECT DISTINCT targetF, processLength, targetHeatingTime, targetCoolingTime FROM Process WHERE productName LIKE :productName AND productQuantity LIKE :productQuantity ORDER BY id DESC";
     query.prepare(queryStr);
 
     // Bind the parameters safely with % wildcards for LIKE

@@ -220,7 +220,8 @@ void StateMachine::autoklavControl()
     case State::STARTING:
         Logger::info("StateMachine: Starting");
 
-        Sensor::mapName[CONSTANTS::AUTOKLAV_FILL]->send(1); // Turn on autoklav water fill        
+        Sensor::mapName[CONSTANTS::AUTOKLAV_FILL]->send(1); // Turn on autoklav water fill
+        stopwatch1 = QDateTime::currentDateTime().addSecs(180); // 3 minutes
 
         state = State::FILLING;
         Logger::info("StateMachine: Filling");
@@ -228,9 +229,8 @@ void StateMachine::autoklavControl()
 
     case State::FILLING:
 
-        // 2.1
-        // TODO Wait 3min after condition
-        if (values.time < 3000){
+        if(QDateTime::currentDateTime() < stopwatch1){
+            Logger::info("Wait 10min");
             break;
         }
 
@@ -282,7 +282,10 @@ void StateMachine::autoklavControl()
         if(values.tankWaterLevel < 40)
             Sensor::mapName[CONSTANTS::FILL_TANK_WITH_WATER]->send(1);
 
+        coolingStart = QDateTime::currentDateTime();
+
         state = State::COOLING;
+
         Logger::info("StateMachine: Cooling");
         break;
 
@@ -299,14 +302,14 @@ void StateMachine::autoklavControl()
 
         if(values.temp > processConfig.finishTemp && values.tempK > processConfig.finishTemp){
             stopwatch1 = QDateTime::currentDateTime().addSecs(600); // 10 minutes
+            coolingTime = coolingStart.msecsTo(QDateTime::currentDateTime());
             break;
         }
 
         Sensor::mapName[CONSTANTS::COOLING_HELPER]->send(0);
 
-        // sleep(10min)
         if(QDateTime::currentDateTime() < stopwatch1){
-            Logger::info("Sleep 10min");
+            Logger::info("Wait 10min");
             break;
         }
 
@@ -339,6 +342,8 @@ void StateMachine::autoklavControl()
         if (process) {
             auto processInfo = process->getInfo();
             processInfo.processLength = QString::number(values.time);
+            processInfo.targetCoolingTime = QString::number(coolingTime);
+            processInfo.targetHeatingTime = QString::number(heatingTime);
             process->setInfo(processInfo);
         }
 
