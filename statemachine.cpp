@@ -280,28 +280,8 @@ void StateMachine::autoklavTick()
         Sensor::mapName[CONSTANTS::COOLING]->send(1);        // Turn on main cooling
         Sensor::mapName[CONSTANTS::COOLING_HELPER]->send(1); // Turn on help cooling
 
-        // wait 2sec,
-
         if(values.tankWaterLevel < 40)
             Sensor::mapName[CONSTANTS::FILL_TANK_WITH_WATER]->send(1);
-
-        // 4.2
-        // finishTemp = 95
-
-        // mantain tank temperature
-        if(values.tankTemp < 95){
-            Sensor::mapName[CONSTANTS::TANK_HEATING]->send(1);
-        }
-        else if(values.tankTemp > 95){
-            Sensor::mapName[CONSTANTS::TANK_HEATING]->send(0);
-        }
-
-        // 80%
-        if(values.tankWaterLevel < 3){
-            break;
-        }
-
-        Sensor::mapName[CONSTANTS::FILL_TANK_WITH_WATER]->send(0);
 
         state = State::COOLING;
         Logger::info("StateMachine: Cooling");
@@ -309,30 +289,33 @@ void StateMachine::autoklavTick()
 
     case State::COOLING:
 
-        if (values.tempK > processConfig.finishTemp)
+        // TODO Import from globals
+        if (values.tempK > 50)
             break;
 
         Sensor::mapName[CONSTANTS::COOLING]->send(0);    // Turn off cooling
 
-        //10.
-        if(values.temp <= 30 || values.tempK <= 30){
-            Sensor::mapName[CONSTANTS::COOLING_HELPER]->send(0);
+        if(values.tankWaterLevel < 80)
+            break;
 
-            // turn on after 10min
-            Sensor::mapName[CONSTANTS::WATER_DRAIN]->send(1);
 
-            // end sterilization process,
-            Sensor::mapName[CONSTANTS::PUMP]->send(1);
-            // TODO should I turn on water drain
-            Sensor::mapName[CONSTANTS::WATER_DRAIN]->send(1);
+        if(values.temp > processConfig.finishTemp && values.tempK > processConfig.finishTemp){
+            break;
         }
+
+        Sensor::mapName[CONSTANTS::COOLING_HELPER]->send(0);
+        Sensor::mapName[CONSTANTS::WATER_DRAIN]->send(1);
 
         state = State::FINISHING;
         Logger::info("StateMachine: Finishing");
         break;
 
     case State::FINISHING:
-        Sensor::mapName[CONSTANTS::PUMP]->send(0);   // Stop circulation pump
+
+        // sleep(10min)
+
+        Sensor::mapName[CONSTANTS::WATER_DRAIN]->send(0);
+        Sensor::mapName[CONSTANTS::PUMP]->send(0);
 
         state = State::FINISHED;
         Logger::info("StateMachine: Finished");
