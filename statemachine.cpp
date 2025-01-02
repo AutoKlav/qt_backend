@@ -27,8 +27,7 @@ void StateMachine::pipeControl()
 {
     Logger::info("### Expansion ###");
 
-    // Todo import from globals
-    if(values.expansionTemp >= 95){
+    if(values.expansionTemp >= Globals::expansionTemp){
         Sensor::mapName[CONSTANTS::EXTENSION_COOLING]->send(1);
     }
     else {

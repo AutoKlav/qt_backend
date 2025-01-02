@@ -32,10 +32,10 @@ public:
 
     struct ProcessConfig {
         Type type;
-        double customTemp; // do we need delta temp
+        double customTemp;
         Mode mode;
-        uint64_t targetTime;
         uint64_t targetHeatingTime;
+        uint64_t targetCoolingTime;
         double maintainTemp;
         double finishTemp;
         double d0, z;

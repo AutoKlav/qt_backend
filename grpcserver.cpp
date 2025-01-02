@@ -172,7 +172,8 @@ Status GRpcServer::Impl::AutoklavServiceImpl::startProcess(grpc::ServerContext *
         .type = static_cast<StateMachine::Type>(request->processconfig().type()),
         .customTemp = request->processconfig().customtemp(),
         .mode = static_cast<StateMachine::Mode>(request->processconfig().mode()),
-        .targetTime = request->processconfig().targettime(),
+        .targetHeatingTime = request->processconfig().targetheatingtime(),
+        .targetCoolingTime = request->processconfig().targetcoolingtime(),
         .maintainTemp = request->processconfig().maintaintemp(),
         .finishTemp = request->processconfig().finishtemp(),
     };

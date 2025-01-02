@@ -161,9 +161,10 @@ message ProcessConfig {
     ProcessConfigType type = 1;
     double customTemp = 2;
     ProcessConfigMode mode = 3;    
-    uint64 targetTime = 4;
-    double maintainTemp = 5;
-    double finishTemp = 6;    
+    uint64 targetHeatingTime = 4;
+    uint64 targetCoolingTime = 5;
+    double maintainTemp = 6;
+    double finishTemp = 7;    
 }
 
 message ProcessInfo {
