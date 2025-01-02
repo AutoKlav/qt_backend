@@ -77,10 +77,12 @@ create table Process
     productQuantity TEXT,    
     processStart    DATETIME,
     targetF         TEXT,
+    targetHeatingTime TEXT,
+    targetCoolingTime TEXT,
     processLength   TEXT
 );
 
-INSERT INTO Process (id, bacteriaId, name, batchLTO, productName, productQuantity, processStart, processLength, targetF) VALUES (55,1, '2024-11-28T17:28:53', 'LTO324325345', 'Testni podaci', 'sint aliqua do laborum', '2024-11-28T17:28:53', '56363634654', null);
+INSERT INTO Process (id, bacteriaId, name, batchLTO, productName, productQuantity, processStart, processLength, targetF, targetCoolingTime, targetHeatingTime) VALUES (55,1, '2024-11-28T17:28:53', 'LTO324325345', 'Testni podaci', 'sint aliqua do laborum', '2024-11-28T17:28:53', '56363634654', null, null, null);
 
 CREATE INDEX idx_process_start ON Process(processStart);
 
