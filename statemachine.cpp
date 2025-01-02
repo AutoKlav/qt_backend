@@ -17,13 +17,16 @@ StateMachine::StateMachine(QObject *parent)
 
 void StateMachine::tick()
 {
-    mainTick();
+    verificationTick();
+    autoklavTick();
     tankTick();
     expansionTick();
 }
 
 void StateMachine::expansionTick()
 {
+    Logger::info("###Expansion Tick###");
+
     // Todo import from globals
     if(values.expansionTemp >= 95){
         Sensor::mapName[CONSTANTS::EXTENSION_COOLING]->send(1);
@@ -33,8 +36,10 @@ void StateMachine::expansionTick()
     }
 }
 
-void StateMachine::tankTick()
+void StateMachine::verificationTick()
 {
+    Logger::info("###Verification Tick###");
+
     if(values.doorClosed == 1 ||
         values.burnerFault == 1 ||
         values.waterShortage == 1 ){
@@ -45,12 +50,22 @@ void StateMachine::tankTick()
             Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(0);
         });
     }
+}
 
-    if(values.tankWaterLevel > 40){
+void StateMachine::tankTick()
+{
+    Logger::info("###Tank Tick###");
+
+    if(values.tankWaterLevel > 40){        
+        // mantain tank temp at 95
         if(values.tankTemp > 96){
             Sensor::mapName[CONSTANTS::TANK_HEATING]->send(1);
         } else if(values.tankTemp < 94){
             Sensor::mapName[CONSTANTS::TANK_HEATING]->send(0);
+        }
+
+        if(values.tankWaterLevel > 80){
+            Sensor::mapName[CONSTANTS::FILL_TANK_WITH_WATER]->send(0);
         }
     }
     else{
@@ -88,7 +103,7 @@ bool StateMachine::start(ProcessConfig processConfig, ProcessInfo processInfo)
 
     // Start the timer with the state machine tick interval
     QMetaObject::invokeMethod(timer, "start", Qt::AutoConnection, Q_ARG(int, Globals::stateMachineTick));
-    mainTick();
+    autoklavTick();
 
     return true;
 }
@@ -191,7 +206,7 @@ StateMachineValues StateMachine::calculateDrFrRValuesFromSensors(int processId)
     return stateMachineValues;
 }
 
-void StateMachine::mainTick()
+void StateMachine::autoklavTick()
 {    
     if (isRunning()) {
         values = calculateDrFrRValuesFromSensors(process->getId());
@@ -216,24 +231,23 @@ void StateMachine::mainTick()
 
         // 2.1
         // TODO Wait 3min after condition
-        if (values.time > 3000) // After 3 min
-            Sensor::mapName[CONSTANTS::PUMP]->send(1); // Turn on pump
-
-
-        // TODO Expand if below
-        if(values.pressure < 0.5 && values.tankWaterLevel == 0.5){
-            Sensor::mapName[CONSTANTS::AUTOKLAV_FILL]->send(0); // Turn off autoklav water fill
-            Sensor::mapName[CONSTANTS::INCREASE_PRESSURE]->send(1); // Turn on pressure increase
+        if (values.time < 3000){
+            break;
         }
 
-        if (values.pressure < 1.0) // Wait till autoklav pressure is 1bar
+        Sensor::mapName[CONSTANTS::PUMP]->send(1); // Turn on pump
+        Sensor::mapName[CONSTANTS::AUTOKLAV_FILL]->send(0); // Turn off autoklav water fill
+        Sensor::mapName[CONSTANTS::INCREASE_PRESSURE]->send(1); // Turn on pressure increase
+
+        if(values.pressure < 0.1 && values.tankWaterLevel < 40){
             break;
+        }
+
 
         Sensor::mapName[CONSTANTS::INCREASE_PRESSURE]->send(0); // Turn off pressure increase
         Sensor::mapName[CONSTANTS::HEATING]->send(1); // Turn on autoklav heating with steem
 
-        // TODO: Log heating start so we can later save length of heating
-        // auto heatingStarted = datetime.now();
+        heatingStart =  QDateTime::currentDateTime();
 
         state = State::HEATING;
         Logger::info("StateMachine: Heating");
@@ -250,12 +264,14 @@ void StateMachine::mainTick()
         if (processConfig.mode == Mode::TARGETF) {
             if (values.sumFr < processInfo.targetF.toDouble())
                 break;
-        } else if (processConfig.mode == Mode::TIME) {
-            // if (datetime.now() - heatingStarted < processConfig.targetHeatingTime)
-            // TODO: Calcualte time of heating, not whole proccess time
+        } else if (processConfig.mode == Mode::TIME) {            
+            if (heatingStart.msecsTo(QDateTime::currentDateTime()) < processConfig.targetHeatingTime)
+                break;
         }
 
-        // process.heatingTime = datetime.now() - heatingStarted;
+        Sensor::mapName[CONSTANTS::PUMP]->send(0);
+
+        heatingTime = heatingStart.msecsTo(QDateTime::currentDateTime());
 
         // tank container A3, should be mantained at 95
 
@@ -263,15 +279,11 @@ void StateMachine::mainTick()
         Sensor::mapName[CONSTANTS::HEATING]->send(0);        // Turn off heating
         Sensor::mapName[CONSTANTS::COOLING]->send(1);        // Turn on main cooling
         Sensor::mapName[CONSTANTS::COOLING_HELPER]->send(1); // Turn on help cooling
+
         // wait 2sec,
 
-        Sensor::mapName[CONSTANTS::AUTOKLAV_FILL]->send(1);
-
-        Sensor::mapName[CONSTANTS::TANK_HEATING]->send(1);
-
-        // TODO change this value
-        if(values.tankWaterLevel < 2)
-            break;
+        if(values.tankWaterLevel < 40)
+            Sensor::mapName[CONSTANTS::FILL_TANK_WITH_WATER]->send(1);
 
         // 4.2
         // finishTemp = 95

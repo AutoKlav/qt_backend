@@ -35,6 +35,7 @@ public:
         double customTemp; // do we need delta temp
         Mode mode;
         uint64_t targetTime;
+        uint64_t targetHeatingTime;
         double maintainTemp;
         double maintainPressure; // not used
         double finishTemp;
@@ -62,6 +63,8 @@ private:
     ProcessLog *processLog;
     State state;
     QDateTime processStart;
+    QDateTime heatingStart;
+    uint heatingTime;
     StateMachineValues values;
     ProcessConfig processConfig;
     ProcessInfo processInfo;
@@ -69,10 +72,11 @@ private:
     quint64 id;
 
 private slots:
-    void mainTick();
-    void tankTick();
     void tick();
+    void autoklavTick();
+    void tankTick();    
     void expansionTick();
+    void verificationTick();
 };
 
 #endif // STATEMACHINE_H
