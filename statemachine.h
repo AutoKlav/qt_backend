@@ -74,10 +74,10 @@ private:
 
 private slots:
     void tick();
-    void autoklavTick();
-    void tankTick();    
-    void expansionTick();
-    void verificationTick();
+    void autoklavControl();
+    void tankControl();
+    void pipeControl();
+    void verificationControl();
 };
 
 #endif // STATEMACHINE_H

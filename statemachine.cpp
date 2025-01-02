@@ -17,15 +17,15 @@ StateMachine::StateMachine(QObject *parent)
 
 void StateMachine::tick()
 {
-    verificationTick();
-    autoklavTick();
-    tankTick();
-    expansionTick();
+    verificationControl();
+    autoklavControl();
+    tankControl();
+    pipeControl();
 }
 
-void StateMachine::expansionTick()
+void StateMachine::pipeControl()
 {
-    Logger::info("###Expansion Tick###");
+    Logger::info("### Expansion ###");
 
     // Todo import from globals
     if(values.expansionTemp >= 95){
@@ -36,9 +36,9 @@ void StateMachine::expansionTick()
     }
 }
 
-void StateMachine::verificationTick()
+void StateMachine::verificationControl()
 {
-    Logger::info("###Verification Tick###");
+    Logger::info("### Verification ###");
 
     if(values.doorClosed == 1 ||
         values.burnerFault == 1 ||
@@ -52,9 +52,9 @@ void StateMachine::verificationTick()
     }
 }
 
-void StateMachine::tankTick()
+void StateMachine::tankControl()
 {
-    Logger::info("###Tank Tick###");
+    Logger::info("### Tank ###");
 
     if(values.tankWaterLevel > 40){        
         // mantain tank temp at 95
@@ -103,7 +103,7 @@ bool StateMachine::start(ProcessConfig processConfig, ProcessInfo processInfo)
 
     // Start the timer with the state machine tick interval
     QMetaObject::invokeMethod(timer, "start", Qt::AutoConnection, Q_ARG(int, Globals::stateMachineTick));
-    autoklavTick();
+    autoklavControl();
 
     return true;
 }
@@ -206,7 +206,7 @@ StateMachineValues StateMachine::calculateDrFrRValuesFromSensors(int processId)
     return stateMachineValues;
 }
 
-void StateMachine::autoklavTick()
+void StateMachine::autoklavControl()
 {    
     if (isRunning()) {
         values = calculateDrFrRValuesFromSensors(process->getId());
