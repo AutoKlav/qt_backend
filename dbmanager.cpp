@@ -256,15 +256,17 @@ QList<ProcessLogInfoRow> DbManager::getAllProcessLogs(int processId)
 int DbManager::createProcess(QString name, ProcessInfo info)
 {    
     QSqlQuery query(m_db);
-    query.prepare("INSERT INTO Process (bacteriaId, name, batchLTO, productName, productQuantity, processStart, targetF, processLength) "
-                  "VALUES (:bacteriaId, :name, :batchLTO, :productName, :productQuantity, :processStart, :targetF, :processLength)");
+    query.prepare("INSERT INTO Process (bacteriaId, name, batchLTO, productName, productQuantity, processStart, targetF, targetHeatingTime, targetCoolingTime, processLength) "
+                  "VALUES (:bacteriaId, :name, :batchLTO, :productName, :productQuantity, :processStart, :targetF, :targetHeatingTime, :targetCoolingTime, :processLength)");
     query.bindValue(":bacteriaId", info.bacteria.id);
     query.bindValue(":name", name);
     query.bindValue(":batchLTO", info.batchLTO);
     query.bindValue(":productName", info.productName);
     query.bindValue(":productQuantity", info.productQuantity);
     query.bindValue(":processStart", info.processStart);
-    query.bindValue(":targetF", info.targetF);
+    query.bindValue(":targetF", info.targetF);    
+    query.bindValue(":targetHeatingTime", info.targetHeatingTime);
+    query.bindValue(":targetCoolingTime", info.targetCoolingTime);
     query.bindValue(":processLength", info.processLength);
 
     if (!query.exec()) {
