@@ -12,20 +12,28 @@ StateMachine::StateMachine(QObject *parent)
 {
     timer = new QTimer(this); // Explicitly initialize timer
     connect(timer, &QTimer::timeout, this, &StateMachine::tick); // Ensure tick is connected
+
+    // Start the timer with the state machine tick interval
+    QMetaObject::invokeMethod(timer, "start", Qt::AutoConnection, Q_ARG(int, Globals::stateMachineTick));
 }
 
-
+// Question, should tick be connected all the time of only when when process starts?
 void StateMachine::tick()
 {
-    verificationControl();
-    //autoklavControl();
+    if (isRunning()) {
+        values = calculateDrFrRValuesFromSensors(process->getId());
+    } else {
+        values = calculateStateMachineValues();
+    }
+
+    //verificationControl();
     //tankControl();
-    //pipeControl();
+    pipeControl();
 }
 
 void StateMachine::pipeControl()
 {
-    Logger::info("### Expansion ###");
+    Logger::info("### Extension ###");
 
     if(values.expansionTemp >= Globals::expansionTemp){
         Sensor::mapName[CONSTANTS::EXTENSION_COOLING]->send(1);
@@ -37,17 +45,15 @@ void StateMachine::pipeControl()
 
 void StateMachine::verificationControl()
 {
-    Logger::info("### Verification ###");
+    Logger::info("### Verification [Door, Burner, Water] ###");
 
-    if(values.doorClosed == 1 ||
-        values.burnerFault == 1 ||
-        values.waterShortage == 1 ){
-        Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(1);
-
-        // Use QTimer::singleShot to wait for 5 seconds and then turn off the alarm
-        QTimer::singleShot(5000, this, [this]() {
-            Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(0);
-        });
+    if(values.doorClosed != 1 ||
+        values.burnerFault != 1 ||
+        values.waterShortage != 1 ){
+        Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(1);        
+        Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(0);
+        //Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(1);
+        //Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(0);
     }
 }
 
@@ -56,11 +62,11 @@ void StateMachine::tankControl()
     Logger::info("### Tank ###");
 
     if(values.tankWaterLevel > 40){        
-        // mantain tank temp at 95
+        // mantain tank temp at 95        
         if(values.tankTemp > 96){
-            Sensor::mapName[CONSTANTS::TANK_HEATING]->send(1);
-        } else if(values.tankTemp < 94){
             Sensor::mapName[CONSTANTS::TANK_HEATING]->send(0);
+        } else if(values.tankTemp < 94){
+            Sensor::mapName[CONSTANTS::TANK_HEATING]->send(1);
         }
 
         if(values.tankWaterLevel > 80){
@@ -100,8 +106,6 @@ bool StateMachine::start(ProcessConfig processConfig, ProcessInfo processInfo)
     process = new Process(processStart.toString(Qt::ISODate), processInfo, this);
     values = StateMachineValues();
 
-    // Start the timer with the state machine tick interval
-    QMetaObject::invokeMethod(timer, "start", Qt::AutoConnection, Q_ARG(int, Globals::stateMachineTick));
     autoklavControl();
 
     return true;
@@ -206,13 +210,7 @@ StateMachineValues StateMachine::calculateDrFrRValuesFromSensors(int processId)
 }
 
 void StateMachine::autoklavControl()
-{    
-    if (isRunning()) {
-        values = calculateDrFrRValuesFromSensors(process->getId());
-    } else {        
-        values = calculateStateMachineValues();
-    }
-
+{
     switch (state) {
     case State::READY:
         break;
@@ -230,7 +228,7 @@ void StateMachine::autoklavControl()
     case State::FILLING:
 
         if(QDateTime::currentDateTime() < stopwatch1){
-            Logger::info("Wait 10min");
+            Logger::info("Wait 3min");
             break;
         }
 
