@@ -11,24 +11,15 @@ StateMachine::StateMachine(QObject *parent)
     : QObject(parent), state(READY), timer(nullptr), process(nullptr), processLog(nullptr)
 {
     timer = new QTimer(this); // Explicitly initialize timer
-    connect(timer, &QTimer::timeout, this, &StateMachine::tick); // Ensure tick is connected
-
-    // Start the timer with the state machine tick interval
-    QMetaObject::invokeMethod(timer, "start", Qt::AutoConnection, Q_ARG(int, Globals::stateMachineTick));
+    connect(timer, &QTimer::timeout, this, &StateMachine::autoklavControl); // Ensure tick is connected
 }
 
 // Question, should tick be connected all the time of only when when process starts?
 void StateMachine::tick()
 {
-    if (isRunning()) {
-        values = calculateDrFrRValuesFromSensors(process->getId());
-    } else {
-        values = calculateStateMachineValues();
-    }
-
-    //verificationControl();
     //tankControl();
-    pipeControl();
+    //verificationControl();    
+    //pipeControl();
 }
 
 void StateMachine::pipeControl()
@@ -106,6 +97,8 @@ bool StateMachine::start(ProcessConfig processConfig, ProcessInfo processInfo)
     process = new Process(processStart.toString(Qt::ISODate), processInfo, this);
     values = StateMachineValues();
 
+    // Start the timer with the state machine tick interval
+    QMetaObject::invokeMethod(timer, "start", Qt::AutoConnection, Q_ARG(int, Globals::stateMachineTick));
     autoklavControl();
 
     return true;
@@ -211,6 +204,13 @@ StateMachineValues StateMachine::calculateDrFrRValuesFromSensors(int processId)
 
 void StateMachine::autoklavControl()
 {
+    // fetch and update values from sensors
+    if (isRunning()) {
+        values = calculateDrFrRValuesFromSensors(process->getId());
+    } else {
+        values = calculateStateMachineValues();
+    }
+
     switch (state) {
     case State::READY:
         break;
@@ -219,7 +219,7 @@ void StateMachine::autoklavControl()
         Logger::info("StateMachine: Starting");
 
         Sensor::mapName[CONSTANTS::AUTOKLAV_FILL]->send(1); // Turn on autoklav water fill
-        stopwatch1 = QDateTime::currentDateTime().addSecs(180); // 3 minutes
+        stopwatch1 = QDateTime::currentDateTime().addSecs(32); // 3 minutes
 
         state = State::FILLING;
         Logger::info("StateMachine: Filling");
@@ -232,14 +232,13 @@ void StateMachine::autoklavControl()
             break;
         }
 
-        Sensor::mapName[CONSTANTS::PUMP]->send(1); // Turn on pump
         Sensor::mapName[CONSTANTS::AUTOKLAV_FILL]->send(0); // Turn off autoklav water fill
+        Sensor::mapName[CONSTANTS::PUMP]->send(1); // Turn on pump
         Sensor::mapName[CONSTANTS::INCREASE_PRESSURE]->send(1); // Turn on pressure increase
 
-        if(values.pressure < 0.1 && values.tankWaterLevel < 40){
+        if(!(values.pressure > 0.1 && values.tankWaterLevel > 40)){
             break;
         }
-
 
         Sensor::mapName[CONSTANTS::INCREASE_PRESSURE]->send(0); // Turn off pressure increase
         Sensor::mapName[CONSTANTS::HEATING]->send(1); // Turn on autoklav heating with steem
@@ -270,21 +269,17 @@ void StateMachine::autoklavControl()
 
         heatingTime = heatingStart.msecsTo(QDateTime::currentDateTime());
 
-        // tank container A3, should be mantained at 95
-
-        // 4.2
-        Sensor::mapName[CONSTANTS::HEATING]->send(0);        // Turn off heating
-        Sensor::mapName[CONSTANTS::COOLING]->send(1);        // Turn on main cooling
-        Sensor::mapName[CONSTANTS::COOLING_HELPER]->send(1); // Turn on help cooling
+        Sensor::mapName[CONSTANTS::HEATING]->send(0);
+        Sensor::mapName[CONSTANTS::COOLING]->send(1);
+        Sensor::mapName[CONSTANTS::COOLING_HELPER]->send(1);
 
         if(values.tankWaterLevel < 40)
             Sensor::mapName[CONSTANTS::FILL_TANK_WITH_WATER]->send(1);
 
-        coolingStart = QDateTime::currentDateTime();
 
         state = State::COOLING;
-
         Logger::info("StateMachine: Cooling");
+        coolingStart = QDateTime::currentDateTime();
         break;
 
     case State::COOLING:
@@ -292,17 +287,19 @@ void StateMachine::autoklavControl()
         if (values.tempK > Globals::coolingThreshold)
             break;
 
-        Sensor::mapName[CONSTANTS::COOLING]->send(0);    // Turn off cooling
+        Sensor::mapName[CONSTANTS::COOLING]->send(0);
 
-        if(values.tankWaterLevel < 80)
-            break;
-
-
-        if(values.temp > processConfig.finishTemp && values.tempK > processConfig.finishTemp){
-            stopwatch1 = QDateTime::currentDateTime().addSecs(600); // 10 minutes
-            coolingTime = coolingStart.msecsTo(QDateTime::currentDateTime());
+        if(!(values.temp < processConfig.finishTemp || values.tempK < processConfig.finishTemp)){
             break;
         }
+
+
+        state = State::COOLING_HELPER;
+        Logger::info("StateMachine: Cooling helper");
+        stopwatch1 = QDateTime::currentDateTime().addSecs(32); // 10 minutes
+        break;
+
+    case State::COOLING_HELPER:
 
         Sensor::mapName[CONSTANTS::COOLING_HELPER]->send(0);
 
@@ -311,22 +308,22 @@ void StateMachine::autoklavControl()
             break;
         }
 
-        Sensor::mapName[CONSTANTS::WATER_DRAIN]->send(1);
-        stopwatch1 = QDateTime::currentDateTime().addSecs(600); // 10 minutes
+        coolingTime = coolingStart.msecsTo(QDateTime::currentDateTime());
+        Sensor::mapName[CONSTANTS::WATER_DRAIN]->send(1);        
 
-        state = State::FINISHING;
+        state = State::FINISHING;        
         Logger::info("StateMachine: Finishing");
+        stopwatch1 = QDateTime::currentDateTime().addSecs(32); // 10 minutes
         break;
 
     case State::FINISHING:
 
-        // sleep(10min)
         if(QDateTime::currentDateTime() < stopwatch1){
+            Logger::info("Wait 10min");
             break;
         }
 
-        Sensor::mapName[CONSTANTS::WATER_DRAIN]->send(0);
-        Sensor::mapName[CONSTANTS::PUMP]->send(0);
+        Sensor::mapName[CONSTANTS::WATER_DRAIN]->send(0);        
 
         state = State::FINISHED;
         Logger::info("StateMachine: Finished");
