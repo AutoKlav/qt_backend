@@ -40,6 +40,7 @@ private:
         Status deleteProcessType(grpc::ServerContext *context, const autoklav::TypeRequest *request, autoklav::Status *replay) override;
         Status startProcess(grpc::ServerContext *context, const autoklav::StartProcessRequest *request, autoklav::Status *replay) override;
         Status startManualProcess(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay) override;
+        Status stopManualProcess(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay) override;
         Status stopProcess(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay) override;
         Status getSensorPinValues(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::SensorValues *replay) override;
         Status getSensorRelayValues(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::SensorRelayValues *replay) override;
@@ -168,9 +169,9 @@ Status GRpcServer::Impl::AutoklavServiceImpl::startProcess(grpc::ServerContext *
 {
     Q_UNUSED(context);
 
-    //TODO   add target heating time
     const StateMachine::ProcessConfig processConfig = {
         .type = static_cast<StateMachine::Type>(request->processconfig().type()),
+        .heatingType = static_cast<StateMachine::HeatingType>(request->processconfig().heatingtype()),
         .customTemp = request->processconfig().customtemp(),
         .mode = static_cast<StateMachine::Mode>(request->processconfig().mode()),        
         .maintainTemp = request->processconfig().maintaintemp(),
@@ -212,6 +213,14 @@ Status GRpcServer::Impl::AutoklavServiceImpl::startManualProcess(grpc::ServerCon
     return Status::OK;
 }
 
+Status GRpcServer::Impl::AutoklavServiceImpl::stopManualProcess(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay)
+{
+    Q_UNUSED(context);
+    Q_UNUSED(request);
+
+    //setStatusReply(replay, !succ);
+    return Status::OK;
+}
 
 Status GRpcServer::Impl::AutoklavServiceImpl::createProcessType(grpc::ServerContext *context, const autoklav::ProcessTypeRequest *request, autoklav::Status *replay)
 {

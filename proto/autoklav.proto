@@ -21,6 +21,7 @@ service Autoklav {
     rpc startProcess(StartProcessRequest) returns (Status);
     rpc stopProcess(Empty) returns (Status);
     rpc startManualProcess(Empty) returns (Status);
+    rpc stopManualProcess(Empty) returns (Status);
 
     // Sensor
     rpc getSensorPinValues(Empty) returns (SensorValues);
@@ -143,6 +144,11 @@ enum ProcessConfigType {
     CUSTOM = 2;
 }
 
+enum HeatingType {
+    STEAM = 0;
+    ELECTRIC = 1;
+}
+
 enum ProcessConfigState {
     READY = 0;
     STARTING = 1;
@@ -160,10 +166,11 @@ enum ProcessConfigMode {
 
 message ProcessConfig {
     ProcessConfigType type = 1;
-    double customTemp = 2;
-    ProcessConfigMode mode = 3;       
-    double maintainTemp = 4;
-    double finishTemp = 5;    
+    HeatingType heatingType = 2;
+    double customTemp = 3;
+    ProcessConfigMode mode = 4;
+    double maintainTemp = 5;
+    double finishTemp = 6;    
 }
 
 message ProcessInfo {

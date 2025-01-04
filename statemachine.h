@@ -30,8 +30,13 @@ public:
         TARGETF, TIME
     };
 
+    enum HeatingType {
+        STEAM, ELECTRIC
+    };
+
     struct ProcessConfig {
         Type type;
+        HeatingType heatingType;
         double customTemp;
         Mode mode;        
         double maintainTemp;
