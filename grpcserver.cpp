@@ -169,9 +169,9 @@ Status GRpcServer::Impl::AutoklavServiceImpl::startProcess(grpc::ServerContext *
 {
     Q_UNUSED(context);
 
-    //TODO   add target heating time
     const StateMachine::ProcessConfig processConfig = {
         .type = static_cast<StateMachine::Type>(request->processconfig().type()),
+        .heatingType = static_cast<StateMachine::HeatingType>(request->processconfig().heatingtype()),
         .customTemp = request->processconfig().customtemp(),
         .mode = static_cast<StateMachine::Mode>(request->processconfig().mode()),        
         .maintainTemp = request->processconfig().maintaintemp(),
