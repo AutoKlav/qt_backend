@@ -22,6 +22,7 @@ service Autoklav {
     rpc stopProcess(Empty) returns (Status);
     rpc startManualProcess(Empty) returns (Status);
     rpc stopManualProcess(Empty) returns (Status);
+    rpc relayTest(Empty) returns (Status);
 
     // Sensor
     rpc getSensorPinValues(Empty) returns (SensorValues);

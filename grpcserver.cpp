@@ -40,6 +40,7 @@ private:
         Status createProcessType(grpc::ServerContext *context, const autoklav::ProcessTypeRequest *request, autoklav::Status *replay) override;
         Status deleteProcessType(grpc::ServerContext *context, const autoklav::TypeRequest *request, autoklav::Status *replay) override;
         Status startProcess(grpc::ServerContext *context, const autoklav::StartProcessRequest *request, autoklav::Status *replay) override;
+        Status relayTest(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay) override;
         Status startManualProcess(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay) override;
         Status stopManualProcess(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay) override;
         Status stopProcess(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay) override;
@@ -203,6 +204,17 @@ Status GRpcServer::Impl::AutoklavServiceImpl::startProcess(grpc::ServerContext *
     };
 
     bool succ = StateMachine::instance().start(processConfig, processInfo);
+
+    setStatusReply(replay, !succ);
+    return Status::OK;
+}
+
+Status GRpcServer::Impl::AutoklavServiceImpl::relayTest(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay)
+{
+    Q_UNUSED(context);
+    Q_UNUSED(request);
+
+    bool succ = StateMachine::instance().testRelays();
 
     setStatusReply(replay, !succ);
     return Status::OK;
