@@ -311,9 +311,9 @@ void StateMachine::autoklavControl()
     case State::STERILIZING:
 
         if (stateMachineValues.temp > processConfig.maintainTemp + 1) {
-            Sensor::mapName[CONSTANTS::HEATING]->send(0); // Turn off heating
+            Sensor::mapName[CONSTANTS::HEATING]->send(0);
         } else if (stateMachineValues.temp < processConfig.maintainTemp - 1) {
-            Sensor::mapName[CONSTANTS::HEATING]->send(1); // Turn on heating
+            Sensor::mapName[CONSTANTS::HEATING]->send(1);
         }
 
         if (processConfig.mode == Mode::TARGETF) {
@@ -361,20 +361,12 @@ void StateMachine::autoklavControl()
         Sensor::mapName[CONSTANTS::PUMP]->send(0);
 
         state = State::COOLING_HELPER;
-        Logger::info("StateMachine: Cooling helper");
-        stopwatch1 = QDateTime::currentDateTime().addSecs(32); // 10 minutes ne treba cekati 10min!!!
+        Logger::info("StateMachine: Cooling helper");        
         break;
 
     case State::COOLING_HELPER:
 
-        // when to turn off, when target time is reached
-
         Sensor::mapName[CONSTANTS::COOLING_HELPER]->send(0);
-
-        if(QDateTime::currentDateTime() < stopwatch1){
-            Logger::info("Wait 10min");
-            break;
-        }
 
         coolingTime = coolingStart.msecsTo(QDateTime::currentDateTime());
         Sensor::mapName[CONSTANTS::WATER_DRAIN]->send(1); // ignoriramo alarm otvorena vrata
@@ -399,8 +391,12 @@ void StateMachine::autoklavControl()
 
     case State::FINISHED:
         timer->stop();
-        // pali alarm kada je proces gotov
-        // 2s, 2s, 2s, 2s alarm
+
+        Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(1);
+        Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(0);
+        Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(1);
+        Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(0);
+
         Logger::info("StateMachine: Ready");
 
         if (process) {
