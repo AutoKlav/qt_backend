@@ -29,9 +29,13 @@ inline const QString TANK_HEATING = "tankHeating";
 inline const QString COOLING_HELPER = "coolingHelper";
 inline const QString AUTOKLAV_FILL = "autoklavFill";
 inline const QString WATER_DRAIN = "waterDrain";
-inline const QString HEATING = "heating";
-inline const QString PUMP = "pump";
+
+// default steam heating
+inline QString HEATING = "heating";
+// electric heating
 inline const QString ELECTRIC_HEATING = "electricHeating";
+
+inline const QString PUMP = "pump";
 inline const QString INCREASE_PRESSURE = "increasePressure";
 inline const QString EXTENSION_COOLING = "extensionCooling";
 inline const QString ALARM_SIGNAL = "alarmSignal";
