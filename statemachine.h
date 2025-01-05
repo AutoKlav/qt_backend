@@ -47,12 +47,15 @@ public:
     bool start(ProcessConfig processConfig, ProcessInfo processInfo);
     bool stop();
     bool isRunning();
-    int getState(); 
+    int getState();
+
+    bool startManualMeasuring();
+    bool stopManualMeasuring();
 
     StateMachineValues getValues();
 
     StateMachineValues calculateStateMachineValues();
-    StateMachineValues calculateDrFrRValuesFromSensors(int processId);
+    StateMachineValues calculateDrFrRValuesAndUpdateDbFromSensors(int processId);
     StateMachineValues getStateMachineValuesOnTheFly();
     
     static StateMachine &instance();
@@ -61,6 +64,7 @@ private:
     explicit StateMachine(QObject *parent = nullptr);
 
     QTimer *timer;
+    QTimer *manualTimer;
     Process *process;
     ProcessLog *processLog;
     State state;
@@ -70,7 +74,7 @@ private:
     QDateTime stopwatch1;
     uint heatingTime;
     uint coolingTime;
-    StateMachineValues values;
+    StateMachineValues stateMachineValues;
     ProcessConfig processConfig;
     ProcessInfo processInfo;
 
@@ -82,6 +86,7 @@ private slots:
     void tankControl();
     void pipeControl();
     void verificationControl();
+    void manualControl();
 };
 
 #endif // STATEMACHINE_H

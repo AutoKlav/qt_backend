@@ -209,7 +209,9 @@ Status GRpcServer::Impl::AutoklavServiceImpl::startManualProcess(grpc::ServerCon
     Q_UNUSED(context);
     Q_UNUSED(request);
 
-    //setStatusReply(replay, !succ);
+    bool succ = StateMachine::instance().startManualMeasuring();
+
+    setStatusReply(replay, !succ);
     return Status::OK;
 }
 
@@ -218,7 +220,9 @@ Status GRpcServer::Impl::AutoklavServiceImpl::stopManualProcess(grpc::ServerCont
     Q_UNUSED(context);
     Q_UNUSED(request);
 
-    //setStatusReply(replay, !succ);
+    bool succ = StateMachine::instance().stopManualMeasuring();
+
+    setStatusReply(replay, !succ);
     return Status::OK;
 }
 
@@ -291,7 +295,6 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getAllProcesses(grpc::ServerContex
         processInfo->set_targetf(process.targetF.toStdString());
         processInfo->set_processlength(process.processLength.toStdString());
     }
-
 
     return Status::OK;
 }
