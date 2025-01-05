@@ -11,7 +11,10 @@ StateMachine::StateMachine(QObject *parent)
     : QObject(parent), state(READY), timer(nullptr), process(nullptr), processLog(nullptr)
 {
     timer = new QTimer(this); // Explicitly initialize timer
+    manualTimer = new QTimer(this); // Timer for manual measuring control
+
     connect(timer, &QTimer::timeout, this, &StateMachine::autoklavControl); // Ensure tick is connected
+    connect(manualTimer, &QTimer::timeout, this, &StateMachine::manualControl); // Ensure manual tick
 }
 
 // Question, should tick be connected all the time of only when when process starts?
@@ -206,11 +209,7 @@ StateMachineValues StateMachine::calculateDrFrRValuesAndUpdateDbFromSensors(int 
 void StateMachine::autoklavControl()
 {
     // fetch and update values from sensors
-    if (isRunning()) {
-        stateMachineValues = calculateDrFrRValuesAndUpdateDbFromSensors(process->getId());
-    } else {
-        stateMachineValues = calculateStateMachineValues();
-    }
+    stateMachineValues = calculateDrFrRValuesAndUpdateDbFromSensors(process->getId());
 
     switch (state) {
     case State::READY:
@@ -377,22 +376,21 @@ bool StateMachine::startManualMeasuring()
     process = new Process(processStart.toString(Qt::ISODate), processInfo, this);
     stateMachineValues = StateMachineValues();
 
-    // Start the timer with the state machine tick interval
-    QMetaObject::invokeMethod(timer, "manualTick", Qt::AutoConnection, Q_ARG(int, Globals::stateMachineTick));
+    // Start the timer with the state machine tick interval    
+    QMetaObject::invokeMethod(manualTimer, "start", Qt::AutoConnection, Q_ARG(int, Globals::stateMachineTick));
+    manualControl();
 
     return true;
 }
 
-void StateMachine::manualTick(){
-    if (isRunning()) {
-        stateMachineValues = calculateDrFrRValuesAndUpdateDbFromSensors(process->getId());
-    } else {
-        stateMachineValues = calculateStateMachineValues();
-    }
+void StateMachine::manualControl(){
+    state = State::STARTING;
+    stateMachineValues = calculateDrFrRValuesAndUpdateDbFromSensors(process->getId());
 }
 
 
 bool StateMachine::stopManualMeasuring(){
+    manualTimer->stop();
 
     if (!isRunning())
         return false;

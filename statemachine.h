@@ -64,6 +64,7 @@ private:
     explicit StateMachine(QObject *parent = nullptr);
 
     QTimer *timer;
+    QTimer *manualTimer;
     Process *process;
     ProcessLog *processLog;
     State state;
@@ -85,7 +86,7 @@ private slots:
     void tankControl();
     void pipeControl();
     void verificationControl();
-    void manualTick();
+    void manualControl();
 };
 
 #endif // STATEMACHINE_H
