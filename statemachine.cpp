@@ -144,11 +144,13 @@ bool StateMachine::testRelays()
 
     Sensor::mapName[CONSTANTS::PUMP]->send(1);
     Sensor::mapName[CONSTANTS::HEATING]->send(1);
+    Sensor::mapName[CONSTANTS::ELECTRIC_HEATING]->send(1);
 
     Sensor::mapName[CONSTANTS::AUTOKLAV_FILL]->send(0);
     Sensor::mapName[CONSTANTS::INCREASE_PRESSURE]->send(1);
     Sensor::mapName[CONSTANTS::INCREASE_PRESSURE]->send(0);
 
+    Sensor::mapName[CONSTANTS::ELECTRIC_HEATING]->send(0);
     Sensor::mapName[CONSTANTS::HEATING]->send(0);
 
     Sensor::mapName[CONSTANTS::COOLING]->send(1);
