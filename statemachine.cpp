@@ -20,12 +20,9 @@ StateMachine::StateMachine(QObject *parent)
 // Question, should tick be connected all the time of only when when process starts?
 void StateMachine::tick()
 {
-    //tankControl();
-    //verificationControl();
-    //pipeControl();
+
 }
 
-// kada startamo proces autoklava, ovo se pokrece
 void StateMachine::pipeControl()
 {
     Logger::info("### Extension ###");
@@ -38,7 +35,13 @@ void StateMachine::pipeControl()
     }
 }
 
-// on the start of each minute
+void StateMachine::triggerAlarm(){
+    Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(1);
+    Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(0);
+    //Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(1);
+    //Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(0);
+}
+
 void StateMachine::verificationControl()
 {
     Logger::info("### Verification [Door, Burner, Water] ###");
@@ -46,14 +49,10 @@ void StateMachine::verificationControl()
     if(stateMachineValues.doorClosed != 1 ||
         stateMachineValues.burnerFault != 1 ||
         stateMachineValues.waterShortage != 1 ){
-        Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(1); // ili upali ili ugasi, odmah na pocetku
-        Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(0);
-        //Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(1);
-        //Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(0);
+        triggerAlarm();
     }
 }
 
-// neka se pokrene svake minute
 void StateMachine::tankControl()
 {
     Logger::info("### Tank ###");
@@ -75,7 +74,6 @@ void StateMachine::tankControl()
     }
 }
 
-// Definition of getState method
 int StateMachine::getState() {
     return static_cast<int>(state);
 }
@@ -90,11 +88,22 @@ bool StateMachine::start(ProcessConfig processConfig, ProcessInfo processInfo)
     // Fetch first time values and abort start if door is not closed
     stateMachineValues = calculateStateMachineValues();
 
-    if (!stateMachineValues.doorClosed){ // ako su di 20,22,24 ne dopusti pokretanje
-        Logger::info("Door is not closed"); // upali alarm ako je greska u kotlovnici
+    if (!stateMachineValues.doorClosed) {
+        Logger::info("Door is not closed");
         return false;
     }
 
+    if (!stateMachineValues.burnerFault) {
+        Logger::info("Burner error");
+        triggerAlarm();
+        return false;
+    }
+
+    if (!stateMachineValues.waterShortage) {
+        Logger::info("Water shortage error");
+        triggerAlarm();
+        return false;
+    }
 
     this->processConfig = processConfig;
     this->processInfo = processInfo;
@@ -183,7 +192,6 @@ inline bool StateMachine::isRunning()
     return state != State::READY;
 }
 
-//TODO delete this
 StateMachineValues StateMachine::getValues()
 {
     return stateMachineValues;
@@ -255,8 +263,15 @@ StateMachineValues StateMachine::calculateDrFrRValuesAndUpdateDbFromSensors(int 
 
 void StateMachine::autoklavControl()
 {
-    // fetch and update values from sensors
-    stateMachineValues = calculateDrFrRValuesAndUpdateDbFromSensors(process->getId());
+    // this is called every minute and we don't want to insert values in db if process is not started
+    if (isRunning()) {
+        //tankControl();
+        //verificationControl();
+        //pipeControl();
+        stateMachineValues = calculateDrFrRValuesAndUpdateDbFromSensors(process->getId());
+    } else {
+        stateMachineValues = calculateStateMachineValues();
+    }
 
     switch (state) {
     case State::READY:

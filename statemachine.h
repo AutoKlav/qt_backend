@@ -88,6 +88,7 @@ private slots:
     void pipeControl();
     void verificationControl();
     void manualControl();
+    void triggerAlarm();
 };
 
 #endif // STATEMACHINE_H
