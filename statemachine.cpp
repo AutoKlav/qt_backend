@@ -254,7 +254,6 @@ StateMachineValues StateMachine::calculateDrFrRValuesAndUpdateDbFromSensors(int 
 {
     auto stateMachineValues = calculateStateMachineValues();
 
-    DbManager::instance().createProcessLog(processId);
 
     return stateMachineValues;
 }
@@ -264,7 +263,9 @@ void StateMachine::autoklavControl()
     //tankControl();
     //verificationControl();
     //pipeControl();
-    stateMachineValues = calculateDrFrRValuesAndUpdateDbFromSensors(process->getId());
+
+    stateMachineValues = calculateStateMachineValues();
+    DbManager::instance().createProcessLog(process->getId());
 
     switch (state) {
     case State::READY:
