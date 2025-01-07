@@ -277,7 +277,7 @@ void StateMachine::autoklavControl()
         Logger::info("StateMachine: Starting");
 
         Sensor::mapName[CONSTANTS::AUTOKLAV_FILL]->send(1);
-        stopwatch1 = QDateTime::currentDateTime().addSecs(32); // 3 minutes
+        stopwatch1 = QDateTime::currentDateTime().addSecs(15); // 3 minutes
 
         state = State::FILLING;
         Logger::info("StateMachine: Filling");
@@ -334,7 +334,7 @@ void StateMachine::autoklavControl()
             }
         } else if (processConfig.mode == Mode::TIME) {
             if (heatingStart.msecsTo(QDateTime::currentDateTime()) < processInfo.targetHeatingTime.toDouble()){
-                Logger::info("Wait until time is reached");
+                Logger::info("Wait until target time is reached");
                 break;
             }
         }
@@ -392,7 +392,7 @@ void StateMachine::autoklavControl()
 
         state = State::FINISHING;
         coolingTime = coolingStart.msecsTo(QDateTime::currentDateTime());
-        stopwatch1 = QDateTime::currentDateTime().addSecs(32); // 10 minutes
+        stopwatch1 = QDateTime::currentDateTime().addSecs(15); // 10 minutes
         Logger::info("StateMachine: Cooling helper");        
         break;
 
