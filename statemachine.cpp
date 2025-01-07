@@ -222,17 +222,22 @@ StateMachineValues StateMachine::calculateStateMachineValues()
     updateStateMachineValues.dTemp = processConfig.customTemp - updateStateMachineValues.tempK;
 
     const auto k = Globals::k;
-    const auto exp = updateStateMachineValues.dTemp / processConfig.z;
+    const auto z = processInfo.bacteria.z;
+    const auto d0 = processInfo.bacteria.d0;
+    Logger::info(QString::number(k));
+    Logger::info(QString::number(z));
+    Logger::info(QString::number(d0));
+
+    const auto exp = updateStateMachineValues.dTemp / z;
 
     // Old autoklav
     //stateMachineValues.Dr = qPow(10, 0.1 * stateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
     //stateMachineValues.Fr = qPow(10, -0.1 * stateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
     //stateMachineValues.r = 5 * stateMachineValues.Fr;
 
-    // TODO check if correct
-    updateStateMachineValues.Dr = k * processConfig.d0 * qPow(10, -1*exp) * (Globals::stateMachineTick / 60000.0);
-    updateStateMachineValues.Fr = (qPow(10, exp) * (Globals::stateMachineTick / 60000.0)) / (k * processConfig.d0);
-    updateStateMachineValues.r = (qPow(10, exp) * (Globals::stateMachineTick / 60000.0)) / processConfig.d0 ;
+    updateStateMachineValues.Dr = k * d0 * qPow(10, -1*exp) * (Globals::stateMachineTick / 60000.0);
+    updateStateMachineValues.Fr = (qPow(10, exp) * (Globals::stateMachineTick / 60000.0)) / (k * d0);
+    updateStateMachineValues.r = (qPow(10, exp) * (Globals::stateMachineTick / 60000.0)) / d0 ;
 
     updateStateMachineValues.state = state;
 

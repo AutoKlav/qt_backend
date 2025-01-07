@@ -41,7 +41,6 @@ public:
         Mode mode;        
         double maintainTemp;
         double finishTemp;
-        double d0, z;
     };
 
     bool start(ProcessConfig processConfig, ProcessInfo processInfo);
