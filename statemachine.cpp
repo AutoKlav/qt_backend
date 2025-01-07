@@ -37,15 +37,22 @@ void StateMachine::verificationControl()
 {
     Logger::info("### Verification [Door, Burner, Water] ###");
 
+    auto turnOnAlarm = false;
     // we control door as long as watertrain is not turned on
-    if(stateMachineValues.doorClosed != 1 && Sensor::getRelayValues().waterDrain == 0 ){
+    if(stateMachineValues.doorClosed != 1 && Sensor::getRelayValues().waterDrain != 0 ){
+        Logger::info("Door not closed!");
         triggerAlarm();
     }
 
     if(stateMachineValues.burnerFault != 1 ||
         stateMachineValues.waterShortage != 1 ){
-        triggerAlarm();
+        Logger::info("Burner or water shortage fault");
+        turnOnAlarm = true;
     }
+
+
+    if (turnOnAlarm)
+        triggerAlarm();
 }
 
 void StateMachine::tankControl()
@@ -263,8 +270,8 @@ StateMachineValues StateMachine::calculateDrFrRValuesAndUpdateDbFromSensors(int 
 void StateMachine::autoklavControl()
 {
     //tankControl();
-    //verificationControl();
-    //pipeControl();
+    verificationControl();
+    pipeControl();
 
     stateMachineValues = calculateStateMachineValues();
     DbManager::instance().createProcessLog(process->getId());
