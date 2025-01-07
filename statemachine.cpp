@@ -325,12 +325,16 @@ void StateMachine::autoklavControl()
             Sensor::mapName[CONSTANTS::HEATING]->send(1);
         }
 
-        if (processConfig.mode == Mode::TARGETF) {
-            if (stateMachineValues.sumFr < processInfo.targetF.toDouble())
+        if (processConfig.mode == Mode::TARGETF) {            
+            if (stateMachineValues.sumFr < processInfo.targetF.toDouble()){
+                Logger::info("Wait until sumfr is reached");
                 break;
+            }
         } else if (processConfig.mode == Mode::TIME) {
-            if (heatingStart.msecsTo(QDateTime::currentDateTime()) < processInfo.targetHeatingTime.toDouble())
+            if (heatingStart.msecsTo(QDateTime::currentDateTime()) < processInfo.targetHeatingTime.toDouble()){
+                Logger::info("Wait until time is reached");
                 break;
+            }
         }
 
         heatingTime = heatingStart.msecsTo(QDateTime::currentDateTime());
@@ -347,8 +351,10 @@ void StateMachine::autoklavControl()
 
     case State::COOLING:
 
-        if(stateMachineValues.tankWaterLevel < 80)
+        if(stateMachineValues.tankWaterLevel < 80) {
+            Logger::info("Wait until tank water level is reached");
             break;
+        }
 
         Sensor::mapName[CONSTANTS::FILL_TANK_WITH_WATER]->send(0);
 
@@ -366,8 +372,10 @@ void StateMachine::autoklavControl()
             Sensor::mapName[CONSTANTS::COOLING_HELPER]->send(0);
 
         } else if (processConfig.mode == Mode::TIME) {
-            if (coolingStart.msecsTo(QDateTime::currentDateTime()) < processInfo.targetCoolingTime.toDouble())
+            if (coolingStart.msecsTo(QDateTime::currentDateTime()) < processInfo.targetCoolingTime.toDouble()) {
+                Logger::info("Wait until target cooling is reached");
                 break;
+            }
 
             Sensor::mapName[CONSTANTS::COOLING]->send(0);
             Sensor::mapName[CONSTANTS::PUMP]->send(0);
