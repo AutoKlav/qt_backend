@@ -224,9 +224,6 @@ StateMachineValues StateMachine::calculateStateMachineValues()
     const auto k = Globals::k;
     const auto z = processInfo.bacteria.z;
     const auto d0 = processInfo.bacteria.d0;
-    Logger::info(QString::number(k));
-    Logger::info(QString::number(z));
-    Logger::info(QString::number(d0));
 
     const auto exp = updateStateMachineValues.dTemp / z;
 
