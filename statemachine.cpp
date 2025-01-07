@@ -380,10 +380,7 @@ void StateMachine::autoklavControl()
             }
 
             Sensor::mapName[CONSTANTS::COOLING]->send(0);
-            Sensor::mapName[CONSTANTS::PUMP]->send(0);
-
-            //if(coolingStart.msecsTo(QDateTime::currentDateTime()) < processInfo.targetCoolingTime.toDouble())
-                //break;
+            Sensor::mapName[CONSTANTS::PUMP]->send(0);            
 
             Sensor::mapName[CONSTANTS::COOLING_HELPER]->send(0);
         }
