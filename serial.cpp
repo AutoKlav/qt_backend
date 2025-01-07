@@ -125,6 +125,7 @@ void Serial::sendData(const QString& data)
     }
 
     auto succ = m_serial->write(protocolData.toUtf8());
+    m_serial->flush();
 
     if (succ == -1) {
         Logger::crit("Failed to send data via serial");

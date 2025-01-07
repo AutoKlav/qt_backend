@@ -19,7 +19,7 @@ public:
     ~StateMachine() = default;
 
     enum State {
-        READY, STARTING, FILLING, HEATING, STERILIZING,  COOLING, COOLING_HELPER, FINISHING, FINISHED
+        READY, STARTING, FILLING, HEATING, STERILIZING,  COOLING, FINISHING, FINISHED
     };
 
     enum Type {
@@ -41,7 +41,6 @@ public:
         Mode mode;        
         double maintainTemp;
         double finishTemp;
-        double d0, z;
     };
 
     bool start(ProcessConfig processConfig, ProcessInfo processInfo);
@@ -49,7 +48,6 @@ public:
     bool isRunning();
     int getState();
 
-    bool startManualMeasuring();
     bool stopManualMeasuring();
     bool testRelays();
 
@@ -65,7 +63,6 @@ private:
     explicit StateMachine(QObject *parent = nullptr);
 
     QTimer *timer;
-    QTimer *manualTimer;
     Process *process;
     ProcessLog *processLog;
     State state;
@@ -81,13 +78,12 @@ private:
 
     quint64 id;
 
-private slots:
-    void tick();
+private slots:    
     void autoklavControl();
     void tankControl();
     void pipeControl();
     void verificationControl();
-    void manualControl();
+    void triggerAlarm();
 };
 
 #endif // STATEMACHINE_H

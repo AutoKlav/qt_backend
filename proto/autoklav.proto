@@ -20,7 +20,7 @@ service Autoklav {
     rpc deleteProcessType(TypeRequest) returns (Status);
     rpc startProcess(StartProcessRequest) returns (Status);
     rpc stopProcess(Empty) returns (Status);
-    rpc startManualProcess(Empty) returns (Status);
+    rpc startManualProcess(StartProcessRequest) returns (Status);
     rpc stopManualProcess(Empty) returns (Status);
     rpc relayTest(Empty) returns (Status);
 
