@@ -41,7 +41,7 @@ private:
         Status deleteProcessType(grpc::ServerContext *context, const autoklav::TypeRequest *request, autoklav::Status *replay) override;
         Status startProcess(grpc::ServerContext *context, const autoklav::StartProcessRequest *request, autoklav::Status *replay) override;
         Status relayTest(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay) override;
-        Status startManualProcess(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay) override;
+        Status startManualProcess(grpc::ServerContext *context, const autoklav::StartProcessRequest *request, autoklav::Status *replay) override;
         Status stopManualProcess(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay) override;
         Status stopProcess(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay) override;
         Status getSensorPinValues(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::SensorValues *replay) override;
@@ -220,12 +220,35 @@ Status GRpcServer::Impl::AutoklavServiceImpl::relayTest(grpc::ServerContext *con
     return Status::OK;
 }
 
-Status GRpcServer::Impl::AutoklavServiceImpl::startManualProcess(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay)
+Status GRpcServer::Impl::AutoklavServiceImpl::startManualProcess(grpc::ServerContext *context, const autoklav::StartProcessRequest *request, autoklav::Status *replay)
 {
     Q_UNUSED(context);
-    Q_UNUSED(request);
 
-    bool succ = StateMachine::instance().startManualMeasuring();
+    const StateMachine::ProcessConfig processConfig = {
+        .type = static_cast<StateMachine::Type>(request->processconfig().type()),
+        .customTemp = request->processconfig().customtemp(),
+        .maintainTemp = request->processconfig().maintaintemp(),
+        .finishTemp = request->processconfig().finishtemp(),
+    };
+
+    const Bacteria bacteria = {
+        .id = static_cast<int>(request->processinfo().bacteria().id()),
+        .name = QString::fromUtf8(request->processinfo().bacteria().name()).trimmed(),
+        .description = QString::fromUtf8(request->processinfo().bacteria().description()).trimmed(),
+        .d0 = request->processinfo().bacteria().d0(),
+        .z = request->processinfo().bacteria().z()
+    };
+
+    const ProcessInfo processInfo = {
+        .batchLTO = QString::fromUtf8(request->processinfo().batchlto()).trimmed(),
+        .productName = QString::fromUtf8(request->processinfo().productname()).trimmed(),
+        .productQuantity = QString::fromUtf8(request->processinfo().productquantity()).trimmed(),
+        .processStart = QString::fromUtf8(request->processinfo().processstart()),
+        .targetF = QString::fromUtf8(request->processinfo().targetf()),
+        .bacteria = bacteria,
+    };
+
+    bool succ = StateMachine::instance().start(processConfig, processInfo);
 
     setStatusReply(replay, !succ);
     return Status::OK;
