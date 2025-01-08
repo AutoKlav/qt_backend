@@ -28,12 +28,10 @@ void StateMachine::pipeControl()
 
 void StateMachine::triggerAlarm(){
     Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(1);
-    Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(0);
-    //Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(1);
-    //Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(0);
+    Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(0);    
 }
 
-void StateMachine::verificationControl()
+bool StateMachine::verificationControl()
 {
     Logger::info("### Verification [Door, Burner, Water] ###");
 
@@ -41,7 +39,7 @@ void StateMachine::verificationControl()
     // we control door as long as watertrain is not turned on
     if(!stateMachineValues.doorClosed && Sensor::getRelayValues().waterDrain == 0 ){
         Logger::info("Door not closed!");
-        triggerAlarm();
+        turnOnAlarm = true;
     }
 
     if(stateMachineValues.burnerFault != 1 ||
@@ -50,9 +48,10 @@ void StateMachine::verificationControl()
         turnOnAlarm = true;
     }
 
-
     if (turnOnAlarm)
         triggerAlarm();
+
+    return !turnOnAlarm;
 }
 
 void StateMachine::tankControl()
@@ -262,14 +261,15 @@ StateMachineValues StateMachine::calculateDrFrRValuesAndUpdateDbFromSensors(int 
 {
     auto stateMachineValues = calculateStateMachineValues();
 
-
     return stateMachineValues;
 }
 
 void StateMachine::autoklavControl()
 {
-    tankControl();
-    verificationControl();
+    if(!verificationControl())
+        return;
+
+    tankControl();    
     pipeControl();
 
     stateMachineValues = calculateStateMachineValues();

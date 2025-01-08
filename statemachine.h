@@ -82,7 +82,7 @@ private slots:
     void autoklavControl();
     void tankControl();
     void pipeControl();
-    void verificationControl();
+    bool verificationControl();
     void triggerAlarm();
 };
 
