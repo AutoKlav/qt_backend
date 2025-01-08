@@ -265,15 +265,12 @@ StateMachineValues StateMachine::calculateDrFrRValuesAndUpdateDbFromSensors(int 
 }
 
 void StateMachine::autoklavControl()
-{
-    if(!verificationControl())
-        return;
-
-    tankControl();    
-    pipeControl();
-
+{    
     stateMachineValues = calculateStateMachineValues();
     DbManager::instance().createProcessLog(process->getId());
+
+    if(!verificationControl())
+        return;
 
     switch (state) {
     case State::READY:
@@ -434,6 +431,9 @@ void StateMachine::autoklavControl()
         stateMachineValues = StateMachineValues();
         break;
     }
+
+    tankControl();
+    pipeControl();
 }
 
 bool StateMachine::stopManualMeasuring(){
