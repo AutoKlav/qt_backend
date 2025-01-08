@@ -39,7 +39,7 @@ void StateMachine::verificationControl()
 
     auto turnOnAlarm = false;
     // we control door as long as watertrain is not turned on
-    if(stateMachineValues.doorClosed != 1 && Sensor::getRelayValues().waterDrain != 0 ){
+    if(!stateMachineValues.doorClosed && Sensor::getRelayValues().waterDrain == 0 ){
         Logger::info("Door not closed!");
         triggerAlarm();
     }
@@ -113,7 +113,6 @@ bool StateMachine::start(ProcessConfig processConfig, ProcessInfo processInfo)
 
     processStart = QDateTime::currentDateTime();
     process = new Process(processStart.toString(Qt::ISODate), processInfo, this);
-    stateMachineValues = StateMachineValues();
 
     // Start the timer with the state machine tick interval
     QMetaObject::invokeMethod(timer, "start", Qt::AutoConnection, Q_ARG(int, Globals::stateMachineTick));
@@ -269,7 +268,7 @@ StateMachineValues StateMachine::calculateDrFrRValuesAndUpdateDbFromSensors(int 
 
 void StateMachine::autoklavControl()
 {
-    //tankControl();
+    tankControl();
     verificationControl();
     pipeControl();
 
