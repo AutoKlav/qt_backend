@@ -28,24 +28,30 @@ void StateMachine::pipeControl()
 
 void StateMachine::triggerAlarm(){
     Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(1);
-    Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(0);
-    //Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(1);
-    //Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(0);
+    Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(0);    
 }
 
-void StateMachine::verificationControl()
+bool StateMachine::verificationControl()
 {
     Logger::info("### Verification [Door, Burner, Water] ###");
 
+    auto turnOnAlarm = false;
     // we control door as long as watertrain is not turned on
-    if(stateMachineValues.doorClosed != 1 && Sensor::getRelayValues().waterDrain == 0 ){
-        triggerAlarm();
+    if(!stateMachineValues.doorClosed && Sensor::getRelayValues().waterDrain == 0 ){
+        Logger::info("Door not closed!");
+        turnOnAlarm = true;
     }
 
     if(stateMachineValues.burnerFault != 1 ||
         stateMachineValues.waterShortage != 1 ){
-        triggerAlarm();
+        Logger::info("Burner or water shortage fault");
+        turnOnAlarm = true;
     }
+
+    if (turnOnAlarm)
+        triggerAlarm();
+
+    return !turnOnAlarm;
 }
 
 void StateMachine::tankControl()
@@ -106,7 +112,6 @@ bool StateMachine::start(ProcessConfig processConfig, ProcessInfo processInfo)
 
     processStart = QDateTime::currentDateTime();
     process = new Process(processStart.toString(Qt::ISODate), processInfo, this);
-    stateMachineValues = StateMachineValues();
 
     // Start the timer with the state machine tick interval
     QMetaObject::invokeMethod(timer, "start", Qt::AutoConnection, Q_ARG(int, Globals::stateMachineTick));
@@ -256,15 +261,16 @@ StateMachineValues StateMachine::calculateDrFrRValuesAndUpdateDbFromSensors(int 
 {
     auto stateMachineValues = calculateStateMachineValues();
 
-
     return stateMachineValues;
 }
 
 void StateMachine::autoklavControl()
 {
-    //tankControl();
-    //verificationControl();
-    //pipeControl();
+    if(!verificationControl())
+        return;
+
+    tankControl();    
+    pipeControl();
 
     stateMachineValues = calculateStateMachineValues();
     DbManager::instance().createProcessLog(process->getId());
