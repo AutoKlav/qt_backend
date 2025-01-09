@@ -226,9 +226,9 @@ StateMachineValues StateMachine::calculateStateMachineValues()
 
     updateStateMachineValues.dTemp = processConfig.customTemp - updateStateMachineValues.tempK;
 
-    const auto k = Globals::k;
-    const auto z = processInfo.bacteria.z;
-    const auto d0 = processInfo.bacteria.d0;
+    const auto k = Globals::k; // 5
+    const auto z = processInfo.bacteria.z; // 10
+    const auto d0 = processInfo.bacteria.d0; // 0.2
 
     const auto exp = updateStateMachineValues.dTemp / z;
 
@@ -304,7 +304,6 @@ void StateMachine::autoklavControl()
 
         if(stateMachineValues.pressure < 1)
             break;
-
 
         Sensor::mapName[CONSTANTS::INCREASE_PRESSURE]->send(0);
 
@@ -388,7 +387,7 @@ void StateMachine::autoklavControl()
             Sensor::mapName[CONSTANTS::COOLING_HELPER]->send(0);
         }
 
-        Sensor::mapName[CONSTANTS::WATER_DRAIN]->send(1); // ignoriramo alarm otvorena vrata
+        Sensor::mapName[CONSTANTS::WATER_DRAIN]->send(1);
 
         state = State::FINISHING;
         coolingTime = coolingStart.msecsTo(QDateTime::currentDateTime());
