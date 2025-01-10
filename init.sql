@@ -1,4 +1,5 @@
 -- Globals
+drop table if exists Globals;
 CREATE TABLE Globals ( name TEXT NOT NULL UNIQUE, value TEXT NOT NULL );
 
 INSERT INTO Globals VALUES ( "serialDataTime", "3000" );
@@ -8,6 +9,7 @@ INSERT INTO Globals VALUES ( "coolingThreshold", "50" );
 INSERT INTO Globals VALUES ( "expansionTemp", "95" );
 
 -- Sensor
+drop table if exists  Sensor;
 create table Sensor
 (
     name     TEXT not null
@@ -36,7 +38,7 @@ INSERT INTO Sensor (name, minValue, maxValue) VALUES ('waterLevel', 0, 3);
 -- Digital Output
 INSERT INTO Sensor (name, minValue, maxValue) VALUES ('fillTankWithWater', 0, 1);
 INSERT INTO Sensor (name, minValue, maxValue) VALUES ('cooling', 0, 1);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('tankHeating', 0, 1); 
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('tankHeating', 0, 1);
 INSERT INTO Sensor (name, minValue, maxValue) VALUES ('coolingHelper', 0, 1);
 INSERT INTO Sensor (name, minValue, maxValue) VALUES ('autoklavFill', 0, 1);
 INSERT INTO Sensor (name, minValue, maxValue) VALUES ('waterDrain', 0, 1);
@@ -48,7 +50,7 @@ INSERT INTO Sensor (name, minValue, maxValue) VALUES ('extensionCooling', 0, 1);
 INSERT INTO Sensor (name, minValue, maxValue) VALUES ('alarmSignal', 0, 1);
 
 -- Bacteria
-drop table Bacteria;
+drop table if exists Bacteria;
 create table Bacteria
 (
     id INTEGER primary key autoincrement,
@@ -62,19 +64,19 @@ create table Bacteria
 INSERT INTO Bacteria (id, name, description, d0, z, dateCreated, dateModified) VALUES (1, 'clostridium botulinum', 'G pozitivna, anaerobna bakterija', 0.2, 10, CURRENT_TIMESTAMP,null);
 
 -- Process
-drop table Process;
+drop table if exists Process;
 create table Process
 (
     id              INTEGER
         primary key autoincrement,
    bacteriaId      INTEGER
-        references Bacteria(id) 
-        on delete set null,        
+        references Bacteria(id)
+        on delete set null,
     name            TEXT
         unique,
     batchLTO        TEXT,
     productName     TEXT,
-    productQuantity TEXT,    
+    productQuantity TEXT,
     processStart    DATETIME,
     targetF         TEXT,
     targetHeatingTime TEXT,
@@ -86,7 +88,7 @@ INSERT INTO Process (id, bacteriaId, name, batchLTO, productName, productQuantit
 
 CREATE INDEX idx_process_start ON Process(processStart);
 
-drop table ProcessType;
+drop table if exists ProcessType;
 create table ProcessType
 (
     id               INTEGER
@@ -94,7 +96,7 @@ create table ProcessType
     name             TEXT not null,
     type             TEXT,
     customTemp       REAL,
-    finishTemp       REAL,    
+    finishTemp       REAL,
     maintainTemp     REAL
 );
 
@@ -102,22 +104,8 @@ INSERT INTO ProcessType (id, name, type, customTemp, finishTemp, maintainTemp) V
 INSERT INTO ProcessType (id, name, type, customTemp, finishTemp, maintainTemp) VALUES (1, 'Pasterizacija', 'pasterizacija', 70, 70, 6);
 INSERT INTO ProcessType (id, name, type, customTemp, finishTemp, maintainTemp) VALUES (2, 'Prilagođeno', null, null, null, null);
 
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('temp', 0, 150);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('expansionTemp', 0, 150);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('heaterTemp', 0, 150);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('tankTemp', 0, 150);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('tempK', 0, 150);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('tankWaterLevel', 0, 1);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('pressure', 0, 3);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('steamPressure', 0, 3);
-
--- Digital Input
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('doorClosed', 0, 1);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('burnerFault', 0, 1);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('waterShortage', 0, 1);
-
 -- ProcessLog
-drop table ProcessLog;
+drop table if exists ProcessLog;
 create table ProcessLog
 (
     processId INTEGER  not null
@@ -133,7 +121,7 @@ create table ProcessLog
     doorClosed REAL,
     burnerFault REAL,
     waterShortage REAL,
-    dTemp     REAL,    
+    dTemp     REAL,
     state     REAL,
     Dr        REAL,
     Fr        REAL,
