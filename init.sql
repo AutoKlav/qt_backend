@@ -3,7 +3,7 @@ CREATE TABLE Globals ( name TEXT NOT NULL UNIQUE, value TEXT NOT NULL );
 
 INSERT INTO Globals VALUES ( "serialDataTime", "3000" );
 INSERT INTO Globals VALUES ( "stateMachineTick", "60000" );
-INSERT INTO Globals VALUES ( "k", "1" );
+INSERT INTO Globals VALUES ( "k", "5" );
 INSERT INTO Globals VALUES ( "coolingThreshold", "50" );
 INSERT INTO Globals VALUES ( "expansionTemp", "95" );
 
