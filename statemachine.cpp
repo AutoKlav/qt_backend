@@ -226,9 +226,9 @@ StateMachineValues StateMachine::calculateStateMachineValues()
 
     updateStateMachineValues.dTemp = processConfig.customTemp - updateStateMachineValues.tempK;
 
-    const auto k = Globals::k; // 5
-    const auto z = processInfo.bacteria.z; // 10
-    const auto d0 = processInfo.bacteria.d0; // 0.2
+    const auto k = Globals::k;
+    const auto z = processInfo.bacteria.z;
+    const auto d0 = processInfo.bacteria.d0;
 
     const auto exp = updateStateMachineValues.dTemp / z;
 
@@ -313,8 +313,10 @@ void StateMachine::autoklavControl()
 
     case State::HEATING:
 
-        if(stateMachineValues.temp < processConfig.maintainTemp)
+        if(stateMachineValues.temp < processConfig.maintainTemp) {
+            Logger::info(QString("Wait until %1 reaches %2").arg(QString::number(stateMachineValues.temp)).arg(QString::number(processConfig.maintainTemp)));
             break;
+        }
 
         state = State::STERILIZING;
         heatingStart =  QDateTime::currentDateTime();
@@ -327,7 +329,7 @@ void StateMachine::autoklavControl()
             Sensor::mapName[CONSTANTS::HEATING]->send(0);
         } else if (stateMachineValues.temp < processConfig.maintainTemp - 1) {
             Sensor::mapName[CONSTANTS::HEATING]->send(1);
-        }
+        }        
 
         if (processConfig.mode == Mode::TARGETF) {            
             if (stateMachineValues.sumFr < processInfo.targetF.toDouble()){
