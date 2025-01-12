@@ -42,8 +42,8 @@ bool StateMachine::verificationControl()
         turnOnAlarm = true;
     }
 
-    if(stateMachineValues.burnerFault != 1 ||
-        stateMachineValues.waterShortage != 1 ){
+    if(stateMachineValues.burnerFault == 1 ||
+        stateMachineValues.waterShortage == 1 ){
         Logger::info("Burner or water shortage fault");
         turnOnAlarm = true;
     }
@@ -94,13 +94,13 @@ bool StateMachine::start(ProcessConfig processConfig, ProcessInfo processInfo)
         return false;
     }
 
-    if (!stateMachineValues.burnerFault) {
+    if (stateMachineValues.burnerFault) {
         Logger::info("Burner error");
         triggerAlarm();
         return false;
     }
 
-    if (!stateMachineValues.waterShortage) {
+    if (stateMachineValues.waterShortage) {
         Logger::info("Water shortage error");
         triggerAlarm();
         return false;
@@ -122,6 +122,12 @@ bool StateMachine::start(ProcessConfig processConfig, ProcessInfo processInfo)
 
 bool StateMachine::stop()
 {
+// ERROR
+// Critical: "Serial: Error occurred 9"
+// Critical: "Global error occured: 2"
+// Critical: "Failed to send data via serial (timeout)"
+// Critical: "Global error occured: 256"
+// ASSERT: "m_buf" in file C:\Users\qt\work\install\include\QtCore\6.8.0\QtCore\private/qiodevice_p.h, line 85
     if (!isRunning())
         return false;
 
@@ -151,41 +157,9 @@ bool StateMachine::testRelays()
 {
     if (isRunning())
         return false;
-
-    Sensor::mapName[CONSTANTS::AUTOKLAV_FILL]->send(1);
-
-    Sensor::mapName[CONSTANTS::PUMP]->send(1);
-    Sensor::mapName[CONSTANTS::HEATING]->send(1);
-    Sensor::mapName[CONSTANTS::ELECTRIC_HEATING]->send(1);
-
-    Sensor::mapName[CONSTANTS::AUTOKLAV_FILL]->send(0);
-    Sensor::mapName[CONSTANTS::INCREASE_PRESSURE]->send(1);
-    Sensor::mapName[CONSTANTS::INCREASE_PRESSURE]->send(0);
-
-    Sensor::mapName[CONSTANTS::ELECTRIC_HEATING]->send(0);
-    Sensor::mapName[CONSTANTS::HEATING]->send(0);
-
-    Sensor::mapName[CONSTANTS::COOLING]->send(1);
-    Sensor::mapName[CONSTANTS::COOLING_HELPER]->send(1);
-
-    Sensor::mapName[CONSTANTS::FILL_TANK_WITH_WATER]->send(1);
-    Sensor::mapName[CONSTANTS::FILL_TANK_WITH_WATER]->send(0);
-
-    Sensor::mapName[CONSTANTS::COOLING]->send(0);
-    Sensor::mapName[CONSTANTS::PUMP]->send(0);
-    Sensor::mapName[CONSTANTS::COOLING_HELPER]->send(0);
-
-    Sensor::mapName[CONSTANTS::WATER_DRAIN]->send(1);
-    Sensor::mapName[CONSTANTS::WATER_DRAIN]->send(0);
-
     Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(1);
     Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(0);
 
-    Sensor::mapName[CONSTANTS::TANK_HEATING]->send(1);
-    Sensor::mapName[CONSTANTS::TANK_HEATING]->send(0);
-
-    Sensor::mapName[CONSTANTS::EXTENSION_COOLING]->send(1);
-    Sensor::mapName[CONSTANTS::EXTENSION_COOLING]->send(0);
 
     return true;
 }
@@ -224,22 +198,20 @@ StateMachineValues StateMachine::calculateStateMachineValues()
     updateStateMachineValues.burnerFault = sensorValues.burnerFault;
     updateStateMachineValues.waterShortage = sensorValues.waterShortage;
 
-    updateStateMachineValues.dTemp = processConfig.customTemp - updateStateMachineValues.tempK;
+    updateStateMachineValues.dTemp = updateStateMachineValues.tempK - processConfig.customTemp;
 
     const auto k = Globals::k;
     const auto z = processInfo.bacteria.z;
     const auto d0 = processInfo.bacteria.d0;
-
-    const auto exp = updateStateMachineValues.dTemp / z;
 
     // Old autoklav
     //stateMachineValues.Dr = qPow(10, 0.1 * stateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
     //stateMachineValues.Fr = qPow(10, -0.1 * stateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
     //stateMachineValues.r = 5 * stateMachineValues.Fr;
 
-    updateStateMachineValues.Dr = k * d0 * qPow(10, -1*exp) * (Globals::stateMachineTick / 60000.0);
-    updateStateMachineValues.Fr = (qPow(10, exp) * (Globals::stateMachineTick / 60000.0)) / (k * d0);
-    updateStateMachineValues.r = (qPow(10, exp) * (Globals::stateMachineTick / 60000.0)) / d0 ;
+    updateStateMachineValues.Dr = k * d0 * qPow(10, -1.0/z*updateStateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
+    updateStateMachineValues.Fr = 1.0/(k * d0) * qPow(10, 1.0/z*updateStateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
+    updateStateMachineValues.r = 1.0/d0 * qPow(10, 1.0/z*updateStateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
 
     updateStateMachineValues.state = state;
 
@@ -280,7 +252,7 @@ void StateMachine::autoklavControl()
         Logger::info("StateMachine: Starting");
 
         Sensor::mapName[CONSTANTS::AUTOKLAV_FILL]->send(1);
-        stopwatch1 = QDateTime::currentDateTime().addSecs(15); // 3 minutes
+        stopwatch1 = QDateTime::currentDateTime().addSecs(3*60); // 3 minutes
 
         state = State::FILLING;
         Logger::info("StateMachine: Filling");
@@ -296,7 +268,7 @@ void StateMachine::autoklavControl()
         Sensor::mapName[CONSTANTS::PUMP]->send(1);
         Sensor::mapName[CONSTANTS::HEATING]->send(1);
 
-        if(stateMachineValues.pressure < 0.1)
+        if(stateMachineValues.pressure < 0.18)
             break;
 
         Sensor::mapName[CONSTANTS::AUTOKLAV_FILL]->send(0);
@@ -325,9 +297,9 @@ void StateMachine::autoklavControl()
 
     case State::STERILIZING:
 
-        if (stateMachineValues.temp > processConfig.maintainTemp + 1) {
+        if (stateMachineValues.temp > processConfig.maintainTemp + 0.5) {
             Sensor::mapName[CONSTANTS::HEATING]->send(0);
-        } else if (stateMachineValues.temp < processConfig.maintainTemp - 1) {
+        } else if (stateMachineValues.temp < processConfig.maintainTemp - 0.5) {
             Sensor::mapName[CONSTANTS::HEATING]->send(1);
         }        
 
@@ -357,20 +329,16 @@ void StateMachine::autoklavControl()
 
     case State::COOLING:
 
-        if(stateMachineValues.tankWaterLevel < 80) {
+        tankControl();
+        if(stateMachineValues.tankWaterLevel < 95) { // TODO: Dogovorit tocan postotak
             Logger::info("Wait until tank water level is reached");
             break;
         }
 
+        Sensor::mapName[CONSTANTS::COOLING]->send(0);
         Sensor::mapName[CONSTANTS::FILL_TANK_WITH_WATER]->send(0);
 
         if (processConfig.mode == Mode::TARGETF) {
-
-            if (stateMachineValues.tempK > Globals::coolingThreshold)
-                break;
-
-            Sensor::mapName[CONSTANTS::COOLING]->send(0);
-            Sensor::mapName[CONSTANTS::PUMP]->send(0);
 
             if(stateMachineValues.tempK > processConfig.finishTemp)
                 break;
@@ -382,13 +350,10 @@ void StateMachine::autoklavControl()
                 Logger::info("Wait until target cooling is reached");
                 break;
             }
-
-            Sensor::mapName[CONSTANTS::COOLING]->send(0);
-            Sensor::mapName[CONSTANTS::PUMP]->send(0);            
-
-            Sensor::mapName[CONSTANTS::COOLING_HELPER]->send(0);
         }
 
+        Sensor::mapName[CONSTANTS::COOLING_HELPER]->send(0);
+        Sensor::mapName[CONSTANTS::PUMP]->send(0);
         Sensor::mapName[CONSTANTS::WATER_DRAIN]->send(1);
 
         state = State::FINISHING;
@@ -433,7 +398,6 @@ void StateMachine::autoklavControl()
         break;
     }
 
-    tankControl();
     pipeControl();
 }
 

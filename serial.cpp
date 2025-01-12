@@ -88,7 +88,7 @@ Serial &Serial::instance()
 
 void Serial::open()
 {
-    m_serial->setPortName("COM4");
+    m_serial->setPortName("COM8");
     m_serial->setBaudRate(QSerialPort::Baud9600);
     m_serial->setDataBits(QSerialPort::Data8);
     m_serial->setParity(QSerialPort::NoParity);
@@ -113,7 +113,7 @@ void Serial::close()
 void Serial::sendData(const QString& data)
 {
     // Add a small delay to prevent overwhelming the Arduino
-    QThread::msleep(5000); // Adjust the delay as necessary
+    QThread::msleep(10000); // Adjust the delay as necessary
 
     QString protocolData = data;
     Logger::info(QString("Sent data to serial communication: %1").arg(protocolData));
