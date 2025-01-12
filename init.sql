@@ -19,14 +19,14 @@ create table Sensor
 );
 
 -- Analog Input
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('temp', 0, 150);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('expansionTemp', 0, 150);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('heaterTemp', 0, 150);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('tankTemp', 0, 150);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('tempK', 0, 150);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('tankWaterLevel', 0, 1);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('pressure', 0, 3);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('steamPressure', 0, 3);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('temp', -53.640776699029125, 194.6601941747573);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('expansionTemp', -51.666666666666664, 191.9047619047619);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('heaterTemp', -53.03579952267303, 194.77923627684964);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('tankTemp', -52.76, 192.57);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('tempK', -50.03157894736842, 192.10526315789474);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('tankWaterLevel', -55.33, 117.25);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('pressure', -0.977, 4.439);
+INSERT INTO Sensor (name, minValue, maxValue) VALUES ('steamPressure', -0.00598, 16.16966);
 
 -- Digital Input
 INSERT INTO Sensor (name, minValue, maxValue) VALUES ('doorClosed', 0, 1);
