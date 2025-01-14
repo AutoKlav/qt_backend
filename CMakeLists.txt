@@ -66,6 +66,7 @@ target_link_libraries(ServerRunner_grpc_gen
 add_library(ServerRunner
     STATIC
     grpcserver.h grpcserver.cpp
+    invokeonmainthread.h
 )
 
 target_include_directories(ServerRunner PRIVATE ${out_dir})
@@ -93,7 +94,6 @@ add_executable(NewAutoklav
   init.sql
   process.cpp process.h
   constants.h
-
 )
 
 target_link_libraries(NewAutoklav
