@@ -10,13 +10,10 @@ Master::Master(QObject *parent)
     : QObject{parent}
 {
     auto &db = DbManager::instance();
-
     db.loadGlobals();
     db.loadSensors();
 
-    // Switch to MockSerial to test without Arduino
     Serial::instance().open();
-    // MockSerial::instance();
 
     StateMachine::instance();
 

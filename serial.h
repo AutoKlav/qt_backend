@@ -62,7 +62,7 @@ private:
      */
     void parseData();
 
-    QSerialPort *m_serial = nullptr; /**< The QSerialPort object for serial communication. */
+    QSerialPort m_serial; /**< The QSerialPort object for serial communication. */
     QByteArray m_buffer; /**< The buffer to store incoming data. */
     QTimer m_retryTimer; /**< The timer to handle reconnection attempts. */
     static constexpr int WAIT_TIME_MS = 2000; /**< The wait time in milliseconds for reconnection attempts. */

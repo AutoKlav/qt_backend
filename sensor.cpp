@@ -29,6 +29,14 @@ void Sensor::send(double newValue)
     serial.sendData(data);
 }
 
+void Sensor::sendIfNew(double newValue)
+{
+    if (newValue == value)
+        return;
+
+    send(newValue);
+}
+
 void Sensor::setValue(uint newPinValue)
 {    
     pinValue = newPinValue;
@@ -154,7 +162,15 @@ void Sensor::parseSerialData(QString data)
 
 bool Sensor::updateSensor(QString name, double minValue, double maxValue)
 {
-    auto isSensorUpdated = DbManager::instance().updateSensor(name, minValue, maxValue);
-    return isSensorUpdated;
+    if (!DbManager::instance().updateSensor(name, minValue, maxValue))
+        return false;
+
+    if (!Sensor::mapName.contains(name))
+        return false;
+
+    Sensor::mapName[name]->minValue = minValue;
+    Sensor::mapName[name]->maxValue = maxValue;
+
+    return true;
 }
 
