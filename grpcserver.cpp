@@ -3,6 +3,7 @@
 #include <grpc++/grpc++.h>
 #include "autoklav.grpc.pb.h"
 
+#include <QCoreApplication>
 #include <QtConcurrent/QtConcurrentRun>
 
 #include "sensor.h"
@@ -11,6 +12,8 @@
 #include "statemachine.h"
 #include "globalerrors.h"
 #include "constants.h"
+#include "invokeonmainthread.h"
+#include "logger.h"
 
 using grpc::Status;
 
@@ -40,9 +43,6 @@ private:
         Status createProcessType(grpc::ServerContext *context, const autoklav::ProcessTypeRequest *request, autoklav::Status *replay) override;
         Status deleteProcessType(grpc::ServerContext *context, const autoklav::TypeRequest *request, autoklav::Status *replay) override;
         Status startProcess(grpc::ServerContext *context, const autoklav::StartProcessRequest *request, autoklav::Status *replay) override;
-        Status relayTest(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay) override;
-        Status startManualProcess(grpc::ServerContext *context, const autoklav::StartProcessRequest *request, autoklav::Status *replay) override;
-        Status stopManualProcess(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay) override;
         Status stopProcess(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay) override;
         Status getSensorPinValues(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::SensorValues *replay) override;
         Status getSensorRelayValues(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::SensorRelayValues *replay) override;
@@ -64,6 +64,8 @@ GRpcServer::Impl::Impl()
     builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
     builder.RegisterService(&service);
     server = builder.BuildAndStart();
+
+    Logger::info("GRpc server started");
 
     // Start the server in a separate thread
     (void)QtConcurrent::run([this] {
@@ -115,10 +117,13 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getVariables(grpc::ServerContext *
     Q_UNUSED(context);
     Q_UNUSED(request);
 
-    auto variables = Globals::getVariables();
-
-    replay->set_serialdatatime(variables.serialDataTime);
-    replay->set_statemachinetick(variables.stateMachineTick);
+    replay->set_statemachinetick(Globals::stateMachineTick);
+    replay->set_k(Globals::k);
+    replay->set_coolingthreshold(Globals::coolingThreshold);
+    replay->set_expansionuppertemp(Globals::expansionUpperTemp);
+    replay->set_expansionlowertemp(Globals::expansionLowerTemp);
+    replay->set_heaterwaterlevel(Globals::heaterWaterLevel);
+    replay->set_maintainwatertanktemp(Globals::maintainWaterTankTemp);
 
     return Status::OK;
 }
@@ -130,20 +135,11 @@ Status GRpcServer::Impl::AutoklavServiceImpl::setVariable(grpc::ServerContext *c
     const auto name = QString::fromUtf8(request->name().c_str());
     const auto value = QString::fromUtf8(request->value().c_str());
 
-    bool succ = false;
-    if (name == "serialDataTime") {
-        succ = Globals::setSerialDataTime(value.toInt());
-    } else if (name == "stateMachineTick") {
-        succ = Globals::setStateMachineTick(value.toInt());
-    } else if (name == "k"){
-        succ = Globals::setK(value.toDouble());
-    } else if (name == "coolingThreshold"){
-        succ = Globals::setCoolingThreshold(value.toDouble());
-    } else if (name == "expansionTemp"){
-        succ = Globals::setExpansionTemp(value.toDouble());
-    }
+    bool success = invokeOnMainThreadBlocking([name, value](){
+        return Globals::updateVariable(name, value);
+    });
 
-    setStatusReply(replay, !succ);
+    setStatusReply(replay, !success);
     return Status::OK;
 }
 
@@ -155,18 +151,14 @@ Status GRpcServer::Impl::AutoklavServiceImpl::updateSensor(grpc::ServerContext *
     const auto minValue = request->minvalue();
     const auto maxValue = request->maxvalue();
 
-    bool success = Sensor::updateSensor(name, minValue, maxValue);
-    setStatusReply(replay, !success);
+    bool success = invokeOnMainThreadBlocking([name, minValue, maxValue](){
+        return Sensor::updateSensor(name, minValue, maxValue);
+    });
 
+    setStatusReply(replay, !success);
     return Status::OK;
 }
 
-/**
- * @brief Represents the status of a gRPC server operation.
- */
-/**
- * @brief Represents the status of a gRPC operation.
- */
 Status GRpcServer::Impl::AutoklavServiceImpl::startProcess(grpc::ServerContext *context, const autoklav::StartProcessRequest *request, autoklav::Status *replay)
 {
     Q_UNUSED(context);
@@ -203,65 +195,11 @@ Status GRpcServer::Impl::AutoklavServiceImpl::startProcess(grpc::ServerContext *
         .bacteria = bacteria,        
     };
 
-    bool succ = StateMachine::instance().start(processConfig, processInfo);
+    bool success = invokeOnMainThreadBlocking([processConfig, processInfo](){
+        return StateMachine::instance().start(processConfig, processInfo);
+    });
 
-    setStatusReply(replay, !succ);
-    return Status::OK;
-}
-
-Status GRpcServer::Impl::AutoklavServiceImpl::relayTest(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay)
-{
-    Q_UNUSED(context);
-    Q_UNUSED(request);
-
-    bool succ = StateMachine::instance().testRelays();
-
-    setStatusReply(replay, !succ);
-    return Status::OK;
-}
-
-Status GRpcServer::Impl::AutoklavServiceImpl::startManualProcess(grpc::ServerContext *context, const autoklav::StartProcessRequest *request, autoklav::Status *replay)
-{
-    Q_UNUSED(context);
-
-    const StateMachine::ProcessConfig processConfig = {
-        .type = static_cast<StateMachine::Type>(request->processconfig().type()),
-        .customTemp = request->processconfig().customtemp(),
-        .maintainTemp = request->processconfig().maintaintemp(),
-        .finishTemp = request->processconfig().finishtemp(),
-    };
-
-    const Bacteria bacteria = {
-        .id = static_cast<int>(request->processinfo().bacteria().id()),
-        .name = QString::fromUtf8(request->processinfo().bacteria().name()).trimmed(),
-        .description = QString::fromUtf8(request->processinfo().bacteria().description()).trimmed(),
-        .d0 = request->processinfo().bacteria().d0(),
-        .z = request->processinfo().bacteria().z()
-    };
-
-    const ProcessInfo processInfo = {
-        .batchLTO = QString::fromUtf8(request->processinfo().batchlto()).trimmed(),
-        .productName = QString::fromUtf8(request->processinfo().productname()).trimmed(),
-        .productQuantity = QString::fromUtf8(request->processinfo().productquantity()).trimmed(),
-        .processStart = QString::fromUtf8(request->processinfo().processstart()),
-        .targetF = QString::fromUtf8(request->processinfo().targetf()),
-        .bacteria = bacteria,
-    };
-
-    bool succ = StateMachine::instance().start(processConfig, processInfo);
-
-    setStatusReply(replay, !succ);
-    return Status::OK;
-}
-
-Status GRpcServer::Impl::AutoklavServiceImpl::stopManualProcess(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay)
-{
-    Q_UNUSED(context);
-    Q_UNUSED(request);
-
-    bool succ = StateMachine::instance().stopManualMeasuring();
-
-    setStatusReply(replay, !succ);
+    setStatusReply(replay, !success);
     return Status::OK;
 }
 
@@ -277,9 +215,11 @@ Status GRpcServer::Impl::AutoklavServiceImpl::createProcessType(grpc::ServerCont
         .maintainTemp = request->maintaintemp()
     };
 
-    bool succ = Process::createProcessType(processType);
+    bool success = invokeOnMainThreadBlocking([processType](){
+        return Process::createProcessType(processType);
+    });
 
-    setStatusReply(replay, !succ);
+    setStatusReply(replay, !success);
     return Status::OK;
 }
 
@@ -289,9 +229,11 @@ Status GRpcServer::Impl::AutoklavServiceImpl::deleteProcessType(grpc::ServerCont
 
     const auto id = request->id();
 
-    bool succ = Process::deleteProcessType(id);
+    bool success = invokeOnMainThreadBlocking([id](){
+        return Process::deleteProcessType(id);
+    });
 
-    setStatusReply(replay, !succ);
+    setStatusReply(replay, !success);
     return Status::OK;
 }
 
@@ -301,9 +243,11 @@ Status GRpcServer::Impl::AutoklavServiceImpl::stopProcess(grpc::ServerContext *c
     Q_UNUSED(context);
     Q_UNUSED(request);
 
-    bool succ = StateMachine::instance().stop();
+    bool success = invokeOnMainThreadBlocking([](){
+        return StateMachine::instance().stop();
+    });
 
-    setStatusReply(replay, !succ);
+    setStatusReply(replay, !success);
     return Status::OK;
 }
 
@@ -344,7 +288,9 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getBacteria(grpc::ServerContext *c
     Q_UNUSED(context);
     Q_UNUSED(request);
 
-    const auto bacteria = Process::getBacteria();
+    const auto bacteria = invokeOnMainThreadBlocking([](){
+        return Process::getBacteria();
+    });
 
     for (const auto &bacterium : bacteria) {
 
@@ -365,7 +311,10 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getDistinctProcessValues(grpc::Ser
     Q_UNUSED(context);
 
     auto columnName = request->columnname();
-    const auto processes = Process::getFilteredProcessValues(QString::fromStdString(columnName));
+
+    const auto processes = invokeOnMainThreadBlocking([columnName](){
+        return Process::getFilteredProcessValues(QString::fromStdString(columnName));
+    });
 
     for (const auto &process : processes) {
         replay->add_values(process.toStdString());
@@ -382,7 +331,9 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getFilteredModeValues(grpc::Server
     const auto productQuantity = QString::fromStdString(request->productquantity());
 
     // Call to the function that retrieves the values from the database
-    const auto filteredMap = Process::getFilteredTargetFAndProcessLengthValues(productName, productQuantity);
+    const auto filteredMap = invokeOnMainThreadBlocking([productName, productQuantity](){
+        return Process::getFilteredTargetFAndProcessLengthValues(productName, productQuantity);
+    });
 
     // Extract the "targetF" and "processLength" lists from the filteredMap
     const auto targetFList = filteredMap.value("targetF");
@@ -406,7 +357,9 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getAllProcessTypes(grpc::ServerCon
     Q_UNUSED(context);
     Q_UNUSED(request);
 
-    const auto processTypes = Process::getProcessTypes();
+    const auto processTypes = invokeOnMainThreadBlocking([](){
+        return Process::getProcessTypes();
+    });
 
     for (const auto &processType : processTypes) {
         auto processTypeInfo = replay->add_processtypes();
@@ -430,7 +383,10 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getProcessLogs(grpc::ServerContext
     std::vector<ProcessLogInfoRow> allProcessLogs;
 
     for (const auto &id : request->ids()) {
-        const auto processLogs = ProcessLog::getAllProcessLogs(id);
+        const auto processLogs = invokeOnMainThreadBlocking([id](){
+            return ProcessLog::getAllProcessLogs(id);
+        });
+
         allProcessLogs.insert(allProcessLogs.end(), processLogs.begin(), processLogs.end());
     }
 
@@ -469,7 +425,9 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getSensorPinValues(grpc::ServerCon
     Q_UNUSED(context);
     Q_UNUSED(request);
 
-    const auto sensorValues = Sensor::getPinValues();
+    const auto sensorValues = invokeOnMainThreadBlocking([](){
+        return Sensor::getPinValues();
+    });
 
     // Fetch error flags
     QVector<QString> errorStrings = GlobalErrors::getErrorsString();
@@ -503,7 +461,9 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getSensorRelayValues(grpc::ServerC
     Q_UNUSED(request);
     Q_UNUSED(replay);
 
-    const auto sensorRelayValues = Sensor::getRelayValues();
+    const auto sensorRelayValues = invokeOnMainThreadBlocking([](){
+        return Sensor::getRelayValues();
+    });
 
     // Fetch error flags
     QVector<QString> errorStrings = GlobalErrors::getErrorsString();
@@ -536,7 +496,9 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getStateMachineValues(grpc::Server
     Q_UNUSED(context);
     Q_UNUSED(request);
 
-    const auto stateMachineValues = StateMachine::instance().getStateMachineValuesOnTheFly();
+    const auto stateMachineValues = invokeOnMainThreadBlocking([](){
+        return StateMachine::instance().calculateStateMachineValues();
+    });
      
     replay->set_elapsedtime(stateMachineValues.time);
 

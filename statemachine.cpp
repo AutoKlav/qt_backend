@@ -1,108 +1,82 @@
 #include "statemachine.h"
+
 #include "logger.h"
 #include "sensor.h"
 #include "globals.h"
 #include "dbmanager.h"
 #include "constants.h"
-#include <QRandomGenerator>
 
 // Constructor
 StateMachine::StateMachine(QObject *parent)
-    : QObject(parent), state(READY), timer(nullptr), process(nullptr), processLog(nullptr)
+    : QObject(parent), state(READY), process(nullptr), processLog(nullptr)
 {
-    timer = new QTimer(this); // Explicitly initialize timer
-    connect(timer, &QTimer::timeout, this, &StateMachine::autoklavControl); // Ensure tick is connected    
+    connect(&timer, &QTimer::timeout, this, &StateMachine::tick);
 }
 
-void StateMachine::pipeControl()
+int StateMachine::getState()
 {
-    Logger::info("### Extension ###");
-
-    if(stateMachineValues.expansionTemp >= Globals::expansionTemp){
-        Sensor::mapName[CONSTANTS::EXTENSION_COOLING]->send(1);
-    }
-    else {
-        Sensor::mapName[CONSTANTS::EXTENSION_COOLING]->send(0);
-    }
+    return static_cast<int>(state);
 }
 
-void StateMachine::triggerAlarm(){
+void StateMachine::tick()
+{
+    pipeControl();
+    tankControl();
+    autoklavControl();
+}
+
+void StateMachine::triggerAlarm()
+{
+    Logger::warn("Alarm triggered!");
     Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(1);
     Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(0);    
 }
 
-bool StateMachine::verificationControl()
+void StateMachine::pipeControl()
 {
-    Logger::info("### Verification [Door, Burner, Water] ###");
-
-    auto turnOnAlarm = false;
-    // we control door as long as watertrain is not turned on
-    if(!stateMachineValues.doorClosed && Sensor::getRelayValues().waterDrain == 0 ){
-        Logger::info("Door not closed!");
-        turnOnAlarm = true;
+    if (stateMachineValues.expansionTemp > Globals::expansionUpperTemp) {
+        Sensor::mapName[CONSTANTS::EXTENSION_COOLING]->sendIfNew(1); // TODO: Check if pipe extension should be controlled while the process is not running
     }
-
-    if(stateMachineValues.burnerFault == 1 ||
-        stateMachineValues.waterShortage == 1 ){
-        Logger::info("Burner or water shortage fault");
-        turnOnAlarm = true;
+    else if (stateMachineValues.expansionTemp < Globals::expansionLowerTemp) {
+        Sensor::mapName[CONSTANTS::EXTENSION_COOLING]->sendIfNew(0);
     }
-
-    if (turnOnAlarm)
-        triggerAlarm();
-
-    return !turnOnAlarm;
 }
 
 void StateMachine::tankControl()
-{
-    Logger::info("### Tank ###");
+{   
+    // When acceptable water level inside tank to turn on heaters
+    if (stateMachineValues.tankWaterLevel > Globals::heaterWaterLevel) {
 
-    if(stateMachineValues.tankWaterLevel > 40){        
-        // mantain tank temp at 95
-        if(stateMachineValues.tankTemp > 96){
-            Sensor::mapName[CONSTANTS::TANK_HEATING]->send(0);
-        } else if(stateMachineValues.tankTemp < 94){
-            Sensor::mapName[CONSTANTS::TANK_HEATING]->send(1);
+        // Maintain temp of water inside tank ±1
+        if (stateMachineValues.tankTemp > Globals::maintainWaterTankTemp + 1) {
+            Sensor::mapName[CONSTANTS::TANK_HEATING]->sendIfNew(0);
+        } else if (stateMachineValues.tankTemp > Globals::maintainWaterTankTemp - 1) {
+            if (isRunning()) // Turn on heaters only while process is running
+                Sensor::mapName[CONSTANTS::TANK_HEATING]->sendIfNew(1);
         }
-
-        if(stateMachineValues.tankWaterLevel > 80){
-            Sensor::mapName[CONSTANTS::FILL_TANK_WITH_WATER]->send(0);
-        }
+    } else {
+        Sensor::mapName[CONSTANTS::TANK_HEATING]->sendIfNew(0);
     }
-    else{
-        Sensor::mapName[CONSTANTS::TANK_HEATING]->send(0);
-    }
-}
 
-int StateMachine::getState() {
-    return static_cast<int>(state);
+    if (stateMachineValues.tankWaterLevel > 100 && state != State::COOLING) {
+        Sensor::mapName[CONSTANTS::FILL_TANK_WITH_WATER]->sendIfNew(0);
+    }
 }
 
 bool StateMachine::start(ProcessConfig processConfig, ProcessInfo processInfo)
 {
+    Logger::info("Process starting");
+
     if (isRunning()){
-        Logger::info("Autoklav is already running");
+        Logger::warn("Start failed: Autoklav is already running");
         return false;
     }
 
     // Fetch first time values and abort start if door is not closed
     stateMachineValues = calculateStateMachineValues();
 
-    if (!stateMachineValues.doorClosed) {
-        Logger::info("Door is not closed");
-        return false;
-    }
-
-    if (stateMachineValues.burnerFault) {
-        Logger::info("Burner error");
-        triggerAlarm();
-        return false;
-    }
-
-    if (stateMachineValues.waterShortage) {
-        Logger::info("Water shortage error");
-        triggerAlarm();
+    if (!verificationControl()) {
+        Logger::warn("Start failed");
         return false;
     }
 
@@ -113,26 +87,21 @@ bool StateMachine::start(ProcessConfig processConfig, ProcessInfo processInfo)
     processStart = QDateTime::currentDateTime();
     process = new Process(processStart.toString(Qt::ISODate), processInfo, this);
 
-    // Start the timer with the state machine tick interval
-    QMetaObject::invokeMethod(timer, "start", Qt::AutoConnection, Q_ARG(int, Globals::stateMachineTick));
-    autoklavControl();
+    Logger::info("Process started");
+
+    tick();
+    timer.start(Globals::stateMachineTick);
 
     return true;
 }
 
 bool StateMachine::stop()
 {
-// ERROR
-// Critical: "Serial: Error occurred 9"
-// Critical: "Global error occured: 2"
-// Critical: "Failed to send data via serial (timeout)"
-// Critical: "Global error occured: 256"
-// ASSERT: "m_buf" in file C:\Users\qt\work\install\include\QtCore\6.8.0\QtCore\private/qiodevice_p.h, line 85
     if (!isRunning())
         return false;
 
     Logger::info("End process");
-    timer->stop();
+    timer.stop();
 
     Sensor::mapName[CONSTANTS::FILL_TANK_WITH_WATER]->send(0);
     Sensor::mapName[CONSTANTS::COOLING]->send(0);
@@ -153,17 +122,6 @@ bool StateMachine::stop()
     return true;
 }
 
-bool StateMachine::testRelays()
-{
-    if (isRunning())
-        return false;
-    Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(1);
-    Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(0);
-
-
-    return true;
-}
-
 inline bool StateMachine::isRunning()
 {
     return state != State::READY;
@@ -172,11 +130,6 @@ inline bool StateMachine::isRunning()
 StateMachineValues StateMachine::getValues()
 {
     return stateMachineValues;
-}
-
-StateMachineValues StateMachine::getStateMachineValuesOnTheFly()
-{
-    return calculateStateMachineValues();
 }
 
 StateMachineValues StateMachine::calculateStateMachineValues()
@@ -204,14 +157,9 @@ StateMachineValues StateMachine::calculateStateMachineValues()
     const auto z = processInfo.bacteria.z;
     const auto d0 = processInfo.bacteria.d0;
 
-    // Old autoklav
-    //stateMachineValues.Dr = qPow(10, 0.1 * stateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
-    //stateMachineValues.Fr = qPow(10, -0.1 * stateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
-    //stateMachineValues.r = 5 * stateMachineValues.Fr;
-
     updateStateMachineValues.Dr = k * d0 * qPow(10, -1.0/z*updateStateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
-    updateStateMachineValues.Fr = 1.0/(k * d0) * qPow(10, 1.0/z*updateStateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
-    updateStateMachineValues.r = 1.0/d0 * qPow(10, 1.0/z*updateStateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
+    updateStateMachineValues.Fr = 1.0 / (k * d0) * qPow(10, 1.0/z*updateStateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
+    updateStateMachineValues.r = 1.0 / d0 * qPow(10, 1.0/z*updateStateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
 
     updateStateMachineValues.state = state;
 
@@ -229,20 +177,35 @@ StateMachineValues StateMachine::calculateStateMachineValues()
 }
 
 
-StateMachineValues StateMachine::calculateDrFrRValuesAndUpdateDbFromSensors(int processId)
+bool StateMachine::verificationControl()
 {
-    auto stateMachineValues = calculateStateMachineValues();
+    auto turnOnAlarm = false;
+    if (!stateMachineValues.doorClosed) {
+        Logger::warn("Door not closed!");
+        turnOnAlarm = true;
+    }
 
-    return stateMachineValues;
+    if (stateMachineValues.burnerFault ||
+        stateMachineValues.waterShortage) {
+        Logger::warn("Burner or water shortage fault");
+        turnOnAlarm = true;
+    }
+
+    if (turnOnAlarm)
+        triggerAlarm();
+
+    return !turnOnAlarm;
 }
+
 
 void StateMachine::autoklavControl()
 {    
     stateMachineValues = calculateStateMachineValues();
     DbManager::instance().createProcessLog(process->getId());
 
-    if(!verificationControl())
-        return;
+    if(!verificationControl()) {
+        Logger::warn("Verification failed, not doing anything!");
+    }
 
     switch (state) {
     case State::READY:
@@ -328,9 +291,7 @@ void StateMachine::autoklavControl()
         break;
 
     case State::COOLING:
-
-        tankControl();
-        if(stateMachineValues.tankWaterLevel < 95) { // TODO: Dogovorit tocan postotak
+        if(stateMachineValues.tankWaterLevel < 95) {
             Logger::info("Wait until tank water level is reached");
             break;
         }
@@ -339,11 +300,10 @@ void StateMachine::autoklavControl()
         Sensor::mapName[CONSTANTS::FILL_TANK_WITH_WATER]->send(0);
 
         if (processConfig.mode == Mode::TARGETF) {
-
-            if(stateMachineValues.tempK > processConfig.finishTemp)
+            if(stateMachineValues.tempK > processConfig.finishTemp) {
+                Logger::info("Wait until tempK reaches finish temp");
                 break;
-
-            Sensor::mapName[CONSTANTS::COOLING_HELPER]->send(0);
+            }
 
         } else if (processConfig.mode == Mode::TIME) {
             if (coolingStart.msecsTo(QDateTime::currentDateTime()) < processInfo.targetCoolingTime.toDouble()) {
@@ -358,8 +318,8 @@ void StateMachine::autoklavControl()
 
         state = State::FINISHING;
         coolingTime = coolingStart.msecsTo(QDateTime::currentDateTime());
-        stopwatch1 = QDateTime::currentDateTime().addSecs(15); // 10 minutes
-        Logger::info("StateMachine: Cooling helper");        
+        stopwatch1 = QDateTime::currentDateTime().addSecs(10*60); // 10 minutes
+        Logger::info("StateMachine: Finishing");
         break;
 
     case State::FINISHING:
@@ -376,7 +336,7 @@ void StateMachine::autoklavControl()
         break;
 
     case State::FINISHED:
-        timer->stop();
+        timer.stop();
 
         Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(1);
         Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(0);
@@ -397,26 +357,6 @@ void StateMachine::autoklavControl()
         stateMachineValues = StateMachineValues();
         break;
     }
-
-    pipeControl();
-}
-
-bool StateMachine::stopManualMeasuring(){
-
-    if (!isRunning())
-        return false;
-
-    if (process) {
-        auto processInfo = process->getInfo();
-        processInfo.processLength = QString::number(stateMachineValues.time);
-        processInfo.targetCoolingTime = QString::number(0);
-        processInfo.targetHeatingTime = QString::number(0);
-        process->setInfo(processInfo);
-    }
-
-    state = State::READY;
-
-    return true;
 }
 
 StateMachine &StateMachine::instance()

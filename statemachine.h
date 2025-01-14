@@ -48,21 +48,15 @@ public:
     bool isRunning();
     int getState();
 
-    bool stopManualMeasuring();
-    bool testRelays();
-
     StateMachineValues getValues();
-
     StateMachineValues calculateStateMachineValues();
-    StateMachineValues calculateDrFrRValuesAndUpdateDbFromSensors(int processId);
-    StateMachineValues getStateMachineValuesOnTheFly();
     
     static StateMachine &instance();
 
 private:
     explicit StateMachine(QObject *parent = nullptr);
 
-    QTimer *timer;
+    QTimer timer;
     Process *process;
     ProcessLog *processLog;
     State state;
@@ -78,12 +72,14 @@ private:
 
     quint64 id;
 
-private slots:    
+    bool verificationControl();
+    void triggerAlarm();
+
+private slots:
+    void tick();
     void autoklavControl();
     void tankControl();
     void pipeControl();
-    bool verificationControl();
-    void triggerAlarm();
 };
 
 #endif // STATEMACHINE_H

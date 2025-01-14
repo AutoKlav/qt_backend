@@ -41,7 +41,8 @@ class Sensor
 public:
     Sensor(QString name, double minValue, double maxValue);
 
-    void send(double value);
+    void send(double newValue);
+    void sendIfNew(double newValue);
     void setValue(uint newPinValue);
     void setValue(QString newPinValue);
 

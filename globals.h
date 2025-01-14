@@ -1,30 +1,38 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
+#include <QHash>
+#include <QString>
+#include <QVariant>
+
 class Globals
 {
 public:
-    struct Variables {
-        int serialDataTime;
-        int stateMachineTick;
-        double k;
-        double coolingThreshold;
-        double expansionTemp;
+    using VarRefType = std::variant<
+        std::reference_wrapper<int>,
+        std::reference_wrapper<double>
+    >;
+
+    inline static int stateMachineTick = 60000;
+    inline static double k = 5;
+    inline static double coolingThreshold = 50;
+    inline static double expansionUpperTemp = 95;
+    inline static double expansionLowerTemp = 90;
+    inline static double heaterWaterLevel = 40;
+    inline static double maintainWaterTankTemp = 95;
+
+    inline static QHash<QString, VarRefType> variables = {
+        {"stateMachineTick",        std::ref(stateMachineTick)},
+        {"k",                       std::ref(k)},
+        {"coolingThreshold",        std::ref(coolingThreshold)},
+        {"expansionUpperTemp",      std::ref(expansionUpperTemp)},
+        {"expansionLowerTemp",      std::ref(expansionLowerTemp)},
+        {"heaterWaterLevel",        std::ref(heaterWaterLevel)},
+        {"maintainWaterTankTemp",   std::ref(maintainWaterTankTemp)}
     };
 
-    inline static int serialDataTime = 0;
-    inline static int stateMachineTick = 0;
-    inline static double k = 1;
-    inline static double coolingThreshold = 50;
-    inline static double expansionTemp = 95;
-
-    static bool setSerialDataTime(int value);
-    static bool setStateMachineTick(int value);
-    static bool setK(double value);
-    static bool setCoolingThreshold(double value);
-    static bool setExpansionTemp(double value);
-    
-    static Variables getVariables();
+    static bool setVariable(const QString &key, const QString &newValue);
+    static bool updateVariable(const QString &key, const QString &newValue);
 };
 
 #endif // GLOBALS_H

@@ -1,81 +1,50 @@
 #include "globals.h"
 
+#include "logger.h"
 #include "dbmanager.h"
 
-bool Globals::setSerialDataTime(int value)
+bool Globals::setVariable(const QString &key, const QString &newValue)
 {
-    if (serialDataTime == value)
-        return true;
+    auto it = variables.find(key);
+    if (it == variables.end()) {
+        Logger::warn(QString("setVariable: variable %1 doesn't exist").arg(key));
+        return false;
+    }
 
-    auto& db = DbManager::instance();
-    if (db.updateGlobal("serialDataTime", QString::number(value))) {
-        serialDataTime = value;
+    VarRefType &varRef = it.value();
+
+    // If the stored variant is a reference to int
+    if (std::holds_alternative<std::reference_wrapper<int>>(varRef)) {
+        bool ok = false;
+        int value = newValue.toInt(&ok);
+        if (ok) {
+            std::get<std::reference_wrapper<int>>(varRef).get() = value;
+        } else {
+            Logger::warn(QString("Failed to parse %1 %2 to int").arg(key).arg(newValue));
+            return false;
+        }
+    }
+    // If the stored variant is a reference to double
+    else if (std::holds_alternative<std::reference_wrapper<double>>(varRef)) {
+        bool ok = false;
+        double value = newValue.toDouble(&ok);
+        if (ok) {
+            std::get<std::reference_wrapper<double>>(varRef).get() = value;
+        } else {
+            Logger::warn(QString("Failed to parse %1 %2 to double").arg(key).arg(newValue));
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool Globals::updateVariable(const QString &key, const QString &newValue)
+{
+    if (setVariable(key, newValue)) {
+        DbManager::instance().updateGlobal(key, newValue);
         return true;
     }
 
     return false;
-}
-
-bool Globals::setStateMachineTick(int value)
-{
-    if (stateMachineTick == value)
-        return true;
-
-    auto& db = DbManager::instance();
-    if (db.updateGlobal("stateMachineTick", QString::number(value))) {
-        stateMachineTick = value;
-        return true;
-    }
-
-    return false;
-}
-
-bool Globals::setK(double value)
-{
-    if (k == value)
-        return true;
-
-    auto& db = DbManager::instance();
-    if (db.updateGlobal("k", QString::number(value))) {
-        k = value;
-        return true;
-    }
-
-    return false;
-}
-
-bool Globals::setCoolingThreshold(double value)
-{
-    if (coolingThreshold == value)
-        return true;
-
-    auto& db = DbManager::instance();
-    if (db.updateGlobal("coolingThreshold", QString::number(value))) {
-        coolingThreshold = value;
-        return true;
-    }
-
-    return false;
-}
-
-bool Globals::setExpansionTemp(double value)
-{
-    if (expansionTemp == value)
-        return true;
-
-    auto& db = DbManager::instance();
-    if (db.updateGlobal("expansionTemp", QString::number(value))) {
-        expansionTemp = value;
-        return true;
-    }
-
-    return false;
-}
-
-
-Globals::Variables Globals::getVariables()
-{
-    return {
-        serialDataTime, stateMachineTick
-    };
 }
