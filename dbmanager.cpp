@@ -43,49 +43,19 @@ QString DbManager::loadGlobal(QString name)
 
 void DbManager::loadGlobals()
 {
-    QString serialDataTimeStr = loadGlobal("serialDataTime");
-    if (!serialDataTimeStr.isEmpty()) {
-        Globals::serialDataTime = serialDataTimeStr.toInt();
-    }
-    else {
-        Logger::crit(GlobalErrors::DB_GLOBAL_SERIAL_DATA_TIME_LOAD_FAILED);
-        GlobalErrors::setError(GlobalErrors::DbSerialDataTimeError);
+    QSqlQuery query("SELECT * FROM Globals", m_db);
+
+    if (!query.exec()) {
+        Logger::crit("Database: Unable to load globals");
+        Logger::crit(QString("SQL error: %1").arg(query.lastError().text()));
+        GlobalErrors::setError(GlobalErrors::DbError);
     }
 
-    QString stateMachineTickStr = loadGlobal("stateMachineTick");
-    if (!stateMachineTickStr.isEmpty()) {
-        Globals::stateMachineTick = stateMachineTickStr.toInt();
-    }
-    else {
-        Logger::crit(GlobalErrors::DB_GLOBAL_STATE_MACHINE_TICK_LOAD_FAILED);
-        GlobalErrors::setError(GlobalErrors::DbStateMachineTickError);
-    }
+    while (query.next()) {
+        auto name = query.value(0).toString();
+        auto value = query.value(1).toString();
 
-    QString k = loadGlobal("k");
-    if (!stateMachineTickStr.isEmpty()) {
-        Globals::k = k.toDouble();
-    }
-    else {
-        Logger::crit(GlobalErrors::DB_GLOBAL_K_LOAD_FAILED);
-        GlobalErrors::setError(GlobalErrors::DbKError);
-    }
-
-    QString coolingThreshold = loadGlobal("coolingThreshold");
-    if (!stateMachineTickStr.isEmpty()) {
-        Globals::coolingThreshold = coolingThreshold.toDouble();
-    }
-    else {
-        Logger::crit(GlobalErrors::DB_GLOBAL_COOLING_THRESHOLD_LOAD_FAILED);
-        GlobalErrors::setError(GlobalErrors::DbCoolingThresholdError);
-    }
-
-    QString expansionTemp = loadGlobal("expansionTemp");
-    if (!stateMachineTickStr.isEmpty()) {
-        Globals::expansionTemp = expansionTemp.toDouble();
-    }
-    else {
-        Logger::crit(GlobalErrors::DB_GLOBAL_EXPANSION_TEMP_LOAD_FAILED);
-        GlobalErrors::setError(GlobalErrors::DbExpansionTempError);
+        Globals::setVariable(name, value);
     }
 }
 

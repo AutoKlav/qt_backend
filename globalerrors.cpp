@@ -4,11 +4,7 @@
 
 // Database errors
 const QString GlobalErrors::DB_ERROR = "Database error occurred";
-const QString GlobalErrors::DB_GLOBAL_SERIAL_DATA_TIME_LOAD_FAILED = "Database global serial data time load failed, value is empty.";
-const QString GlobalErrors::DB_GLOBAL_STATE_MACHINE_TICK_LOAD_FAILED = "Database global state machine tick load failed, value is empty.";
-const QString GlobalErrors::DB_GLOBAL_K_LOAD_FAILED = "Database global k, value is empty.";
-const QString GlobalErrors::DB_GLOBAL_COOLING_THRESHOLD_LOAD_FAILED = "Database global cooling threshold, value is empty.";
-const QString GlobalErrors::DB_GLOBAL_EXPANSION_TEMP_LOAD_FAILED = "Database global expansion temp, value is empty.";
+const QString GlobalErrors::DB_GLOBALS = "Database failed to load globals.";
 
 // Serial errors
 const QString GlobalErrors::SERIAL_ERROR = "Serial error occurred";
@@ -44,11 +40,7 @@ QVector<QString> GlobalErrors::getErrorsString()
 
     // Db error
     if (errors.testFlag(Error::DbError)) err.push_back(DB_ERROR);
-    if (errors.testFlag(Error::DbSerialDataTimeError)) err.push_back(DB_GLOBAL_SERIAL_DATA_TIME_LOAD_FAILED);
-    if (errors.testFlag(Error::DbStateMachineTickError)) err.push_back(DB_GLOBAL_STATE_MACHINE_TICK_LOAD_FAILED);
-    if (errors.testFlag(Error::DbKError)) err.push_back(DB_GLOBAL_K_LOAD_FAILED);
-    if (errors.testFlag(Error::DbCoolingThresholdError)) err.push_back(DB_GLOBAL_COOLING_THRESHOLD_LOAD_FAILED);
-    if (errors.testFlag(Error::DbExpansionTempError)) err.push_back(DB_GLOBAL_EXPANSION_TEMP_LOAD_FAILED);
+    if (errors.testFlag(Error::DbGlobalsError)) err.push_back(DB_GLOBALS);
     
     // Serial errors
     if (errors.testFlag(Error::SerialError)) err.push_back(SERIAL_ERROR);

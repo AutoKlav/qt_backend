@@ -20,9 +20,6 @@ service Autoklav {
     rpc deleteProcessType(TypeRequest) returns (Status);
     rpc startProcess(StartProcessRequest) returns (Status);
     rpc stopProcess(Empty) returns (Status);
-    rpc startManualProcess(StartProcessRequest) returns (Status);
-    rpc stopManualProcess(Empty) returns (Status);
-    rpc relayTest(Empty) returns (Status);
 
     // Sensor
     rpc getSensorPinValues(Empty) returns (SensorValues);
@@ -70,8 +67,13 @@ message ProcessTypesList {
 }
 
 message Variables {
-    int32 serialDataTime = 1;
-    int32 stateMachineTick = 2;    
+    int32 stateMachineTick = 1;
+    double k = 2;
+    double coolingThreshold = 3;
+    double expansionUpperTemp = 4;
+    double expansionLowerTemp = 5;
+    double heaterWaterLevel = 6;
+    double maintainWaterTankTemp = 7;
 }
 
 message SetVariable {

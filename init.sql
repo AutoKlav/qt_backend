@@ -2,12 +2,13 @@
 drop table if exists Globals;
 CREATE TABLE Globals ( name TEXT NOT NULL UNIQUE, value TEXT NOT NULL );
 
-INSERT INTO Globals VALUES ( "serialDataTime", "3000" );
 INSERT INTO Globals VALUES ( "stateMachineTick", "60000" );
 INSERT INTO Globals VALUES ( "k", "5" );
 INSERT INTO Globals VALUES ( "coolingThreshold", "50" );
-INSERT INTO Globals VALUES ( "expansionTemp", "95" );
-
+INSERT INTO Globals VALUES ( "expansionUpperTemp", "95" );
+INSERT INTO Globals VALUES ( "expansionLowerTemp", "90" );
+INSERT INTO Globals VALUES ( "heaterWaterLevel", "40" );
+INSERT INTO Globals VALUES ( "maintainWaterTankTemp", "95" );
 -- Sensor
 drop table if exists  Sensor;
 create table Sensor
@@ -64,6 +65,7 @@ create table Bacteria
 INSERT INTO Bacteria (id, name, description, d0, z, dateCreated, dateModified) VALUES (1, 'clostridium botulinum', 'G pozitivna, anaerobna bakterija', 0.2, 10, CURRENT_TIMESTAMP,null);
 
 -- Process
+drop table if exists ProcessLog;
 drop table if exists Process;
 create table Process
 (
