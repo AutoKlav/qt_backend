@@ -188,3 +188,9 @@ bool Sensor::updateSensor(QString name, double minValue, double maxValue)
     return true;
 }
 
+void Sensor::requestRelayUpdate()
+{
+    // Send specific command that will tell Arduino to send states of all relayes (digital outputs) to backend
+    Serial::instance().sendData("readDigitalOutputs=1;");
+}
+

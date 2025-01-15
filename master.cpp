@@ -15,6 +15,8 @@ Master::Master(QObject *parent)
 
     Serial::instance().open();
 
+    Sensor::requestRelayUpdate();
+
     StateMachine::instance();
 
     Logger::info("Program started");

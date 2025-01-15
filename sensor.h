@@ -61,6 +61,7 @@ public:
     static QList<Sensor> sensors;
     static QMap<QString, Sensor *> mapName;    
     static bool updateSensor(QString name, double minValue, double maxValue);
+    static void requestRelayUpdate();
 };
 
 #endif // SENSOR_H
