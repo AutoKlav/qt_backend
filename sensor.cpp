@@ -23,10 +23,9 @@ void Sensor::send(double newValue)
     value = newValue; // Update the internal value
     uint pinValue = newValue;
 
-    auto data = QString("%1=%2").arg(name).arg(pinValue);
+    auto data = QString("%1=%2;").arg(name).arg(pinValue);
 
-    auto &serial = Serial::instance();
-    serial.sendData(data);
+    Serial::instance().sendData(data);
 }
 
 void Sensor::sendIfNew(double newValue)
