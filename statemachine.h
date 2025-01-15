@@ -58,7 +58,6 @@ private:
 
     QTimer timer;
     Process *process;
-    ProcessLog *processLog;
     State state;
     QDateTime processStart;
     QDateTime heatingStart;

@@ -8,7 +8,7 @@
 
 // Constructor
 StateMachine::StateMachine(QObject *parent)
-    : QObject(parent), state(READY), process(nullptr), processLog(nullptr)
+    : QObject(parent), state(READY), process(nullptr)
 {
     connect(&timer, &QTimer::timeout, this, &StateMachine::tick);
 }
@@ -185,9 +185,13 @@ bool StateMachine::verificationControl()
         turnOnAlarm = true;
     }
 
-    if (stateMachineValues.burnerFault ||
-        stateMachineValues.waterShortage) {
-        Logger::warn("Burner or water shortage fault");
+    if (stateMachineValues.burnerFault) {
+        Logger::warn("Burner fault");
+        turnOnAlarm = true;
+    }
+
+    if (stateMachineValues.waterShortage) {
+        Logger::warn("Water shortage in burner fault");
         turnOnAlarm = true;
     }
 

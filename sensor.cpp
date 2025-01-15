@@ -3,6 +3,7 @@
 #include <QDateTime>
 
 #include "globalerrors.h"
+#include "globals.h"
 #include "logger.h"
 #include "dbmanager.h"
 #include "serial.h"
@@ -23,10 +24,9 @@ void Sensor::send(double newValue)
     value = newValue; // Update the internal value
     uint pinValue = newValue;
 
-    auto data = QString("%1=%2").arg(name).arg(pinValue);
+    auto data = QString("%1=%2;").arg(name).arg(pinValue);
 
-    auto &serial = Serial::instance();
-    serial.sendData(data);
+    Serial::instance().sendData(data);
 }
 
 void Sensor::sendIfNew(double newValue)
@@ -55,11 +55,21 @@ void Sensor::setValue(QString newPinValue)
 }
 
 
+void Sensor::checkIfDataIsOld()
+{
+    if (lastDataTime && QDateTime::currentMSecsSinceEpoch() - lastDataTime > Globals::serialDataOldTime)
+        GlobalErrors::setError(GlobalErrors::OldDataError);
+    else
+        GlobalErrors::removeError(GlobalErrors::OldDataError);
+}
+
 /**
  * @brief Representing the sensor values mapped to virtual values. 
  */
 SensorValues Sensor::getValues()
 {
+    checkIfDataIsOld();
+
     SensorValues values;
     
     values.temp = mapName[CONSTANTS::TEMP]->value;
@@ -83,6 +93,8 @@ SensorValues Sensor::getValues()
  */
 SensorValues Sensor::getPinValues()
 {
+    checkIfDataIsOld();
+
     SensorValues values;
 
     values.temp = mapName[CONSTANTS::TEMP]->pinValue;
@@ -107,6 +119,8 @@ SensorValues Sensor::getPinValues()
  */
 SensorRelayValues Sensor::getRelayValues()
 {
+    checkIfDataIsOld();
+
     SensorRelayValues relayValues;
     
     relayValues.fillTankWithWater = mapName[CONSTANTS::FILL_TANK_WITH_WATER]->value;
@@ -172,5 +186,11 @@ bool Sensor::updateSensor(QString name, double minValue, double maxValue)
     Sensor::mapName[name]->maxValue = maxValue;
 
     return true;
+}
+
+void Sensor::requestRelayUpdate()
+{
+    // Send specific command that will tell Arduino to send states of all relayes (digital outputs) to backend
+    Serial::instance().sendData("readDigitalOutputs=1;");
 }
 
