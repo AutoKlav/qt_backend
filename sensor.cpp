@@ -3,6 +3,7 @@
 #include <QDateTime>
 
 #include "globalerrors.h"
+#include "globals.h"
 #include "logger.h"
 #include "dbmanager.h"
 #include "serial.h"
@@ -54,11 +55,21 @@ void Sensor::setValue(QString newPinValue)
 }
 
 
+void Sensor::checkIfDataIsOld()
+{
+    if (lastDataTime && QDateTime::currentMSecsSinceEpoch() - lastDataTime > Globals::serialDataOldTime)
+        GlobalErrors::setError(GlobalErrors::OldDataError);
+    else
+        GlobalErrors::removeError(GlobalErrors::OldDataError);
+}
+
 /**
  * @brief Representing the sensor values mapped to virtual values. 
  */
 SensorValues Sensor::getValues()
 {
+    checkIfDataIsOld();
+
     SensorValues values;
     
     values.temp = mapName[CONSTANTS::TEMP]->value;
@@ -82,6 +93,8 @@ SensorValues Sensor::getValues()
  */
 SensorValues Sensor::getPinValues()
 {
+    checkIfDataIsOld();
+
     SensorValues values;
 
     values.temp = mapName[CONSTANTS::TEMP]->pinValue;
@@ -106,6 +119,8 @@ SensorValues Sensor::getPinValues()
  */
 SensorRelayValues Sensor::getRelayValues()
 {
+    checkIfDataIsOld();
+
     SensorRelayValues relayValues;
     
     relayValues.fillTankWithWater = mapName[CONSTANTS::FILL_TANK_WITH_WATER]->value;
