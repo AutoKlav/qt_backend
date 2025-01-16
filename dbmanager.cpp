@@ -499,7 +499,7 @@ QList<ProcessType> DbManager::getProcessTypes()
         auto type = query.value(2).toString();
         auto customTemp = query.value(3).toDouble();
         auto finishTemp = query.value(4).toDouble();
-        auto maintainTemp = query.value(6).toDouble();
+        auto maintainTemp = query.value(5).toDouble();
 
         types.append({id, name, type, customTemp, finishTemp, maintainTemp});
     }
