@@ -50,7 +50,7 @@ void StateMachine::tankControl()
         // Maintain temp of water inside tank ±1
         if (stateMachineValues.tankTemp > Globals::maintainWaterTankTemp + 1) {
             Sensor::mapName[CONSTANTS::TANK_HEATING]->sendIfNew(0);
-        } else if (stateMachineValues.tankTemp > Globals::maintainWaterTankTemp - 1) {
+        } else if (stateMachineValues.tankTemp < Globals::maintainWaterTankTemp - 1) {
             if (isRunning()) // Turn on heaters only while process is running
                 Sensor::mapName[CONSTANTS::TANK_HEATING]->sendIfNew(1);
         }
@@ -235,13 +235,13 @@ void StateMachine::autoklavControl()
         Sensor::mapName[CONSTANTS::PUMP]->send(1);
         Sensor::mapName[CONSTANTS::HEATING]->send(1);
 
-        if(stateMachineValues.pressure < 0.18)
+        if(stateMachineValues.pressure < 0.16)
             break;
 
         Sensor::mapName[CONSTANTS::AUTOKLAV_FILL]->send(0);
         Sensor::mapName[CONSTANTS::INCREASE_PRESSURE]->send(1);
 
-        if(stateMachineValues.pressure < 1)
+        if(stateMachineValues.pressure < 1.5)
             break;
 
         Sensor::mapName[CONSTANTS::INCREASE_PRESSURE]->send(0);
