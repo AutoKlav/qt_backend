@@ -3,7 +3,6 @@
 #include "sensor.h"
 #include "logger.h"
 #include "globalerrors.h"
-#include <QThread>
 #include <QTimer>
 
 Serial::Serial(QObject *parent)
@@ -110,8 +109,7 @@ void Serial::close()
 }
 
 void Serial::sendData(const QString& data)
-{
-    QThread::msleep(1000);
+{    
     QString protocolData = data;
     Logger::info(QString("Sent data to serial communication: %1").arg(protocolData));
 
