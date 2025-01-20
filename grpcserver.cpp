@@ -118,6 +118,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getVariables(grpc::ServerContext *
     Q_UNUSED(request);
 
     replay->set_statemachinetick(Globals::stateMachineTick);
+    replay->set_dbtick(Globals::dbTick);
     replay->set_k(Globals::k);
     replay->set_coolingthreshold(Globals::coolingThreshold);
     replay->set_expansionuppertemp(Globals::expansionUpperTemp);

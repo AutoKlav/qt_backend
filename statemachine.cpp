@@ -91,6 +91,7 @@ bool StateMachine::start(ProcessConfig processConfig, ProcessInfo processInfo)
 
     tick();
     timer.start(Globals::stateMachineTick);
+    writeInDBstopwatch = QDateTime::currentDateTime().addMSecs(Globals::dbTick);
 
     return true;
 }
@@ -205,7 +206,12 @@ bool StateMachine::verificationControl()
 void StateMachine::autoklavControl()
 {    
     stateMachineValues = calculateStateMachineValues();
-    DbManager::instance().createProcessLog(process->getId());
+
+    if(QDateTime::currentDateTime() > writeInDBstopwatch) {
+        DbManager::instance().createProcessLog(process->getId());
+        writeInDBstopwatch = QDateTime::currentDateTime().addMSecs(Globals::dbTick);
+    }
+
 
     if(!verificationControl()) {
         Logger::warn("Verification failed, not doing anything!");
@@ -219,7 +225,7 @@ void StateMachine::autoklavControl()
         Logger::info("StateMachine: Starting");
 
         Sensor::mapName[CONSTANTS::AUTOKLAV_FILL]->send(1);
-        stopwatch1 = QDateTime::currentDateTime().addSecs(3*60); // 3 minutes
+        stopwatch1 = QDateTime::currentDateTime().addMSecs(10*1000); // 3 minutes
 
         state = State::FILLING;
         Logger::info("StateMachine: Filling");
@@ -322,7 +328,7 @@ void StateMachine::autoklavControl()
 
         state = State::FINISHING;
         coolingTime = coolingStart.msecsTo(QDateTime::currentDateTime());
-        stopwatch1 = QDateTime::currentDateTime().addSecs(10*60); // 10 minutes
+        stopwatch1 = QDateTime::currentDateTime().addMSecs(10*1000); // 10 minutes
         Logger::info("StateMachine: Finishing");
         break;
 
