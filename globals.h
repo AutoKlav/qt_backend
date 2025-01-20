@@ -14,6 +14,7 @@ public:
     >;
 
     inline static int stateMachineTick = 60000;
+    inline static int dbTick = 120000;
     inline static int serialDataOldTime = 5000;
     inline static double k = 5;
     inline static double coolingThreshold = 50;
@@ -24,6 +25,7 @@ public:
 
     inline static QHash<QString, VarRefType> variables = {
         {"stateMachineTick",        std::ref(stateMachineTick)},
+        {"dbTick",                  std::ref(dbTick)},
         {"serialDataOldTime",       std::ref(serialDataOldTime)},
         {"k",                       std::ref(k)},
         {"coolingThreshold",        std::ref(coolingThreshold)},

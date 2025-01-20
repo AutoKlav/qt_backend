@@ -89,8 +89,9 @@ void DbManager::loadSensors()
     QSqlQuery query("SELECT * FROM Sensor", m_db);
     while (query.next()) {
         auto name = query.value(0).toString();
-        auto minValue = query.value(1).toDouble();
-        auto maxValue = query.value(2).toDouble();
+        auto alias = query.value(1).toString(); // alias is not used anywhere, just provides descriptions for virtual arduino pins
+        auto minValue = query.value(2).toDouble();
+        auto maxValue = query.value(3).toDouble();
 
         Sensor::sensors.append(Sensor(name, minValue, maxValue));
         Sensor::mapName.insert(name, &Sensor::sensors.last());        

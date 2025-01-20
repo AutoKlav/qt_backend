@@ -68,12 +68,13 @@ message ProcessTypesList {
 
 message Variables {
     int32 stateMachineTick = 1;
-    double k = 2;
-    double coolingThreshold = 3;
-    double expansionUpperTemp = 4;
-    double expansionLowerTemp = 5;
-    double heaterWaterLevel = 6;
-    double maintainWaterTankTemp = 7;
+    int32 dbTick = 2;
+    double k = 3;
+    double coolingThreshold = 4;
+    double expansionUpperTemp = 5;
+    double expansionLowerTemp = 6;
+    double heaterWaterLevel = 7;
+    double maintainWaterTankTemp = 8;
 }
 
 message SetVariable {

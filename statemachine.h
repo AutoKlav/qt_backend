@@ -63,6 +63,7 @@ private:
     QDateTime heatingStart;
     QDateTime coolingStart;
     QDateTime stopwatch1;
+    QDateTime writeInDBstopwatch;
     uint heatingTime;
     uint coolingTime;
     StateMachineValues stateMachineValues;

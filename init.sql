@@ -2,7 +2,8 @@
 drop table if exists Globals;
 CREATE TABLE Globals ( name TEXT NOT NULL UNIQUE, value TEXT NOT NULL );
 
-INSERT INTO Globals VALUES ( "stateMachineTick", "60000" );
+INSERT INTO Globals VALUES ( "stateMachineTick", "15000" );
+INSERT INTO Globals VALUES ( "dbTick", "120000" );
 INSERT INTO Globals VALUES ( "serialDataOldTime", "5000" );
 INSERT INTO Globals VALUES ( "k", "5" );
 INSERT INTO Globals VALUES ( "coolingThreshold", "50" );
@@ -10,46 +11,46 @@ INSERT INTO Globals VALUES ( "expansionUpperTemp", "95" );
 INSERT INTO Globals VALUES ( "expansionLowerTemp", "90" );
 INSERT INTO Globals VALUES ( "heaterWaterLevel", "40" );
 INSERT INTO Globals VALUES ( "maintainWaterTankTemp", "95" );
+
 -- Sensor
-drop table if exists  Sensor;
+drop table if exists Sensor;
 create table Sensor
 (
     name     TEXT not null
         unique,
+    alias   TEXT,
     minValue REAL not null,
     maxValue REAL not null
 );
 
--- Analog Input
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('temp', -53.640776699029125, 194.6601941747573);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('expansionTemp', -51.666666666666664, 191.9047619047619);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('heaterTemp', -53.03579952267303, 194.77923627684964);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('tankTemp', -52.76, 202.57);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('tempK', -50.03157894736842, 192.10526315789474);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('tankWaterLevel', -52.33, 120.25);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('pressure', -0.977, 4.439);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('steamPressure', -0.00598, 16.16966);
+-- Analog Inputs
+INSERT INTO Sensor (name, alias, minValue, maxValue) VALUES ('x', 'temp', -53.640776699029125, 194.6601941747573);  -- temp
+INSERT INTO Sensor (name, alias, minValue, maxValue) VALUES ('y', 'expansionTemp', -51.666666666666664, 191.9047619047619);  -- expansionTemp
+INSERT INTO Sensor (name, alias, minValue, maxValue) VALUES ('z', 'heaterTemp', -53.03579952267303, 194.77923627684964);  -- heaterTemp
+INSERT INTO Sensor (name, alias, minValue, maxValue) VALUES ('w', 'tankTemp', -52.76, 202.57);  -- tankTemp
+INSERT INTO Sensor (name, alias, minValue, maxValue) VALUES ('v', 'tempK', -50.03157894736842, 192.10526315789474);  -- tempK
+INSERT INTO Sensor (name, alias, minValue, maxValue) VALUES ('u', 'tankWaterLevel', -52.33, 120.25);  -- tankWaterLevel
+INSERT INTO Sensor (name, alias, minValue, maxValue) VALUES ('t', 'pressure', -0.977, 4.439);  -- pressure
+INSERT INTO Sensor (name, alias, minValue, maxValue) VALUES ('s', 'steamPressure', -0.00598, 16.16966);  -- steamPressure
 
--- Digital Input
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('doorClosed', 0, 1);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('burnerFault', 0, 1);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('waterShortage', 0, 1);
+-- Digital Inputs
+INSERT INTO Sensor (name, alias, minValue, maxValue) VALUES ('m', 'doorClosed', 0, 1);  -- doorClosed
+INSERT INTO Sensor (name, alias, minValue, maxValue) VALUES ('n', 'burnerFault', 0, 1);  -- burnerFault
+INSERT INTO Sensor (name, alias, minValue, maxValue) VALUES ('o', 'waterShortage', 0, 1);  -- waterShortage
 
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('waterLevel', 0, 3);
-
--- Digital Output
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('fillTankWithWater', 0, 1);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('cooling', 0, 1);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('tankHeating', 0, 1);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('coolingHelper', 0, 1);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('autoklavFill', 0, 1);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('waterDrain', 0, 1);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('heating', 0, 1);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('pump', 0, 1);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('electricHeating', 0, 1);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('increasePressure', 0, 1);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('extensionCooling', 0, 1);
-INSERT INTO Sensor (name, minValue, maxValue) VALUES ('alarmSignal', 0, 1);
+-- Digital Outputs
+INSERT INTO Sensor (name, alias, minValue, maxValue) VALUES ('a', 'fillTankWithWater', 0, 1);  -- fillTankWithWater
+INSERT INTO Sensor (name, alias, minValue, maxValue) VALUES ('b', 'cooling', 0, 1);  -- cooling
+INSERT INTO Sensor (name, alias, minValue, maxValue) VALUES ('c', 'tankHeating', 0, 1);  -- tankHeating
+INSERT INTO Sensor (name, alias, minValue, maxValue) VALUES ('d', 'coolingHelper', 0, 1);  -- coolingHelper
+INSERT INTO Sensor (name, alias, minValue, maxValue) VALUES ('e', 'autoklavFill', 0, 1);  -- autoklavFill
+INSERT INTO Sensor (name, alias, minValue, maxValue) VALUES ('f', 'waterDrain', 0, 1);  -- waterDrain
+INSERT INTO Sensor (name, alias, minValue, maxValue) VALUES ('g', 'heating', 0, 1);  -- heating
+INSERT INTO Sensor (name, alias, minValue, maxValue) VALUES ('h', 'pump', 0, 1);  -- pump
+INSERT INTO Sensor (name, alias, minValue, maxValue) VALUES ('i', 'electricHeating', 0, 1);  -- electricHeating
+INSERT INTO Sensor (name, alias, minValue, maxValue) VALUES ('j', 'increasePressure', 0, 1);  -- increasePressure
+INSERT INTO Sensor (name, alias, minValue, maxValue) VALUES ('k', 'extensionCooling', 0, 1);  -- extensionCooling
+INSERT INTO Sensor (name, alias, minValue, maxValue) VALUES ('l', 'alarmSignal', 0, 1);  -- alarmSignal
 
 -- Bacteria
 drop table if exists Bacteria;
@@ -58,8 +59,8 @@ create table Bacteria
     id INTEGER primary key autoincrement,
     name TEXT,
     description TEXT,
-    d0 REAL, -- secret values, used in top secret formulas below, d0 --> min, z --> celsius
-    z REAL, -- D = k * D0 ( 10^(-1/z))^deltaT, F = (10^(1/z))^deltaT / k*D0, r = (10^(1/z))^deltaT / D0
+    d0 REAL,
+    z REAL,
     dateCreated DATETIME not null,
     dateModified DATETIME
 );
