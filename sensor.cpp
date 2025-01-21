@@ -29,6 +29,20 @@ void Sensor::send(double newValue)
     Serial::instance().sendData(data);
 }
 
+bool Sensor::setRelayState(QString name, uint value)
+{
+    // Update sensor value if sensor exists
+    if (mapName.contains(name)) {        
+        Sensor::mapName[name]->send(value);    
+    } else {
+        Logger::crit(QString("Sensor '%1' cannot be set to '%2' since it is not found in database.").arg(name).arg(value));
+        GlobalErrors::setError(GlobalErrors::DbError);
+        return false;
+    }
+
+    return true;
+}
+
 void Sensor::sendIfNew(double newValue)
 {
     if (newValue == value)

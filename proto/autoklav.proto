@@ -31,6 +31,8 @@ service Autoklav {
 
     // StateMachine
     rpc getStateMachineValues(Empty) returns (StateMachineValues);
+    rpc setRelayStatus(SetVariable) returns (Status);    
+    rpc setStateMachineState(SetState) returns (Status);    
 }
 
 message Empty {}
@@ -153,14 +155,8 @@ enum HeatingType {
     ELECTRIC = 1;
 }
 
-enum ProcessConfigState {
-    READY = 0;
-    STARTING = 1;
-    FILLING = 2;
-    HEATING = 3;
-    COOLING = 4;
-    FINISHING = 5;
-    FINISHED = 6;
+message SetState {
+    uint32 state = 1;
 }
 
 enum ProcessConfigMode {

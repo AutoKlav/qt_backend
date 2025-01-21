@@ -44,9 +44,10 @@ public:
     };
 
     bool start(ProcessConfig processConfig, ProcessInfo processInfo);
+    bool setState(uint newState);
     bool stop();
     bool isRunning();
-    int getState();
+    int getState();    
 
     StateMachineValues getValues();
     StateMachineValues calculateStateMachineValues();
