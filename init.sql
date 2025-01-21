@@ -2,8 +2,8 @@
 drop table if exists Globals;
 CREATE TABLE Globals ( name TEXT NOT NULL UNIQUE, value TEXT NOT NULL );
 
-INSERT INTO Globals VALUES ( "stateMachineTick", "15000" );
-INSERT INTO Globals VALUES ( "dbTick", "120000" );
+INSERT INTO Globals VALUES ( "stateMachineTick", "5000" );
+INSERT INTO Globals VALUES ( "dbTick", "60000" );
 INSERT INTO Globals VALUES ( "serialDataOldTime", "5000" );
 INSERT INTO Globals VALUES ( "k", "5" );
 INSERT INTO Globals VALUES ( "coolingThreshold", "50" );
