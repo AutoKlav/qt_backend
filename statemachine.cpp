@@ -35,7 +35,7 @@ void StateMachine::triggerAlarm()
 void StateMachine::pipeControl()
 {
     if (stateMachineValues.expansionTemp > Globals::expansionUpperTemp) {
-        Sensor::mapName[CONSTANTS::EXTENSION_COOLING]->sendIfNew(1); // TODO: Check if pipe extension should be controlled while the process is not running
+        Sensor::mapName[CONSTANTS::EXTENSION_COOLING]->sendIfNew(1);
     }
     else if (stateMachineValues.expansionTemp < Globals::expansionLowerTemp) {
         Sensor::mapName[CONSTANTS::EXTENSION_COOLING]->sendIfNew(0);
@@ -225,7 +225,7 @@ void StateMachine::autoklavControl()
         Logger::info("StateMachine: Starting");
 
         Sensor::mapName[CONSTANTS::AUTOKLAV_FILL]->send(1);
-        stopwatch1 = QDateTime::currentDateTime().addMSecs(10*1000); // 3 minutes
+        stopwatch1 = QDateTime::currentDateTime().addMSecs(3*60*1000); // 3 minutes
 
         state = State::FILLING;
         Logger::info("StateMachine: Filling");
@@ -328,7 +328,7 @@ void StateMachine::autoklavControl()
 
         state = State::FINISHING;
         coolingTime = coolingStart.msecsTo(QDateTime::currentDateTime());
-        stopwatch1 = QDateTime::currentDateTime().addMSecs(10*1000); // 10 minutes
+        stopwatch1 = QDateTime::currentDateTime().addMSecs(3*60*1000); // 10 minutes
         Logger::info("StateMachine: Finishing");
         break;
 
