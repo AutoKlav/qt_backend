@@ -29,7 +29,7 @@ inline const QString AUTOKLAV_FILL = "e";  // autoklavFill
 inline const QString WATER_DRAIN = "f";  // waterDrain
 
 // default steam heating
-inline QString HEATING = "g";  // heating
+inline QString STEAM_HEATING = "g";  // heating
 // electric heating
 inline const QString ELECTRIC_HEATING = "i";  // electricHeating
 

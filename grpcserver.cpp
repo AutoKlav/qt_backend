@@ -207,9 +207,6 @@ Status GRpcServer::Impl::AutoklavServiceImpl::startProcess(grpc::ServerContext *
         .finishTemp = request->processconfig().finishtemp(),
     };
 
-    if(processConfig.heatingType == StateMachine::ELECTRIC)
-        CONSTANTS::HEATING = CONSTANTS::ELECTRIC_HEATING;
-
     const Bacteria bacteria = {
         .id = static_cast<int>(request->processinfo().bacteria().id()),
         .name = QString::fromUtf8(request->processinfo().bacteria().name()).trimmed(),
