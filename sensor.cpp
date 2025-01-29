@@ -143,7 +143,7 @@ SensorRelayValues Sensor::getRelayValues()
     relayValues.coolingHelper = mapName[CONSTANTS::COOLING_HELPER]->value;
     relayValues.autoklavFill = mapName[CONSTANTS::AUTOKLAV_FILL]->value;
     relayValues.waterDrain = mapName[CONSTANTS::WATER_DRAIN]->value;
-    relayValues.heating = mapName[CONSTANTS::HEATING]->value;
+    relayValues.heating = mapName[CONSTANTS::STEAM_HEATING]->value;
     relayValues.pump = mapName[CONSTANTS::PUMP]->value;
     relayValues.electricHeating = mapName[CONSTANTS::ELECTRIC_HEATING]->value;
     relayValues.increasePressure = mapName[CONSTANTS::INCREASE_PRESSURE]->value;
