@@ -32,21 +32,6 @@ void StateMachine::triggerAlarm()
     Sensor::mapName[CONSTANTS::ALARM_SIGNAL]->send(0);    
 }
 
-void StateMachine::selectAndActivateHeatingType(uint sendState)
-{
-    if(processConfig.heatingType == StateMachine::ELECTRIC)
-        Sensor::mapName[CONSTANTS::ELECTRIC_HEATING]->send(sendState);
-
-    else if(processConfig.heatingType == StateMachine::STEAM)
-        Sensor::mapName[CONSTANTS::STEAM_HEATING]->send(sendState);
-
-    else if(processConfig.heatingType == StateMachine::STEAM_ELECTRIC)
-    {
-        Sensor::mapName[CONSTANTS::ELECTRIC_HEATING]->send(sendState);
-        Sensor::mapName[CONSTANTS::STEAM_HEATING]->send(sendState);
-    }
-}
-
 void StateMachine::pipeControl()
 {
     if (stateMachineValues.expansionTemp > Globals::expansionUpperTemp) {
@@ -124,8 +109,8 @@ bool StateMachine::stop()
     Sensor::mapName[CONSTANTS::TANK_HEATING]->send(0);
     Sensor::mapName[CONSTANTS::COOLING_HELPER]->send(0);
     Sensor::mapName[CONSTANTS::AUTOKLAV_FILL]->send(0);
-    Sensor::mapName[CONSTANTS::WATER_DRAIN]->send(0);    
-    selectAndActivateHeatingType(0);
+    Sensor::mapName[CONSTANTS::WATER_DRAIN]->send(0);
+    Sensor::mapName[CONSTANTS::STEAM_HEATING]->send(0);
     Sensor::mapName[CONSTANTS::PUMP]->send(0);
     Sensor::mapName[CONSTANTS::ELECTRIC_HEATING]->send(0);
     Sensor::mapName[CONSTANTS::INCREASE_PRESSURE]->send(0);
@@ -254,7 +239,7 @@ void StateMachine::autoklavControl()
         }
 
         Sensor::mapName[CONSTANTS::PUMP]->send(1);
-        selectAndActivateHeatingType(1);
+        Sensor::mapName[CONSTANTS::STEAM_HEATING]->send(1);
 
 
         if(stateMachineValues.pressure < 0.16)
@@ -286,10 +271,10 @@ void StateMachine::autoklavControl()
 
     case State::STERILIZING:
 
-        if (stateMachineValues.temp > processConfig.maintainTemp + 0.5) {            
-            selectAndActivateHeatingType(0);
+        if (stateMachineValues.temp > processConfig.maintainTemp + 0.5) {                        
+            Sensor::mapName[CONSTANTS::STEAM_HEATING]->send(0);
         } else if (stateMachineValues.temp < processConfig.maintainTemp - 0.5) {
-            selectAndActivateHeatingType(1);
+            Sensor::mapName[CONSTANTS::STEAM_HEATING]->send(1);
         }        
 
         if (processConfig.mode == Mode::TARGETF) {            
@@ -300,27 +285,27 @@ void StateMachine::autoklavControl()
         } else if (processConfig.mode == Mode::TIME) {
             if (heatingStart.msecsTo(QDateTime::currentDateTime()) < processInfo.targetHeatingTime.toDouble()){
                 Logger::info("Wait until target time is reached");
+                heatingTime = heatingStart.msecsTo(QDateTime::currentDateTime());
+                coolingStart = QDateTime::currentDateTime();
                 break;
             }
         }
 
-        heatingTime = heatingStart.msecsTo(QDateTime::currentDateTime());
-
-        selectAndActivateHeatingType(0);
+        Sensor::mapName[CONSTANTS::STEAM_HEATING]->send(0);
         Sensor::mapName[CONSTANTS::COOLING]->send(1);
         Sensor::mapName[CONSTANTS::COOLING_HELPER]->send(1);
         Sensor::mapName[CONSTANTS::FILL_TANK_WITH_WATER]->send(1);
 
-        state = State::COOLING;
-        Logger::info("StateMachine: Cooling");
-        coolingStart = QDateTime::currentDateTime();
-        break;
-
-    case State::COOLING:
         if(stateMachineValues.tankWaterLevel < 95) {
             Logger::info("Wait until tank water level is reached");
             break;
         }
+
+        state = State::COOLING;
+        Logger::info("StateMachine: Cooling");        
+        break;
+
+    case State::COOLING:        
 
         Sensor::mapName[CONSTANTS::COOLING]->send(0);
         Sensor::mapName[CONSTANTS::FILL_TANK_WITH_WATER]->send(0);
