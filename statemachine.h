@@ -81,7 +81,6 @@ private slots:
     void autoklavControl();
     void tankControl();
     void pipeControl();
-    void selectAndActivateHeatingType(uint sendState);
 };
 
 #endif // STATEMACHINE_H
