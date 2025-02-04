@@ -5,15 +5,16 @@
 
 #include <QCoreApplication>
 #include <QtConcurrent/QtConcurrentRun>
+#include "QtSerialPort/QSerialPortInfo"
 
 #include "sensor.h"
 #include "globals.h"
 #include "processlog.h"
 #include "statemachine.h"
 #include "globalerrors.h"
-#include "constants.h"
 #include "invokeonmainthread.h"
 #include "logger.h"
+
 
 using grpc::Status;
 
@@ -50,6 +51,7 @@ private:
         Status getStateMachineValues(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::StateMachineValues *replay) override;
         Status setRelayStatus(grpc::ServerContext *context, const autoklav::SetVariable *request, autoklav::Status *replay) override;
         Status setStateMachineState(grpc::ServerContext *context, const autoklav::SetState *request, autoklav::Status *replay) override;
+        Status getAvailablePorts(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::PortListResponse *replay) override;
 
         // Custom helper function
         void setStatusReply(autoklav::Status *replay, int code);
@@ -483,6 +485,22 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getSensorPinValues(grpc::ServerCon
     replay->set_doorclosed(sensorValues.doorClosed);
     replay->set_burnerfault(sensorValues.burnerFault);
     replay->set_watershortage(sensorValues.waterShortage);
+
+    return Status::OK;
+}
+
+Status GRpcServer::Impl::AutoklavServiceImpl::getAvailablePorts(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::PortListResponse *replay)
+{
+    Q_UNUSED(context);
+    Q_UNUSED(request);
+
+    for (const QSerialPortInfo& info : QSerialPortInfo::availablePorts()) {
+        auto portInfo = replay->add_ports();
+        portInfo->set_name(info.portName().toStdString());
+        portInfo->set_description(info.description().toStdString());
+        portInfo->set_manufacturer(info.manufacturer().toStdString());
+        portInfo->set_serialnumber(info.serialNumber().toStdString());
+    }
 
     return Status::OK;
 }
