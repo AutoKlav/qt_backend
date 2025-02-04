@@ -32,13 +32,27 @@ service Autoklav {
     // StateMachine
     rpc getStateMachineValues(Empty) returns (StateMachineValues);
     rpc setRelayStatus(SetVariable) returns (Status);    
-    rpc setStateMachineState(SetState) returns (Status);    
+    rpc setStateMachineState(SetState) returns (Status);
+
+    // SerialInfo
+    rpc getAvailablePorts (Empty) returns (PortListResponse);
 }
 
 message Empty {}
 
 message TypeRequest {
     int32 id = 1;
+}
+
+message PortInfo {
+  string name = 1; 
+  string description = 2;
+  string manufacturer = 3;
+  string serialNumber = 4;
+}
+
+message PortListResponse {
+  repeated PortInfo ports = 1;
 }
 
 message Status {
