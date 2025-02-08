@@ -1,9 +1,7 @@
 #include "master.h"
-
+#include "modbus.h"
 #include "logger.h"
-#include "serial.h"
 #include "dbmanager.h"
-//#include "mockserial.h"
 #include "statemachine.h"
 
 Master::Master(QObject *parent)
@@ -13,9 +11,15 @@ Master::Master(QObject *parent)
     db.loadGlobals();
     db.loadSensors();
 
-    Serial::instance().open();
+    //Serial::instance().open();
+    Modbus &modbusApp = Modbus::instance();
 
-    Sensor::requestRelayUpdate();
+    modbusApp.connectToServer("172.16.0.2", 502);
+
+    QTimer::singleShot(2000, &modbusApp, &Modbus::readInputRegisters);
+    QTimer::singleShot(4000, &modbusApp, &Modbus::writeMultipleCoils);
+
+    //Sensor::requestRelayUpdate();
 
     StateMachine::instance();
 
