@@ -6,6 +6,7 @@
 #include <QModbusDataUnit>
 #include <QTimer>
 #include <QDebug>
+#include <QDateTime>
 
 class Modbus : public QObject
 {
@@ -14,6 +15,9 @@ class Modbus : public QObject
 public:
     static Modbus &instance();
     ~Modbus();
+
+    static qint64 lastDataTime;
+    static void checkIfDataIsOld();
 
     void connectToServer(const QString &ip, int port);
     void readInputRegisters();

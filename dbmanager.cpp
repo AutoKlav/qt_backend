@@ -76,43 +76,63 @@ bool DbManager::updateGlobal(QString name, QString value)
     return true;
 }
 
-void DbManager::loadSensors()
+void DbManager::loadAnalogSensors()
 {
     // Get number of sensors
-    QSqlQuery count_query("SELECT COUNT(*) FROM Sensor", m_db);
+    QSqlQuery count_query("SELECT COUNT(*) FROM AnalogSensor", m_db);
 
     // Resize Sensor::sensors to number of sensors
     if (count_query.exec() && count_query.next()) {
-        Sensor::sensors.reserve(count_query.value(0).toInt());
+        Sensor::analogSensors.reserve(count_query.value(0).toInt());
     }
 
-    QSqlQuery query("SELECT * FROM Sensor", m_db);
+    QSqlQuery query("SELECT * FROM AnalogSensor", m_db);
     while (query.next()) {
-        auto name = query.value(0).toString();
+        auto id = query.value(0).toUInt();
         auto alias = query.value(1).toString(); // alias is not used anywhere, just provides descriptions for virtual arduino pins
         auto minValue = query.value(2).toDouble();
         auto maxValue = query.value(3).toDouble();
 
-        Sensor::sensors.append(Sensor(name, minValue, maxValue));
-        Sensor::mapName.insert(name, &Sensor::sensors.last());        
+        Sensor::analogSensors.append(Sensor(id, minValue, maxValue));
+        Sensor::mapAnalogSensor.insert(id, &Sensor::analogSensors.last());
     }
 }
 
-bool DbManager::updateSensor(QString name, double newMinValue, double newMaxValue)
+void DbManager::loadDigitalSensors()
+{
+    // Get number of sensors
+    QSqlQuery count_query("SELECT COUNT(*) FROM DigitalSensor", m_db);
+
+    // Resize Sensor::sensors to number of sensors
+    if (count_query.exec() && count_query.next()) {
+        Sensor::digitalSensors.reserve(count_query.value(0).toInt());
+    }
+
+    QSqlQuery query("SELECT * FROM DigitalSensor", m_db);
+    while (query.next()) {
+        auto id = query.value(0).toUInt();
+        auto alias = query.value(1).toString(); // alias is not used anywhere, just provides descriptions for virtual arduino pins
+
+        Sensor::digitalSensors.append(Sensor(id));
+        Sensor::mapDigitalSensor.insert(id, &Sensor::digitalSensors.last());
+    }
+}
+
+bool DbManager::updateAnalogSensor(uint id, double newMinValue, double newMaxValue)
 {
     QSqlQuery query(m_db);
-    query.prepare("UPDATE Sensor SET minValue = :minValue, maxValue = :maxValue WHERE name = :name");
-    query.bindValue(":name", name);
+    query.prepare("UPDATE AnalogSensor SET minValue = :minValue, maxValue = :maxValue WHERE id = :id");
+    query.bindValue(":id", id);
     query.bindValue(":minValue", newMinValue);
     query.bindValue(":maxValue", newMaxValue);
 
     if (!query.exec()) {
-        Logger::crit(QString("Database: Unable to update sensor %1").arg(name));
+        Logger::crit(QString("Database: Unable to update sensor %1").arg(id));
         Logger::crit(QString("SQL error: %1").arg(query.lastError().text()));
         return false;
     }
 
-    Logger::info(QString("Database: Update sensor %1").arg(name));
+    Logger::info(QString("Database: Update sensor %1").arg(id));
     return true;
 }
 

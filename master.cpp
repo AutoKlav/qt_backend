@@ -9,7 +9,8 @@ Master::Master(QObject *parent)
 {
     auto &db = DbManager::instance();
     db.loadGlobals();
-    db.loadSensors();
+    db.loadAnalogSensors();
+    db.loadDigitalSensors();
 
     //Serial::instance().open();
     Modbus &modbusApp = Modbus::instance();

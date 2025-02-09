@@ -1,4 +1,8 @@
 #include "modbus.h"
+#include "sensor.h"
+#include "logger.h"
+#include "globalerrors.h"
+#include "globals.h"
 #include <qvariant.h>
 
 Modbus::Modbus(QObject *parent)
@@ -37,7 +41,7 @@ void Modbus::readInputRegisters()
         return;
     }
 
-    QModbusDataUnit readUnit(QModbusDataUnit::InputRegisters, 0, 12);
+    QModbusDataUnit readUnit(QModbusDataUnit::InputRegisters, 0, 11);
 
     if (auto *reply = modbusClient->sendReadRequest(readUnit, 1)) {
         connect(reply, &QModbusReply::finished, this, [this, reply]() {
@@ -46,6 +50,15 @@ void Modbus::readInputRegisters()
                 qDebug() << "Continuous Input Registers:";
                 for (uint i = 0; i < unit.valueCount(); i++) {
                     qDebug() << "Register" << i << ":" << unit.value(i);
+                    // Update sensor value if sensor exists
+                    if (Sensor::mapAnalogSensor.contains(i)) {
+                        Sensor::mapAnalogSensor[i]->setValue(unit.value(i));
+                    } else {
+                        Logger::crit(QString("Sensor '%1' not found in AnalogSensor database.").arg(i));
+                        GlobalErrors::setError(GlobalErrors::DbError);
+                    }
+
+                    //lastDataTime = QDateTime::currentMSecsSinceEpoch();
                 }
             } else {
                 qCritical() << "Read error:" << reply->errorString();
@@ -123,4 +136,12 @@ void Modbus::attemptReconnect()
     } else {
         qCritical() << "Reconnection attempt failed: " << modbusClient->errorString();
     }
+}
+
+void Modbus::checkIfDataIsOld()
+{
+    // if (lastDataTime && QDateTime::currentMSecsSinceEpoch() - lastDataTime > Globals::serialDataOldTime)
+    //     GlobalErrors::setError(GlobalErrors::OldDataError);
+    // else
+    //     GlobalErrors::removeError(GlobalErrors::OldDataError);
 }

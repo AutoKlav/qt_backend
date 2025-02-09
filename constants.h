@@ -3,41 +3,42 @@
 
 #include <QString>
 
+/**
+* @brief Constants related to the Controllino board, only ushort values are send and received through network.
+*/
 namespace CONSTANTS {
+    // Analog sensor constants
+    inline const ushort TEMP = 1;  // temp
+    inline const ushort EXPANSION_TEMP = 2;  // expansionTemp
+    inline const ushort HEATER_TEMP = 3;  // heaterTemp
+    inline const ushort TANK_TEMP = 4;  // tankTemp
+    inline const ushort TEMP_K = 5;  // tempK
+    inline const ushort TANK_WATER_LEVEL = 6;  // tankWaterLevel
+    inline const ushort PRESSURE = 7;  // pressure
+    inline const ushort STEAM_PRESSURE = 8;  // steamPressure
 
-// Analog sensor constants
-inline const QString TEMP = "x";  // temp
-inline const QString EXPANSION_TEMP = "y";  // expansionTemp
-inline const QString HEATER_TEMP = "z";  // heaterTemp
-inline const QString TANK_TEMP = "w";  // tankTemp
-inline const QString TEMP_K = "v";  // tempK
-inline const QString TANK_WATER_LEVEL = "u";  // tankWaterLevel
-inline const QString PRESSURE = "t";  // pressure
-inline const QString STEAM_PRESSURE = "s";  // steamPressure
+    // Digital input constants
+    inline const ushort DOOR_CLOSED = 9;  // doorClosed
+    inline const ushort BURNER_FAULT = 10;  // burnerFault
+    inline const ushort WATER_SHORTAGE = 11;  // waterShortage
 
-// Digital input constants
-inline const QString DOOR_CLOSED = "m";  // doorClosed
-inline const QString BURNER_FAULT = "n";  // burnerFault
-inline const QString WATER_SHORTAGE = "o";  // waterShortage
+    // Digital output constants
+    inline const ushort FILL_TANK_WITH_WATER = 1;  // fillTankWithWater
+    inline const ushort COOLING = 2;  // cooling
+    inline const ushort TANK_HEATING = 3;  // tankHeating
+    inline const ushort COOLING_HELPER = 4;  // coolingHelper
+    inline const ushort AUTOKLAV_FILL = 5;  // autoklavFill
+    inline const ushort WATER_DRAIN = 6;  // waterDrain
 
-// Digital output constants
-inline const QString FILL_TANK_WITH_WATER = "a";  // fillTankWithWater
-inline const QString COOLING = "b";  // cooling
-inline const QString TANK_HEATING = "c";  // tankHeating
-inline const QString COOLING_HELPER = "d";  // coolingHelper
-inline const QString AUTOKLAV_FILL = "e";  // autoklavFill
-inline const QString WATER_DRAIN = "f";  // waterDrain
+    // default steam heating
+    inline ushort STEAM_HEATING = 7;  // heating
+    // electric heating
+    inline const ushort ELECTRIC_HEATING = 8;  // electricHeating
 
-// default steam heating
-inline QString STEAM_HEATING = "g";  // heating
-// electric heating
-inline const QString ELECTRIC_HEATING = "i";  // electricHeating
-
-inline const QString PUMP = "h";  // pump
-inline const QString INCREASE_PRESSURE = "j";  // increasePressure
-inline const QString EXTENSION_COOLING = "k";  // extensionCooling
-inline const QString ALARM_SIGNAL = "l";  // alarmSignal
-
-} // namespace CONSTANTS
+    inline const ushort PUMP = 9;  // pump
+    inline const ushort INCREASE_PRESSURE = 10;  // increasePressure
+    inline const ushort EXTENSION_COOLING = 11;  // extensionCooling
+    inline const ushort ALARM_SIGNAL = 12;  // alarmSignal
+}
 
 #endif // CONSTANTS_H

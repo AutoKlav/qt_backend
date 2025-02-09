@@ -24,7 +24,7 @@ void MockSerial::readData()
     QString line = in.readLine();
     file.close();
 
-    Sensor::parseSerialData(line);
+    //Sensor::parseSerialData(line);
 }
 
 void MockSerial::sendData(QString data)

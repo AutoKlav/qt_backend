@@ -6,15 +6,23 @@
 #include "globals.h"
 #include "logger.h"
 #include "dbmanager.h"
-#include "serial.h"
 #include "constants.h"
 
 qint64 Sensor::lastDataTime = 0;
-QList<Sensor> Sensor::sensors = QList<Sensor>();
-QMap<QString, Sensor *> Sensor::mapName = QMap<QString, Sensor *>();
+QList<Sensor> Sensor::analogSensors = QList<Sensor>();
+QList<Sensor> Sensor::digitalSensors = QList<Sensor>();
 
-Sensor::Sensor(QString name, double minValue, double maxValue)
-    : name{name}, minValue{minValue}, maxValue{maxValue}
+QMap<ushort, Sensor *> Sensor::mapAnalogSensor = QMap<ushort, Sensor *>();
+QMap<ushort, Sensor *> Sensor::mapDigitalSensor = QMap<ushort, Sensor *>();
+
+Sensor::Sensor(ushort id, double minValue, double maxValue)
+    : id{id}, minValue{minValue}, maxValue{maxValue}
+{
+
+}
+
+Sensor::Sensor(ushort id)
+    : id{id}
 {
 
 }
@@ -24,18 +32,18 @@ void Sensor::send(double newValue)
     value = newValue; // Update the internal value
     uint pinValue = newValue;
 
-    auto data = QString("%1=%2;").arg(name).arg(pinValue);
+    // auto data = QString("%1=%2;").arg(name).arg(pinValue);
 
-    Serial::instance().sendData(data);
+    // Serial::instance().sendData(data);
 }
 
-bool Sensor::setRelayState(QString name, uint value)
+bool Sensor::setRelayState(ushort id, ushort value)
 {
     // Update sensor value if sensor exists
-    if (mapName.contains(name)) {        
-        Sensor::mapName[name]->send(value);    
+    if (mapDigitalSensor.contains(id)) {
+        Sensor::mapDigitalSensor[id]->send(value);
     } else {
-        Logger::crit(QString("Sensor '%1' cannot be set to '%2' since it is not found in database.").arg(name).arg(value));
+        Logger::crit(QString("Sensor '%1' cannot be set to '%2' since it is not found in database.").arg(id).arg(value));
         GlobalErrors::setError(GlobalErrors::DbError);
         return false;
     }
@@ -51,7 +59,7 @@ void Sensor::sendIfNew(double newValue)
     send(newValue);
 }
 
-void Sensor::setValue(uint newPinValue)
+void Sensor::setValue(ushort newPinValue)
 {    
     pinValue = newPinValue;
 
@@ -63,41 +71,27 @@ void Sensor::setValue(uint newPinValue)
     value = (newPinValue / scalingFactor) * (maxValue - minValue) + minValue;
 }
 
-void Sensor::setValue(QString newPinValue)
-{
-    setValue(newPinValue.toUInt());
-}
-
-
-void Sensor::checkIfDataIsOld()
-{
-    if (lastDataTime && QDateTime::currentMSecsSinceEpoch() - lastDataTime > Globals::serialDataOldTime)
-        GlobalErrors::setError(GlobalErrors::OldDataError);
-    else
-        GlobalErrors::removeError(GlobalErrors::OldDataError);
-}
-
 /**
  * @brief Representing the sensor values mapped to virtual values. 
  */
 SensorValues Sensor::getValues()
 {
-    checkIfDataIsOld();
+    //checkIfDataIsOld();
 
     SensorValues values;
     
-    values.temp = mapName[CONSTANTS::TEMP]->value;
-    values.expansionTemp = mapName[CONSTANTS::EXPANSION_TEMP]->value;
-    values.heaterTemp = mapName[CONSTANTS::HEATER_TEMP]->value;
-    values.tankTemp = mapName[CONSTANTS::TANK_TEMP]->value;
-    values.tempK = mapName[CONSTANTS::TEMP_K]->value;
-    values.tankWaterLevel = mapName[CONSTANTS::TANK_WATER_LEVEL]->value;
-    values.pressure = mapName[CONSTANTS::PRESSURE]->value;
-    values.steamPressure = mapName[CONSTANTS::STEAM_PRESSURE]->value;
+    values.temp = mapAnalogSensor[CONSTANTS::TEMP]->value;
+    values.expansionTemp = mapAnalogSensor[CONSTANTS::EXPANSION_TEMP]->value;
+    values.heaterTemp = mapAnalogSensor[CONSTANTS::HEATER_TEMP]->value;
+    values.tankTemp = mapAnalogSensor[CONSTANTS::TANK_TEMP]->value;
+    values.tempK = mapAnalogSensor[CONSTANTS::TEMP_K]->value;
+    values.tankWaterLevel = mapAnalogSensor[CONSTANTS::TANK_WATER_LEVEL]->value;
+    values.pressure = mapAnalogSensor[CONSTANTS::PRESSURE]->value;
+    values.steamPressure = mapAnalogSensor[CONSTANTS::STEAM_PRESSURE]->value;
 
-    values.doorClosed = mapName[CONSTANTS::DOOR_CLOSED]->value;
-    values.burnerFault = mapName[CONSTANTS::BURNER_FAULT]->value;
-    values.waterShortage = mapName[CONSTANTS::WATER_SHORTAGE]->value;
+    values.doorClosed = mapAnalogSensor[CONSTANTS::DOOR_CLOSED]->value;
+    values.burnerFault = mapAnalogSensor[CONSTANTS::BURNER_FAULT]->value;
+    values.waterShortage = mapAnalogSensor[CONSTANTS::WATER_SHORTAGE]->value;
     
     return values;
 }
@@ -107,22 +101,22 @@ SensorValues Sensor::getValues()
  */
 SensorValues Sensor::getPinValues()
 {
-    checkIfDataIsOld();
+    //checkIfDataIsOld();
 
     SensorValues values;
 
-    values.temp = mapName[CONSTANTS::TEMP]->pinValue;
-    values.expansionTemp = mapName[CONSTANTS::EXPANSION_TEMP]->pinValue;
-    values.heaterTemp = mapName[CONSTANTS::HEATER_TEMP]->pinValue;
-    values.tankTemp = mapName[CONSTANTS::TANK_TEMP]->pinValue;
-    values.tempK = mapName[CONSTANTS::TEMP_K]->pinValue;
-    values.tankWaterLevel = mapName[CONSTANTS::TANK_WATER_LEVEL]->pinValue;
-    values.pressure = mapName[CONSTANTS::PRESSURE]->pinValue;
-    values.steamPressure = mapName[CONSTANTS::STEAM_PRESSURE]->pinValue;
+    values.temp = mapAnalogSensor[CONSTANTS::TEMP]->pinValue;
+    values.expansionTemp = mapAnalogSensor[CONSTANTS::EXPANSION_TEMP]->pinValue;
+    values.heaterTemp = mapAnalogSensor[CONSTANTS::HEATER_TEMP]->pinValue;
+    values.tankTemp = mapAnalogSensor[CONSTANTS::TANK_TEMP]->pinValue;
+    values.tempK = mapAnalogSensor[CONSTANTS::TEMP_K]->pinValue;
+    values.tankWaterLevel = mapAnalogSensor[CONSTANTS::TANK_WATER_LEVEL]->pinValue;
+    values.pressure = mapAnalogSensor[CONSTANTS::PRESSURE]->pinValue;
+    values.steamPressure = mapAnalogSensor[CONSTANTS::STEAM_PRESSURE]->pinValue;
 
-    values.doorClosed = mapName[CONSTANTS::DOOR_CLOSED]->pinValue;
-    values.burnerFault = mapName[CONSTANTS::BURNER_FAULT]->pinValue;
-    values.waterShortage = mapName[CONSTANTS::WATER_SHORTAGE]->pinValue;
+    values.doorClosed = mapAnalogSensor[CONSTANTS::DOOR_CLOSED]->pinValue;
+    values.burnerFault = mapAnalogSensor[CONSTANTS::BURNER_FAULT]->pinValue;
+    values.waterShortage = mapAnalogSensor[CONSTANTS::WATER_SHORTAGE]->pinValue;
 
     return values;
 }
@@ -133,78 +127,67 @@ SensorValues Sensor::getPinValues()
  */
 SensorRelayValues Sensor::getRelayValues()
 {
-    checkIfDataIsOld();
+    //checkIfDataIsOld();
 
     SensorRelayValues relayValues;
     
-    relayValues.fillTankWithWater = mapName[CONSTANTS::FILL_TANK_WITH_WATER]->value;
-    relayValues.cooling = mapName[CONSTANTS::COOLING]->value;
-    relayValues.tankHeating = mapName[CONSTANTS::TANK_HEATING]->value;
-    relayValues.coolingHelper = mapName[CONSTANTS::COOLING_HELPER]->value;
-    relayValues.autoklavFill = mapName[CONSTANTS::AUTOKLAV_FILL]->value;
-    relayValues.waterDrain = mapName[CONSTANTS::WATER_DRAIN]->value;
-    relayValues.heating = mapName[CONSTANTS::STEAM_HEATING]->value;
-    relayValues.pump = mapName[CONSTANTS::PUMP]->value;
-    relayValues.electricHeating = mapName[CONSTANTS::ELECTRIC_HEATING]->value;
-    relayValues.increasePressure = mapName[CONSTANTS::INCREASE_PRESSURE]->value;
-    relayValues.extensionCooling = mapName[CONSTANTS::EXTENSION_COOLING]->value;
-    relayValues.alarmSignal = mapName[CONSTANTS::ALARM_SIGNAL]->value;
+    relayValues.fillTankWithWater = mapDigitalSensor[CONSTANTS::FILL_TANK_WITH_WATER]->value;
+    relayValues.cooling = mapDigitalSensor[CONSTANTS::COOLING]->value;
+    relayValues.tankHeating = mapDigitalSensor[CONSTANTS::TANK_HEATING]->value;
+    relayValues.coolingHelper = mapDigitalSensor[CONSTANTS::COOLING_HELPER]->value;
+    relayValues.autoklavFill = mapDigitalSensor[CONSTANTS::AUTOKLAV_FILL]->value;
+    relayValues.waterDrain = mapDigitalSensor[CONSTANTS::WATER_DRAIN]->value;
+    relayValues.heating = mapDigitalSensor[CONSTANTS::STEAM_HEATING]->value;
+    relayValues.pump = mapDigitalSensor[CONSTANTS::PUMP]->value;
+    relayValues.electricHeating = mapDigitalSensor[CONSTANTS::ELECTRIC_HEATING]->value;
+    relayValues.increasePressure = mapDigitalSensor[CONSTANTS::INCREASE_PRESSURE]->value;
+    relayValues.extensionCooling = mapDigitalSensor[CONSTANTS::EXTENSION_COOLING]->value;
+    relayValues.alarmSignal = mapDigitalSensor[CONSTANTS::ALARM_SIGNAL]->value;
     
     return relayValues;
 }
 
-/**
- * @brief Parses the serial data received from the sensor and updates the corresponding sensor values.  
- * @param data The serial data received from the sensor.
- */
-void Sensor::parseSerialData(QString data)
-{
+//void Sensor::parseSerialData(QString data)
+//{
     // Parse data
     // Split data by sensors
-    QList<QString> sensors = data.split(';');
+    //QList<QString> sensors = data.split(';');
     // Iterate over sensors
-    for (const QString &sensor : sensors)
-    {
-        // Split sensor by name and value
-        QList<QString> sensorData = sensor.split('=');
-        // If sensor data is not valid continue
-        if (sensorData.size() != 2)
-            continue;
+    // for (const QString &sensor : sensors)
+    // {
+    //     // Split sensor by name and value
+    //     QList<QString> sensorData = sensor.split('=');
+    //     // If sensor data is not valid continue
+    //     if (sensorData.size() != 2)
+    //         continue;
 
-        // Get sensor name
-        QString sensorName = sensorData[0];
-        // Get sensor value
-        QString sensorValue = sensorData[1];
+    //     // Get sensor name
+    //     QString sensorName = sensorData[0];
+    //     // Get sensor value
+    //     QString sensorValue = sensorData[1];
 
-        // Update sensor value if sensor exists
-        if (mapName.contains(sensorName)) {
-            mapName[sensorName]->setValue(sensorValue);
-        } else {
-            Logger::crit(QString("Sensor '%1' not found in database.").arg(sensorName));
-            GlobalErrors::setError(GlobalErrors::DbError);
-        }
+    //     // Update sensor value if sensor exists
+    //     if (mapName.contains(sensorName)) {
+    //         mapName[sensorName]->setValue(sensorValue);
+    //     } else {
+    //         Logger::crit(QString("Sensor '%1' not found in database.").arg(sensorName));
+    //         GlobalErrors::setError(GlobalErrors::DbError);
+    //     }
 
-        lastDataTime = QDateTime::currentMSecsSinceEpoch();
-    }
-}
+    //     lastDataTime = QDateTime::currentMSecsSinceEpoch();
+    // }
+//}
 
-bool Sensor::updateSensor(QString name, double minValue, double maxValue)
+bool Sensor::updateAnalogSensor(ushort id, double minValue, double maxValue)
 {
-    if (!DbManager::instance().updateSensor(name, minValue, maxValue))
+    if (!DbManager::instance().updateAnalogSensor(id, minValue, maxValue))
         return false;
 
-    if (!Sensor::mapName.contains(name))
+    if (mapAnalogSensor.contains(id))
         return false;
 
-    Sensor::mapName[name]->minValue = minValue;
-    Sensor::mapName[name]->maxValue = maxValue;
+    mapAnalogSensor[id]->minValue = minValue;
+    mapAnalogSensor[id]->maxValue = maxValue;
 
     return true;
 }
-
-void Sensor::requestRelayUpdate()
-{
-    // Send specific command that will tell Arduino to send states of all relayes (digital outputs) to backend
-    Serial::instance().sendData("readDigitalOutputs=1;");
-}
-
