@@ -39,8 +39,9 @@ public:
     bool updateGlobal(QString name, QString value);
 
     // Sensors
-    void loadSensors();
-    bool updateSensor(QString name, double newMinValue, double newMaxValue);
+    void loadAnalogSensors();
+    void loadDigitalSensors();
+    bool updateAnalogSensor(uint id, double newMinValue, double newMaxValue);
 
     // Process
     QList<ProcessRow> getAllProcessesOrderedDesc();

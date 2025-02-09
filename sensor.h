@@ -39,30 +39,30 @@ struct SensorRelayValues{
 class Sensor
 {
 public:
-    Sensor(QString name, double minValue, double maxValue);
+    Sensor(ushort id, double minValue, double maxValue);
+    Sensor(ushort id);
 
     void send(double newValue);
     void sendIfNew(double newValue);
-    void setValue(uint newPinValue);
-    void setValue(QString newPinValue);
-
+    void setValue(ushort newPinValue);
+    
     static SensorValues getValues();
     static SensorValues getPinValues();
     static SensorRelayValues getRelayValues();
-    static bool setRelayState(QString name, uint value);
-    static void parseSerialData(QString data);
-    static void checkIfDataIsOld();
+    static bool setRelayState(ushort id, ushort value);
+    static void parseModbusData(QString data);
     
-    QString name;
+    ushort id; // position of the I/O port in the PLC
     double minValue, maxValue;
-    double value;
-    uint pinValue;
+    double value;  // parsed value
+    ushort pinValue; // Raw data used for calibration
 
     static qint64 lastDataTime;
-    static QList<Sensor> sensors;
-    static QMap<QString, Sensor *> mapName;    
-    static bool updateSensor(QString name, double minValue, double maxValue);
-    static void requestRelayUpdate();
+    static QList<Sensor> analogSensors;
+    static QList<Sensor> digitalSensors;
+    static QMap<ushort, Sensor *> mapAnalogSensor;
+    static QMap<ushort, Sensor *> mapDigitalSensor;
+    static bool updateAnalogSensor(ushort id, double minValue, double maxValue);
 };
 
 #endif // SENSOR_H

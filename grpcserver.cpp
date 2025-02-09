@@ -5,7 +5,6 @@
 
 #include <QCoreApplication>
 #include <QtConcurrent/QtConcurrentRun>
-#include "QtSerialPort/QSerialPortInfo"
 
 #include "sensor.h"
 #include "globals.h"
@@ -47,11 +46,10 @@ private:
         Status stopProcess(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay) override;
         Status getSensorPinValues(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::SensorValues *replay) override;
         Status getSensorRelayValues(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::SensorRelayValues *replay) override;
-        Status updateSensor(grpc::ServerContext *context, const autoklav::UpdateSensorRequest *request, autoklav::Status *replay) override;
+        Status updateAnalogSensor(grpc::ServerContext *context, const autoklav::UpdateAnalogSensorRequest *request, autoklav::Status *replay) override;
         Status getStateMachineValues(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::StateMachineValues *replay) override;
-        Status setRelayStatus(grpc::ServerContext *context, const autoklav::SetVariable *request, autoklav::Status *replay) override;
+        Status setRelayStatus(grpc::ServerContext *context, const autoklav::SetRelay *request, autoklav::Status *replay) override;
         Status setStateMachineState(grpc::ServerContext *context, const autoklav::SetState *request, autoklav::Status *replay) override;
-        Status getAvailablePorts(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::PortListResponse *replay) override;
 
         // Custom helper function
         void setStatusReply(autoklav::Status *replay, int code);
@@ -149,15 +147,15 @@ Status GRpcServer::Impl::AutoklavServiceImpl::setVariable(grpc::ServerContext *c
     return Status::OK;
 }
 
-Status GRpcServer::Impl::AutoklavServiceImpl::setRelayStatus(grpc::ServerContext *context, const autoklav::SetVariable *request, autoklav::Status *replay)
+Status GRpcServer::Impl::AutoklavServiceImpl::setRelayStatus(grpc::ServerContext *context, const autoklav::SetRelay *request, autoklav::Status *replay)
 {
     Q_UNUSED(context);
 
-    const auto name = QString::fromUtf8(request->name().c_str());
+    const auto id = request->id();
     const auto value = QString::fromUtf8(request->value()).toUInt();
 
-    bool success = invokeOnMainThreadBlocking([name, value](){
-        return Sensor::setRelayState(name, value);
+    bool success = invokeOnMainThreadBlocking([id, value](){
+        return Sensor::setRelayState(id, value);
     });
 
     setStatusReply(replay, !success);
@@ -180,16 +178,16 @@ Status GRpcServer::Impl::AutoklavServiceImpl::setStateMachineState(grpc::ServerC
 }
 
 
-Status GRpcServer::Impl::AutoklavServiceImpl::updateSensor(grpc::ServerContext *context, const autoklav::UpdateSensorRequest *request, autoklav::Status *replay)
+Status GRpcServer::Impl::AutoklavServiceImpl::updateAnalogSensor(grpc::ServerContext *context, const autoklav::UpdateAnalogSensorRequest *request, autoklav::Status *replay)
 {
     Q_UNUSED(context);
 
-    const auto name = QString::fromUtf8(request->name().c_str());
+    const auto id = request->id();
     const auto minValue = request->minvalue();
     const auto maxValue = request->maxvalue();
 
-    bool success = invokeOnMainThreadBlocking([name, minValue, maxValue](){
-        return Sensor::updateSensor(name, minValue, maxValue);
+    bool success = invokeOnMainThreadBlocking([id, minValue, maxValue](){
+        return Sensor::updateAnalogSensor(id, minValue, maxValue);
     });
 
     setStatusReply(replay, !success);
@@ -485,22 +483,6 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getSensorPinValues(grpc::ServerCon
     replay->set_doorclosed(sensorValues.doorClosed);
     replay->set_burnerfault(sensorValues.burnerFault);
     replay->set_watershortage(sensorValues.waterShortage);
-
-    return Status::OK;
-}
-
-Status GRpcServer::Impl::AutoklavServiceImpl::getAvailablePorts(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::PortListResponse *replay)
-{
-    Q_UNUSED(context);
-    Q_UNUSED(request);
-
-    for (const QSerialPortInfo& info : QSerialPortInfo::availablePorts()) {
-        auto portInfo = replay->add_ports();
-        portInfo->set_name(info.portName().toStdString());
-        portInfo->set_description(info.description().toStdString());
-        portInfo->set_manufacturer(info.manufacturer().toStdString());
-        portInfo->set_serialnumber(info.serialNumber().toStdString());
-    }
 
     return Status::OK;
 }

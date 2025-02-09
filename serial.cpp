@@ -59,7 +59,7 @@ void Serial::parseData()
     // Remove all data except incomplete data
     m_buffer = m_buffer.mid(endIndex + 1);
 
-    Sensor::parseSerialData(data);
+    //Sensor::parseSerialData(data);
 }
 
 void Serial::tryToReconnectWhenErrorAppears(QSerialPort::SerialPortError error)
