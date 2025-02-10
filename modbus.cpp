@@ -5,6 +5,8 @@
 #include "globals.h"
 #include <qvariant.h>
 
+qint64 Modbus::lastDataTime = 0; // Define the static member outside the class
+
 Modbus::Modbus(QObject *parent)
     : QObject{parent}, modbusClient(new QModbusTcpClient(this))
 {
@@ -57,7 +59,7 @@ void Modbus::readInputRegisters()
                         GlobalErrors::setError(GlobalErrors::DbError);
                     }
 
-                    //lastDataTime = QDateTime::currentMSecsSinceEpoch();
+                    lastDataTime = QDateTime::currentMSecsSinceEpoch();
                 }
             } else {
                 qCritical() << "Read error:" << reply->errorString();
@@ -135,12 +137,4 @@ void Modbus::attemptReconnect()
     } else {
         qCritical() << "Reconnection attempt failed: " << modbusClient->errorString();
     }
-}
-
-void Modbus::checkIfDataIsOld()
-{
-    // if (lastDataTime && QDateTime::currentMSecsSinceEpoch() - lastDataTime > Globals::serialDataOldTime)
-    //     GlobalErrors::setError(GlobalErrors::OldDataError);
-    // else
-    //     GlobalErrors::removeError(GlobalErrors::OldDataError);
 }

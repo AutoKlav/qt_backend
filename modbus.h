@@ -16,8 +16,7 @@ public:
     static Modbus &instance();
     ~Modbus();
 
-    static qint64 lastDataTime;
-    static void checkIfDataIsOld();
+    static qint64 lastDataTime;    
 
     void connectToServer(const QString &ip, int port);
     void readInputRegisters();

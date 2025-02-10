@@ -51,6 +51,7 @@ public:
     static SensorRelayValues getRelayValues();
     static bool setRelayState(ushort id, ushort value);
     static void parseModbusData(QString data);
+    static void checkIfDataIsOld();
     
     ushort id; // position of the I/O port in the PLC
     double minValue, maxValue;

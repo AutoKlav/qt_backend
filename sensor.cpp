@@ -76,7 +76,7 @@ void Sensor::setValue(ushort newPinValue)
  */
 SensorValues Sensor::getValues()
 {
-    //checkIfDataIsOld();
+    checkIfDataIsOld();
 
     SensorValues values;
     
@@ -101,7 +101,7 @@ SensorValues Sensor::getValues()
  */
 SensorValues Sensor::getPinValues()
 {
-    //checkIfDataIsOld();
+    checkIfDataIsOld();
 
     SensorValues values;
 
@@ -127,7 +127,7 @@ SensorValues Sensor::getPinValues()
  */
 SensorRelayValues Sensor::getRelayValues()
 {
-    //checkIfDataIsOld();
+    checkIfDataIsOld();
 
     SensorRelayValues relayValues;
     
@@ -190,4 +190,12 @@ bool Sensor::updateAnalogSensor(ushort id, double minValue, double maxValue)
     mapAnalogSensor[id]->maxValue = maxValue;
 
     return true;
+}
+
+void Sensor::checkIfDataIsOld()
+{
+    if (lastDataTime && QDateTime::currentMSecsSinceEpoch() - lastDataTime > Globals::serialDataOldTime)
+        GlobalErrors::setError(GlobalErrors::OldDataError);
+    else
+        GlobalErrors::removeError(GlobalErrors::OldDataError);
 }
