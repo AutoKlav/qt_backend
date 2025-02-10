@@ -102,6 +102,30 @@ void Modbus::writeMultipleCoils()
     }
 }
 
+void Modbus::writeSingleCoil(int coilAddress, bool value)
+{
+    if (!modbusClient || modbusClient->state() != QModbusDevice::ConnectedState) {
+        qCritical() << "Modbus client not connected. Cannot write to coil.";
+        return;
+    }
+
+    QModbusDataUnit writeUnit(QModbusDataUnit::Coils, coilAddress, 1);
+    writeUnit.setValue(0, value);
+
+    if (auto *reply = modbusClient->sendWriteRequest(writeUnit, 1)) {
+        connect(reply, &QModbusReply::finished, this, [reply]() {
+            if (reply->error() == QModbusDevice::NoError) {
+                qDebug() << "Single coil at address written successfully!";
+            } else {
+                qCritical() << "Write error:" << reply->errorString();
+            }
+            reply->deleteLater();
+        });
+    } else {
+        qCritical() << "Write request failed:" << modbusClient->errorString();
+    }
+}
+
 void Modbus::onErrorOccurred(QModbusDevice::Error error)
 {
     if (error != QModbusDevice::NoError) {

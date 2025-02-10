@@ -10,7 +10,7 @@
 StateMachine::StateMachine(QObject *parent)
     : QObject(parent), state(READY), process(nullptr)
 {
-    connect(&timer, &QTimer::timeout, this, &StateMachine::tick);
+    connect(&timer, &QTimer::timeout, this, &StateMachine::tick);    
 }
 
 int StateMachine::getState()

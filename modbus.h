@@ -20,6 +20,7 @@ public:
 
     void connectToServer(const QString &ip, int port);
     void readInputRegisters();
+    void writeSingleCoil(int coilAddress, bool value);
     void writeMultipleCoils();
 
 private:
