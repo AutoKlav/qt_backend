@@ -18,7 +18,7 @@ Master::Master(QObject *parent)
     modbusApp.connectToServer("172.16.0.2", 502);
 
     QTimer::singleShot(2000, &modbusApp, &Modbus::readInputRegisters);
-    QTimer::singleShot(4000, &modbusApp, &Modbus::writeMultipleCoils);
+    //QTimer::singleShot(4000, &modbusApp, &Modbus::writeMultipleCoils);
 
     //Sensor::requestRelayUpdate();
 

@@ -47,9 +47,8 @@ void Modbus::readInputRegisters()
         connect(reply, &QModbusReply::finished, this, [this, reply]() {
             if (reply->error() == QModbusDevice::NoError) {
                 const QModbusDataUnit unit = reply->result();
-                qDebug() << "Continuous Input Registers:";
+
                 for (uint i = 0; i < unit.valueCount(); i++) {
-                    qDebug() << "Register" << i << ":" << unit.value(i);
                     // Update sensor value if sensor exists
                     if (Sensor::mapAnalogSensor.contains(i)) {
                         Sensor::mapAnalogSensor[i]->setValue(unit.value(i));
