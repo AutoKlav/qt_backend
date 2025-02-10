@@ -7,6 +7,7 @@
 #include "logger.h"
 #include "dbmanager.h"
 #include "constants.h"
+#include "modbus.h"
 
 qint64 Sensor::lastDataTime = 0;
 QList<Sensor> Sensor::analogSensors = QList<Sensor>();
@@ -32,9 +33,7 @@ void Sensor::send(double newValue)
     value = newValue; // Update the internal value
     uint pinValue = newValue;
 
-    // auto data = QString("%1=%2;").arg(name).arg(pinValue);
-
-    // Serial::instance().sendData(data);
+    Modbus::instance().writeSingleCoil(id, newValue);
 }
 
 bool Sensor::setRelayState(ushort id, ushort value)
@@ -76,7 +75,7 @@ void Sensor::setValue(ushort newPinValue)
  */
 SensorValues Sensor::getValues()
 {
-    //checkIfDataIsOld();
+    checkIfDataIsOld();
 
     SensorValues values;
     
@@ -101,7 +100,7 @@ SensorValues Sensor::getValues()
  */
 SensorValues Sensor::getPinValues()
 {
-    //checkIfDataIsOld();
+    checkIfDataIsOld();
 
     SensorValues values;
 
@@ -127,7 +126,7 @@ SensorValues Sensor::getPinValues()
  */
 SensorRelayValues Sensor::getRelayValues()
 {
-    //checkIfDataIsOld();
+    checkIfDataIsOld();
 
     SensorRelayValues relayValues;
     
@@ -147,37 +146,6 @@ SensorRelayValues Sensor::getRelayValues()
     return relayValues;
 }
 
-//void Sensor::parseSerialData(QString data)
-//{
-    // Parse data
-    // Split data by sensors
-    //QList<QString> sensors = data.split(';');
-    // Iterate over sensors
-    // for (const QString &sensor : sensors)
-    // {
-    //     // Split sensor by name and value
-    //     QList<QString> sensorData = sensor.split('=');
-    //     // If sensor data is not valid continue
-    //     if (sensorData.size() != 2)
-    //         continue;
-
-    //     // Get sensor name
-    //     QString sensorName = sensorData[0];
-    //     // Get sensor value
-    //     QString sensorValue = sensorData[1];
-
-    //     // Update sensor value if sensor exists
-    //     if (mapName.contains(sensorName)) {
-    //         mapName[sensorName]->setValue(sensorValue);
-    //     } else {
-    //         Logger::crit(QString("Sensor '%1' not found in database.").arg(sensorName));
-    //         GlobalErrors::setError(GlobalErrors::DbError);
-    //     }
-
-    //     lastDataTime = QDateTime::currentMSecsSinceEpoch();
-    // }
-//}
-
 bool Sensor::updateAnalogSensor(ushort id, double minValue, double maxValue)
 {
     if (!DbManager::instance().updateAnalogSensor(id, minValue, maxValue))
@@ -190,4 +158,12 @@ bool Sensor::updateAnalogSensor(ushort id, double minValue, double maxValue)
     mapAnalogSensor[id]->maxValue = maxValue;
 
     return true;
+}
+
+void Sensor::checkIfDataIsOld()
+{
+    if (lastDataTime && QDateTime::currentMSecsSinceEpoch() - lastDataTime > Globals::serialDataOldTime)
+        GlobalErrors::setError(GlobalErrors::OldDataError);
+    else
+        GlobalErrors::removeError(GlobalErrors::OldDataError);
 }
