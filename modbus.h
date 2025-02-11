@@ -29,7 +29,7 @@ private:
     QModbusTcpClient *modbusClient = nullptr;
     QTimer retryTimer; /**< The timer to handle reconnection attempts. */
     static constexpr int WAIT_TIME_MS = 2000; /**< The wait time in milliseconds for reconnection attempts. */
-    static constexpr int READ_INTERVAL_MS = 500; /**< The wait time in milliseconds for reconnection attempts. */
+    static constexpr int READ_INTERVAL_MS = 1000; /**< The wait time in milliseconds for reconnection attempts. */
     void attemptReconnect();
 
 private slots:
