@@ -29,11 +29,9 @@ void Modbus::connectToServer(const QString &ip, int port)
     modbusClient->setConnectionParameter(QModbusDevice::NetworkAddressParameter, ip);
     modbusClient->setConnectionParameter(QModbusDevice::NetworkPortParameter, port);
 
-    if (!modbusClient->connectDevice()) {
-        Logger::crit(QString("Initial connection failed: %1").arg(modbusClient->errorString()));
-        retryTimer.start();
-    }
+    attemptReconnect(); // Start initial connection
 }
+
 
 void Modbus::readInputRegisters()
 {
@@ -126,10 +124,9 @@ void Modbus::writeSingleCoil(int coilAddress, bool value)
 
 void Modbus::onErrorOccurred(QModbusDevice::Error error)
 {
-    if (error != QModbusDevice::NoError) {        
+    if (error != QModbusDevice::NoError) {
         Logger::crit(QString("Modbus error: %1").arg(modbusClient->errorString()));
         if (modbusClient->state() != QModbusDevice::ConnectedState) {
-            modbusClient->disconnectDevice();
             retryTimer.start();
         }
     }
@@ -137,26 +134,26 @@ void Modbus::onErrorOccurred(QModbusDevice::Error error)
 
 void Modbus::onStateChanged(QModbusDevice::State state)
 {
-    switch (state) {
-    case QModbusDevice::ConnectedState:        
-        Logger::info("Modbus client connected.");
+    if (state == QModbusDevice::ConnectedState) {
+        Logger::info("Modbus client successfully connected.");
         retryTimer.stop();
-        break;
-    case QModbusDevice::UnconnectedState:        
-        Logger::info("Modbus client disconnected. Starting reconnect timer.");
+    } else if (state == QModbusDevice::UnconnectedState) {
+        Logger::info("Modbus client disconnected. Will attempt reconnection.");
         retryTimer.start();
-        break;
-    default:
-        break;
     }
 }
 
 void Modbus::attemptReconnect()
 {
+    if (modbusClient->state() == QModbusDevice::ConnectedState)
+        return;
+
     Logger::info("Attempting to reconnect to the Modbus server...");
-    if (modbusClient->connectDevice()) {
-        Logger::info("Reconnected to Modbus server.");
-    } else {
-        Logger::crit(QString("Reconnection attempt failed: %1").arg(modbusClient->errorString()));
-    }
+    modbusClient->disconnectDevice(); // Ensure a fresh start
+    QTimer::singleShot(500, this, [this]() {
+        if (!modbusClient->connectDevice()) {
+            Logger::crit(QString("Reconnection attempt failed: %1").arg(modbusClient->errorString()));
+            retryTimer.start();
+        }
+    });
 }
