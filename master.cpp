@@ -19,7 +19,6 @@ Master::Master(QObject *parent)
 
     QTimer::singleShot(2000, &modbusApp, &Modbus::readInputRegisters);
 
-
     StateMachine::instance();
 
     Logger::info("Program started");
