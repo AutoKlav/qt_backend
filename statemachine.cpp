@@ -174,6 +174,29 @@ StateMachineValues StateMachine::calculateStateMachineValues()
         updateStateMachineValues.sumr = 0;
     }
 
+    const double tickFactor = Globals::stateMachineTick / 60000.0;
+    const double tempFactor = qPow(10, 1.0 / z * updateStateMachineValues.dTemp);
+    qDebug() << "###";
+    qDebug() << "tempK: " << updateStateMachineValues.tempK;
+    qDebug() << "customTemp: " << processConfig.customTemp;
+    qDebug() << "dtemp: tempK - customTemp:" << updateStateMachineValues.dTemp;
+    qDebug() << "k:" << k;
+    qDebug() << "z:" << z;
+    qDebug() << "d0:" << d0;
+    qDebug() << "stateMachineTick:" << Globals::stateMachineTick;
+    qDebug() << "tickFactor: (stateMachineTick/60000):" << tickFactor;
+    qDebug() << "tempFactor: (10^(1/z * dTemp)):" << tempFactor;
+    qDebug() << "Formula for Dr: k * d0 * 10^(-1.0/z * dTemp) * (stateMachineTick / 60000)";
+    qDebug() << "Dr:" << updateStateMachineValues.Dr;
+    qDebug() << "Formula for Fr: (1.0 / (k * d0)) * 10^(1.0/z * dTemp) * (stateMachineTick / 60000)";
+    qDebug() << "Fr:" << updateStateMachineValues.Fr;
+    qDebug() << "Formula for r: (1.0 / d0) * 10^(1.0/z * dTemp) * (stateMachineTick / 60000)";
+    qDebug() << "r:" << updateStateMachineValues.r;
+    qDebug() << "time:" << QDateTime::currentDateTime();
+    qDebug() << "sumFr:" << updateStateMachineValues.sumFr;
+    qDebug() << "sumr:" << updateStateMachineValues.r;
+    qDebug() << "###";
+
     return updateStateMachineValues;
 }
 

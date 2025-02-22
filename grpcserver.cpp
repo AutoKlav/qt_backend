@@ -529,7 +529,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getStateMachineValues(grpc::Server
     Q_UNUSED(request);
 
     const auto stateMachineValues = invokeOnMainThreadBlocking([](){
-        return StateMachine::instance().calculateStateMachineValues();
+        return StateMachine::instance().getValues();
     });
      
     replay->set_elapsedtime(stateMachineValues.time);
