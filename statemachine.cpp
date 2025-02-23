@@ -70,15 +70,15 @@ bool StateMachine::start(ProcessConfig processConfig, ProcessInfo processInfo)
     if (isRunning()){
         Logger::warn("Start failed: Autoklav is already running");
         return false;
-    }
-
-    // Fetch first time values and abort start if door is not closed
-    stateMachineValues = calculateStateMachineValues();
+    }    
 
     if (!verificationControl()) {
         Logger::warn("Start failed");
         return false;
     }
+
+    // Fetch first time values and abort start if door is not closed
+    stateMachineValues = calculateStateMachineValues();
 
     this->processConfig = processConfig;
     this->processInfo = processInfo;
