@@ -203,18 +203,20 @@ StateMachineValues StateMachine::calculateStateMachineValues()
 
 bool StateMachine::verificationControl()
 {
+    auto sensorValues = Sensor::getValues();
+
     auto turnOnAlarm = false;
-    if (!stateMachineValues.doorClosed) {
+    if (!sensorValues.doorClosed) {
         Logger::warn("Door not closed!");
         turnOnAlarm = true;
     }
 
-    if (stateMachineValues.burnerFault) {
+    if (sensorValues.burnerFault) {
         Logger::warn("Burner fault");
         turnOnAlarm = true;
     }
 
-    if (stateMachineValues.waterShortage) {
+    if (sensorValues.waterShortage) {
         Logger::warn("Water shortage in burner fault");
         turnOnAlarm = true;
     }
