@@ -466,8 +466,8 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getSensorPinValues(grpc::ServerCon
 
     // If there is a serial error, send abort status
     for(const QString& errorString : errorStrings){
-        if(errorString == GlobalErrors::SERIAL_ERROR){
-            return Status(grpc::StatusCode::ABORTED, GlobalErrors::SERIAL_ERROR.toStdString());
+        if(errorString == GlobalErrors::MODBUS_ERROR){
+            return Status(grpc::StatusCode::ABORTED, GlobalErrors::MODBUS_ERROR.toStdString());
         }
     }
 
@@ -502,8 +502,8 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getSensorRelayValues(grpc::ServerC
 
     // If there is a serial error, send abort status
     for(const QString& errorString : errorStrings){
-        if(errorString == GlobalErrors::SERIAL_ERROR){
-            return Status(grpc::StatusCode::ABORTED, GlobalErrors::SERIAL_ERROR.toStdString());
+        if(errorString == GlobalErrors::MODBUS_ERROR){
+            return Status(grpc::StatusCode::ABORTED, GlobalErrors::MODBUS_ERROR.toStdString());
         }
     }
     

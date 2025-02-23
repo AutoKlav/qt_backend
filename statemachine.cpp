@@ -5,6 +5,7 @@
 #include "globals.h"
 #include "dbmanager.h"
 #include "constants.h"
+#include "globalerrors.h"
 
 // Constructor
 StateMachine::StateMachine(QObject *parent)
@@ -69,8 +70,12 @@ bool StateMachine::start(ProcessConfig processConfig, ProcessInfo processInfo)
 
     if (isRunning()){
         Logger::warn("Start failed: Autoklav is already running");
+        GlobalErrors::setError(GlobalErrors::AlreadyStarted);
         return false;
-    }    
+    }
+    else {
+        GlobalErrors::removeError(GlobalErrors::AlreadyStarted);
+    }
 
     if (!verificationControl()) {
         Logger::warn("Start failed");
@@ -98,9 +103,6 @@ bool StateMachine::start(ProcessConfig processConfig, ProcessInfo processInfo)
 
 bool StateMachine::stop()
 {
-    if (!isRunning())
-        return false;
-
     Logger::info("End process");
     timer.stop();
 
@@ -207,18 +209,30 @@ bool StateMachine::verificationControl()
 
     auto turnOnAlarm = false;
     if (!sensorValues.doorClosed) {
+        GlobalErrors::setError(GlobalErrors::DoorClosedError);
         Logger::warn("Door not closed!");
         turnOnAlarm = true;
     }
+    else {
+        GlobalErrors::removeError(GlobalErrors::DoorClosedError);
+    }
 
     if (sensorValues.burnerFault) {
+        GlobalErrors::setError(GlobalErrors::BurnerError);
         Logger::warn("Burner fault");
         turnOnAlarm = true;
     }
+    else {
+        GlobalErrors::removeError(GlobalErrors::BurnerError);
+    }
 
     if (sensorValues.waterShortage) {
+        GlobalErrors::setError(GlobalErrors::WaterShortageError);
         Logger::warn("Water shortage in burner fault");
         turnOnAlarm = true;
+    }
+    else {
+        GlobalErrors::removeError(GlobalErrors::WaterShortageError);
     }
 
     if (turnOnAlarm)
@@ -236,7 +250,6 @@ void StateMachine::autoklavControl()
         DbManager::instance().createProcessLog(process->getId());
         writeInDBstopwatch = QDateTime::currentDateTime().addMSecs(Globals::dbTick);
     }
-
 
     if(!verificationControl()) {
         Logger::warn("Verification failed, not doing anything!");

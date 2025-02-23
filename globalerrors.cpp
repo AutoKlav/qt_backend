@@ -6,10 +6,15 @@
 const QString GlobalErrors::DB_ERROR = "Database error occurred";
 const QString GlobalErrors::DB_GLOBALS = "Database failed to load globals.";
 
-// Serial errors
-const QString GlobalErrors::SERIAL_ERROR = "Serial error occurred";
-const QString GlobalErrors::OLD_DATA_ERROR = "Serial data is old";
-const QString GlobalErrors::SERIAL_SEND_ERROR = "Failed to send serial data";
+// Modbus errors
+const QString GlobalErrors::MODBUS_ERROR = "Modbus connection error occurred";
+const QString GlobalErrors::OLD_DATA_ERROR = "TCP data is old";
+
+// Autoklav errors
+const QString GlobalErrors::DOOR_CLOSED_ERROR = "Vrata nisu zatvorena!";
+const QString GlobalErrors::BURNER_ERROR = "Plamenik nije uključen!";
+const QString GlobalErrors::WATER_SHORTAGE_ERROR = "Nema dovoljno vode!";
+const QString GlobalErrors::ALREADY_STARTED = "Program je već pokrenut!";
 
 void GlobalErrors::setError(Error error)
 {
@@ -42,10 +47,15 @@ QVector<QString> GlobalErrors::getErrorsString()
     if (errors.testFlag(Error::DbError)) err.push_back(DB_ERROR);
     if (errors.testFlag(Error::DbGlobalsError)) err.push_back(DB_GLOBALS);
     
-    // Serial errors
-    if (errors.testFlag(Error::SerialError)) err.push_back(SERIAL_ERROR);
+    // Modbus errors
+    if (errors.testFlag(Error::ModbusError)) err.push_back(MODBUS_ERROR);
     if (errors.testFlag(Error::OldDataError)) err.push_back(OLD_DATA_ERROR);
-    if (errors.testFlag(Error::SerialSendError)) err.push_back(SERIAL_SEND_ERROR);
+
+    // Autoklav errors
+    if (errors.testFlag(Error::DoorClosedError)) err.push_back(DOOR_CLOSED_ERROR);
+    if (errors.testFlag(Error::BurnerError)) err.push_back(BURNER_ERROR);
+    if (errors.testFlag(Error::WaterShortageError)) err.push_back(WATER_SHORTAGE_ERROR);
+    if (errors.testFlag(Error::AlreadyStarted)) err.push_back(ALREADY_STARTED);
 
     return err;
 }
