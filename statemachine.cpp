@@ -5,6 +5,7 @@
 #include "globals.h"
 #include "dbmanager.h"
 #include "constants.h"
+#include "globalerrors.h"
 
 // Constructor
 StateMachine::StateMachine(QObject *parent)
@@ -69,16 +70,20 @@ bool StateMachine::start(ProcessConfig processConfig, ProcessInfo processInfo)
 
     if (isRunning()){
         Logger::warn("Start failed: Autoklav is already running");
+        GlobalErrors::setError(GlobalErrors::AlreadyStarted);
         return false;
     }
-
-    // Fetch first time values and abort start if door is not closed
-    stateMachineValues = calculateStateMachineValues();
+    else {
+        GlobalErrors::removeError(GlobalErrors::AlreadyStarted);
+    }
 
     if (!verificationControl()) {
         Logger::warn("Start failed");
         return false;
     }
+
+    // Fetch first time values and abort start if door is not closed
+    stateMachineValues = calculateStateMachineValues();
 
     this->processConfig = processConfig;
     this->processInfo = processInfo;
@@ -98,9 +103,6 @@ bool StateMachine::start(ProcessConfig processConfig, ProcessInfo processInfo)
 
 bool StateMachine::stop()
 {
-    if (!isRunning())
-        return false;
-
     Logger::info("End process");
     timer.stop();
 
@@ -203,20 +205,34 @@ StateMachineValues StateMachine::calculateStateMachineValues()
 
 bool StateMachine::verificationControl()
 {
+    auto sensorValues = Sensor::getValues();
+
     auto turnOnAlarm = false;
-    if (!stateMachineValues.doorClosed) {
+    if (!sensorValues.doorClosed) {
+        GlobalErrors::setError(GlobalErrors::DoorClosedError);
         Logger::warn("Door not closed!");
         turnOnAlarm = true;
     }
+    else {
+        GlobalErrors::removeError(GlobalErrors::DoorClosedError);
+    }
 
-    if (stateMachineValues.burnerFault) {
+    if (sensorValues.burnerFault) {
+        GlobalErrors::setError(GlobalErrors::BurnerError);
         Logger::warn("Burner fault");
         turnOnAlarm = true;
     }
+    else {
+        GlobalErrors::removeError(GlobalErrors::BurnerError);
+    }
 
-    if (stateMachineValues.waterShortage) {
+    if (sensorValues.waterShortage) {
+        GlobalErrors::setError(GlobalErrors::WaterShortageError);
         Logger::warn("Water shortage in burner fault");
         turnOnAlarm = true;
+    }
+    else {
+        GlobalErrors::removeError(GlobalErrors::WaterShortageError);
     }
 
     if (turnOnAlarm)
@@ -234,7 +250,6 @@ void StateMachine::autoklavControl()
         DbManager::instance().createProcessLog(process->getId());
         writeInDBstopwatch = QDateTime::currentDateTime().addMSecs(Globals::dbTick);
     }
-
 
     if(!verificationControl()) {
         Logger::warn("Verification failed, not doing anything!");
@@ -394,17 +409,6 @@ void StateMachine::autoklavControl()
         stateMachineValues = StateMachineValues();
         break;
     }
-}
-
-bool StateMachine::setState(uint newState)
-{
-    // Check if newState is within the valid range of the enum
-    if (newState >= READY && newState <= FINISHED) {
-        this->state = static_cast<State>(newState);
-        return true;  // State change successful
-    }
-
-    return false;  // Invalid state, return false
 }
 
 StateMachine &StateMachine::instance()

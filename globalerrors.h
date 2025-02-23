@@ -8,10 +8,13 @@ class GlobalErrors
 public:
     enum Error {
         DbError = 0x1,
-        SerialError = 0x2,
-        DbGlobalsError = 0x4,
-        OldDataError = 0x8,
-        SerialSendError = 0x10
+        DbGlobalsError = 0x2,
+        OldDataError = 0x4,     
+        ModbusError = 0x8,  
+        DoorClosedError = 0x10,
+        BurnerError = 0x20,
+        WaterShortageError = 0x40, 
+        AlreadyStarted = 0x80,
     };
     Q_DECLARE_FLAGS(Errors, Error);
 
@@ -19,10 +22,15 @@ public:
     static const QString DB_ERROR;
     static const QString DB_GLOBALS;
     
-    // Serial errors
-    static const QString SERIAL_ERROR;
+    // Modbus errors
     static const QString OLD_DATA_ERROR;
-    static const QString SERIAL_SEND_ERROR;
+    static const QString MODBUS_ERROR;
+
+    // Autoklav errors
+    static const QString DOOR_CLOSED_ERROR;
+    static const QString BURNER_ERROR;
+    static const QString WATER_SHORTAGE_ERROR;
+    static const QString ALREADY_STARTED;
 
     static void setError(Error error);
     static void removeError(Error error);
