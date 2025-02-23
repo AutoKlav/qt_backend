@@ -49,7 +49,6 @@ private:
         Status updateAnalogSensor(grpc::ServerContext *context, const autoklav::UpdateAnalogSensorRequest *request, autoklav::Status *replay) override;
         Status getStateMachineValues(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::StateMachineValues *replay) override;
         Status setRelayStatus(grpc::ServerContext *context, const autoklav::SetRelay *request, autoklav::Status *replay) override;
-        Status setStateMachineState(grpc::ServerContext *context, const autoklav::SetState *request, autoklav::Status *replay) override;
 
         // Custom helper function
         void setStatusReply(autoklav::Status *replay, int code);
@@ -161,22 +160,6 @@ Status GRpcServer::Impl::AutoklavServiceImpl::setRelayStatus(grpc::ServerContext
     setStatusReply(replay, !success);
     return Status::OK;
 }
-
-
-Status GRpcServer::Impl::AutoklavServiceImpl::setStateMachineState(grpc::ServerContext *context, const autoklav::SetState *request, autoklav::Status *replay)
-{
-    Q_UNUSED(context);
-
-    const auto state = request->state();
-
-    bool success = invokeOnMainThreadBlocking([state](){
-        return  StateMachine::instance().setState(state);
-    });
-
-    setStatusReply(replay, !success);
-    return Status::OK;
-}
-
 
 Status GRpcServer::Impl::AutoklavServiceImpl::updateAnalogSensor(grpc::ServerContext *context, const autoklav::UpdateAnalogSensorRequest *request, autoklav::Status *replay)
 {

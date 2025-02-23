@@ -411,17 +411,6 @@ void StateMachine::autoklavControl()
     }
 }
 
-bool StateMachine::setState(uint newState)
-{
-    // Check if newState is within the valid range of the enum
-    if (newState >= READY && newState <= FINISHED) {
-        this->state = static_cast<State>(newState);
-        return true;  // State change successful
-    }
-
-    return false;  // Invalid state, return false
-}
-
 StateMachine &StateMachine::instance()
 {
     static StateMachine _instance;
