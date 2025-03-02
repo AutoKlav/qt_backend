@@ -17,7 +17,6 @@ Master::Master(QObject *parent)
 
     modbusApp.connectToServer("172.16.0.2", 502);
 
-    QTimer::singleShot(2000, &modbusApp, &Modbus::readInputRegisters);
 
     StateMachine::instance();
 
