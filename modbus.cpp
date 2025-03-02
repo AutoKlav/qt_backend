@@ -137,19 +137,29 @@ void Modbus::onStateChanged(QModbusDevice::State state)
     if (state == QModbusDevice::ConnectedState) {
         Logger::info("Modbus client successfully connected.");
         retryTimer.stop();
+
+        // Start reading input registers after connection
+        QTimer::singleShot(1000, this, &Modbus::readInputRegisters);
     } else if (state == QModbusDevice::UnconnectedState) {
         Logger::info("Modbus client disconnected. Will attempt reconnection.");
         retryTimer.start();
     }
 }
 
+
 void Modbus::attemptReconnect()
 {
-    if (modbusClient->state() == QModbusDevice::ConnectedState)
+    if (modbusClient->state() == QModbusDevice::ConnectedState) {
         return;
+    }
 
     Logger::info("Attempting to reconnect to the Modbus server...");
-    modbusClient->disconnectDevice(); // Ensure a fresh start
+
+    // Ensure a fresh connection by properly disconnecting first
+    if (modbusClient->state() != QModbusDevice::UnconnectedState) {
+        modbusClient->disconnectDevice();
+    }
+
     QTimer::singleShot(500, this, [this]() {
         if (!modbusClient->connectDevice()) {
             Logger::crit(QString("Reconnection attempt failed: %1").arg(modbusClient->errorString()));
