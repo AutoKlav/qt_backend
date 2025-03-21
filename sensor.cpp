@@ -64,7 +64,7 @@ void Sensor::setValue(ushort newPinValue)
 
     // Determine the scaling factor based on the maxValue, analog Values will have maxValues above 1,
     // in order to scale them properly scaling factor should be 1023
-    double scalingFactor = maxValue > 1 ? 760.0 : 1.0;
+    double scalingFactor = maxValue > 1 ? 28290 : 1.0;
 
     // Calculate the new value based on the scaling factor and the min/max range
     value = (newPinValue / scalingFactor) * (maxValue - minValue) + minValue;
