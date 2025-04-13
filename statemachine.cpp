@@ -165,6 +165,7 @@ StateMachineValues StateMachine::calculateStateMachineValues()
         updateStateMachineValues.dTemp = updateStateMachineValues.tempK - processConfig.customTemp;
 
     } else if (processConfig.mode == Mode::TIME) {
+        // avoid calculations it time is selected
         updateStateMachineValues.dTemp = NAN;
     }
 
