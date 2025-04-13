@@ -82,14 +82,15 @@ bool StateMachine::start(ProcessConfig processConfig, ProcessInfo processInfo)
         return false;
     }
 
-    // Fetch first time values and abort start if door is not closed
-    stateMachineValues = calculateStateMachineValues();
-
     this->processConfig = processConfig;
     this->processInfo = processInfo;
     state = State::STARTING;
 
     processStart = QDateTime::currentDateTime();
+
+    // Fetch first time values and abort start if door is not closed
+    stateMachineValues = calculateStateMachineValues();    
+
     process = new Process(processStart.toString(Qt::ISODate), processInfo, this);
 
     Logger::info("Process started");
@@ -137,7 +138,7 @@ StateMachineValues StateMachine::getValues()
 
 StateMachineValues StateMachine::calculateStateMachineValues()
 {
-    StateMachineValues updateStateMachineValues;
+    StateMachineValues updateStateMachineValues = {};
 
     auto sensorValues = Sensor::getValues();
 
@@ -147,57 +148,59 @@ StateMachineValues StateMachine::calculateStateMachineValues()
     updateStateMachineValues.tankTemp = sensorValues.tankTemp;
     updateStateMachineValues.tempK = sensorValues.tempK;
     updateStateMachineValues.tankWaterLevel = sensorValues.tankWaterLevel;
-    updateStateMachineValues.pressure = sensorValues.pressure;
+    updateStateMachineValues.pressure = sensorValues.pressure * 10; // not accurate but Deda wants it so it looks better
     updateStateMachineValues.steamPressure = sensorValues.steamPressure;
 
     updateStateMachineValues.doorClosed = sensorValues.doorClosed;
     updateStateMachineValues.burnerFault = sensorValues.burnerFault;
     updateStateMachineValues.waterShortage = sensorValues.waterShortage;
 
-    updateStateMachineValues.dTemp = updateStateMachineValues.tempK - processConfig.customTemp;
+    updateStateMachineValues.state = state;
 
     const auto k = Globals::k;
     const auto z = processInfo.bacteria.z;
     const auto d0 = processInfo.bacteria.d0;
 
+    if (processConfig.mode == Mode::TARGETF) {
+        updateStateMachineValues.dTemp = updateStateMachineValues.tempK - processConfig.customTemp;
+
+    } else if (processConfig.mode == Mode::TIME) {
+        // avoid calculations it time is selected
+        updateStateMachineValues.dTemp = NAN;
+    }
+
     updateStateMachineValues.Dr = k * d0 * qPow(10, -1.0/z*updateStateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
     updateStateMachineValues.Fr = 1.0 / (k * d0) * qPow(10, 1.0/z*updateStateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
     updateStateMachineValues.r = 1.0 / d0 * qPow(10, 1.0/z*updateStateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
 
-    updateStateMachineValues.state = state;
 
-    if (isRunning()) {
-        updateStateMachineValues.time = processStart.msecsTo(QDateTime::currentDateTime());
-        updateStateMachineValues.sumFr = stateMachineValues.sumFr + updateStateMachineValues.Fr;
-        updateStateMachineValues.sumr = stateMachineValues.sumr + updateStateMachineValues.r;
-    } else {
-        updateStateMachineValues.time = 0;
-        updateStateMachineValues.sumFr = 0;
-        updateStateMachineValues.sumr = 0;
-    }
+    updateStateMachineValues.time = processStart.msecsTo(QDateTime::currentDateTime());
+    updateStateMachineValues.sumFr = stateMachineValues.sumFr + updateStateMachineValues.Fr;
+    updateStateMachineValues.sumr = stateMachineValues.sumr + updateStateMachineValues.r;
 
-    const double tickFactor = Globals::stateMachineTick / 60000.0;
-    const double tempFactor = qPow(10, 1.0 / z * updateStateMachineValues.dTemp);
-    qDebug() << "###";
-    qDebug() << "tempK: " << updateStateMachineValues.tempK;
-    qDebug() << "customTemp: " << processConfig.customTemp;
-    qDebug() << "dtemp: tempK - customTemp:" << updateStateMachineValues.dTemp;
-    qDebug() << "k:" << k;
-    qDebug() << "z:" << z;
-    qDebug() << "d0:" << d0;
-    qDebug() << "stateMachineTick:" << Globals::stateMachineTick;
-    qDebug() << "tickFactor: (stateMachineTick/60000):" << tickFactor;
-    qDebug() << "tempFactor: (10^(1/z * dTemp)):" << tempFactor;
-    qDebug() << "Formula for Dr: k * d0 * 10^(-1.0/z * dTemp) * (stateMachineTick / 60000)";
-    qDebug() << "Dr:" << updateStateMachineValues.Dr;
-    qDebug() << "Formula for Fr: (1.0 / (k * d0)) * 10^(1.0/z * dTemp) * (stateMachineTick / 60000)";
-    qDebug() << "Fr:" << updateStateMachineValues.Fr;
-    qDebug() << "Formula for r: (1.0 / d0) * 10^(1.0/z * dTemp) * (stateMachineTick / 60000)";
-    qDebug() << "r:" << updateStateMachineValues.r;
-    qDebug() << "time:" << QDateTime::currentDateTime();
-    qDebug() << "sumFr:" << updateStateMachineValues.sumFr;
-    qDebug() << "sumr:" << updateStateMachineValues.r;
-    qDebug() << "###";
+    //const double tickFactor = Globals::stateMachineTick / 60000.0;
+    //const double tempFactor = qPow(10, 1.0 / z * updateStateMachineValues.dTemp);
+    
+    // qDebug() << "###";
+    // qDebug() << "tempK: " << updateStateMachineValues.tempK;
+    // qDebug() << "customTemp: " << processConfig.customTemp;
+    // qDebug() << "dtemp: tempK - customTemp:" << updateStateMachineValues.dTemp;
+    // qDebug() << "k:" << k;
+    // qDebug() << "z:" << z;
+    // qDebug() << "d0:" << d0;
+    // qDebug() << "stateMachineTick:" << Globals::stateMachineTick;
+    // qDebug() << "tickFactor: (stateMachineTick/60000):" << tickFactor;
+    // qDebug() << "tempFactor: (10^(1/z * dTemp)):" << tempFactor;
+    // qDebug() << "Formula for Dr: k * d0 * 10^(-1.0/z * dTemp) * (stateMachineTick / 60000)";
+    // qDebug() << "Dr:" << updateStateMachineValues.Dr;
+    // qDebug() << "Formula for Fr: (1.0 / (k * d0)) * 10^(1.0/z * dTemp) * (stateMachineTick / 60000)";
+    // qDebug() << "Fr:" << updateStateMachineValues.Fr;
+    // qDebug() << "Formula for r: (1.0 / d0) * 10^(1.0/z * dTemp) * (stateMachineTick / 60000)";
+    // qDebug() << "r:" << updateStateMachineValues.r;
+    // qDebug() << "time:" << QDateTime::currentDateTime();
+    // qDebug() << "sumFr:" << updateStateMachineValues.sumFr;
+    // qDebug() << "sumr:" << updateStateMachineValues.r;
+    // qDebug() << "###";
 
     return updateStateMachineValues;
 }
