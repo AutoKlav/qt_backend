@@ -45,10 +45,14 @@ public:
 
     // Process
     QList<ProcessRow> getAllProcessesOrderedDesc();
+    QList<ProcessRow> getAllUniqueProcesses();
     QList<QString> getDistinctProcessValues(QString columnName);
     QMap<QString, QList<QString>> getFilteredTargetFAndProcessLengthValues(QString productName, QString productQuantity);
     QList<ProcessType> getProcessTypes();
+    int deleteProcess(int id);
 
+
+    // Process Type
     int createProcessType(ProcessType processType);
     int deleteProcessType(int id);
     int createProcess(QString name, ProcessInfo info);
@@ -57,6 +61,7 @@ public:
     // Bacteria
     int createBacteria(Bacteria bacteria);
     QList<Bacteria> getBacteria();
+    int deleteBacteria(int id);
 
     // ProcessLog
     QList<ProcessLogInfoRow> getAllProcessLogs(int processId);

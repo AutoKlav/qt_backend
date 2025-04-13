@@ -182,6 +182,46 @@ QList<ProcessRow> DbManager::getAllProcessesOrderedDesc()
     return processes;
 }
 
+QList<ProcessRow> DbManager::getAllUniqueProcesses() {
+    QSqlQuery query("SELECT DISTINCT Process.id, Process.productName, Process.productQuantity, Process.targetF, Process.targetHeatingTime, Process.targetCoolingTime, Bacteria.id AS bacteriaId, Bacteria.name AS bacteriaName, Bacteria.description as bacteriaDescription, Bacteria.d0 as d0, Bacteria.z as z FROM Process LEFT JOIN Bacteria ON Process.bacteriaId = Bacteria.id ORDER BY Process.id DESC", m_db);
+    QList<ProcessRow> processes;
+    while (query.next()) {
+        auto id = query.value(0).toInt();
+        auto productName = query.value(1).toString();
+        auto productQuantity = query.value(2).toString();
+        auto targetF = query.value(3).toString();
+        auto targetHeatingTime = query.value(4).toString();
+        auto targetCoolingTime = query.value(5).toString();
+        auto bacteriaId = query.value(6).toInt();
+        auto bacteriaName = query.value(7).toString();
+        auto bacteriaDescription = query.value(8).toString();
+        auto d0 = query.value(9).toDouble();
+        auto z = query.value(10).toDouble();
+
+        const Bacteria bacteria = {
+            .id = bacteriaId,
+            .name = bacteriaName,
+            .description = bacteriaDescription,
+            .d0 = d0,
+            .z = z
+        };
+
+        ProcessRow info;
+        info.id = id;
+        info.productName = productName;
+        info.productQuantity = productQuantity;
+        info.targetF = targetF;
+        info.bacteria = bacteria;
+        info.targetHeatingTime = targetHeatingTime;
+        info.targetCoolingTime = targetCoolingTime;
+
+        processes.append(info);
+    }
+
+    return processes;
+}
+
+
 QList<ProcessLogInfoRow> DbManager::getAllProcessLogs(int processId)
 {
     QList<ProcessLogInfoRow> processLogs;
@@ -451,6 +491,38 @@ int DbManager::deleteProcessType(int id)
     }
 
     Logger::info(QString("Database: Delete process type %1").arg(id));
+    return query.numRowsAffected();
+}
+
+int DbManager::deleteProcess(int id)
+{
+    QSqlQuery query(m_db);
+    query.prepare("DELETE FROM Process WHERE id = :id");
+    query.bindValue(":id", id);
+
+    if (!query.exec()) {
+        Logger::crit(QString("Database: Unable to delete process type %1").arg(id));
+        Logger::crit(QString("SQL error: %1").arg(query.lastError().text()));
+        return -1;
+    }
+
+    Logger::info(QString("Database: Delete process %1").arg(id));
+    return query.numRowsAffected();
+}
+
+int DbManager::deleteBacteria(int id)
+{
+    QSqlQuery query(m_db);
+    query.prepare("DELETE FROM Bacteria WHERE id = :id");
+    query.bindValue(":id", id);
+
+    if (!query.exec()) {
+        Logger::crit(QString("Database: Unable to delete process type %1").arg(id));
+        Logger::crit(QString("SQL error: %1").arg(query.lastError().text()));
+        return -1;
+    }
+
+    Logger::info(QString("Database: Delete process %1").arg(id));
     return query.numRowsAffected();
 }
 
