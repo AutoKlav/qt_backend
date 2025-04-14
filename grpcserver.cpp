@@ -248,7 +248,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::createBacteria(grpc::ServerContext
     Q_UNUSED(context);
 
     const Bacteria bacteria = {
-        .name = QString::fromUtf8(request->name().c_str()).trimmed(),
+        .name = QString::fromUtf8(request->name()).trimmed(),
         .description = QString::fromUtf8(request->description()).trimmed(),
         .d0 = request->d0(),
         .z = request->z()
