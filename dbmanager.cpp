@@ -452,7 +452,7 @@ int DbManager::createBacteria(Bacteria bacteria)
     query.bindValue(":dateCreated", QDateTime::currentDateTime());
 
     if (!query.exec()) {
-        Logger::crit(QString("Database: Unable to bacteria type %1").arg(bacteria.name));
+        Logger::crit(QString("Database: Unable to create bacteria %1").arg(bacteria.name));
         Logger::crit(QString("SQL error: %1").arg(query.lastError().text()));
         return -1;
     }
