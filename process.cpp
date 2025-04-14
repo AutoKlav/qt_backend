@@ -20,7 +20,7 @@ QList<ProcessRow> Process::getAllProcesses() {
 }
 
 QList<ProcessRow> Process::getUniqueProcesses() {
-    auto processes = DbManager::instance().getAllUniqueProcesses();
+    auto processes = DbManager::instance().getUniqueProcesses();
     return processes;
 }
 

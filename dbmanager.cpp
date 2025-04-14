@@ -182,7 +182,7 @@ QList<ProcessRow> DbManager::getAllProcessesOrderedDesc()
     return processes;
 }
 
-QList<ProcessRow> DbManager::getAllUniqueProcesses() {
+QList<ProcessRow> DbManager::getUniqueProcesses() {
     QSqlQuery query("SELECT DISTINCT Process.id, Process.productName, Process.productQuantity, Process.targetF, Process.targetHeatingTime, Process.targetCoolingTime, Bacteria.id AS bacteriaId, Bacteria.name AS bacteriaName, Bacteria.description as bacteriaDescription, Bacteria.d0 as d0, Bacteria.z as z FROM Process LEFT JOIN Bacteria ON Process.bacteriaId = Bacteria.id ORDER BY Process.id DESC", m_db);
     QList<ProcessRow> processes;
     while (query.next()) {
