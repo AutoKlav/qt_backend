@@ -353,7 +353,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getUniqueProcesses(grpc::ServerCon
     Q_UNUSED(context);
     Q_UNUSED(request);
 
-    const auto processes = Process::getAllProcesses();
+    const auto processes = Process::getUniqueProcesses();
 
     for (const auto& process : processes) {
         auto processInfo = replay->add_processes();
@@ -370,7 +370,8 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getUniqueProcesses(grpc::ServerCon
         processInfo->set_productname(process.productName.toStdString());
         processInfo->set_productquantity(process.productQuantity.toStdString());
         processInfo->set_targetf(process.targetF.toStdString());
-        
+        processInfo->set_targetcoolingtime(process.targetCoolingTime.toStdString());
+        processInfo->set_targetheatingtime(process.targetHeatingTime.toStdString());
     }
 
     return Status::OK;
