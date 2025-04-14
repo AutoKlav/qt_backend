@@ -30,6 +30,7 @@ service Autoklav {
 
     // Bacteria
     rpc getBacteria(Empty) returns (BacteriaList);
+    rpc createBacteria(BacteriaRequest) returns (Status);    
     rpc deleteBacteria(TypeRequest) returns (Status);
 
     // StateMachine
@@ -210,6 +211,13 @@ message Bacteria {
     string description = 3;
     double d0 = 4;
     double z = 5;
+}
+
+message BacteriaRequest {    
+    string name = 1;
+    string description = 2;
+    double d0 = 3;
+    double z = 4;
 }
 
 message StartProcessRequest {

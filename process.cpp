@@ -92,6 +92,11 @@ int Process::createProcessType(ProcessType processType)
     return DbManager::instance().createProcessType(processType);
 }
 
+int Process::createBacteria(Bacteria bacteria)
+{
+    return DbManager::instance().createBacteria(bacteria);
+}
+
 int Process::deleteProcessType(int id)
 {
     return DbManager::instance().deleteProcessType(id);

@@ -452,12 +452,12 @@ int DbManager::createBacteria(Bacteria bacteria)
     query.bindValue(":dateCreated", QDateTime::currentDateTime());
 
     if (!query.exec()) {
-        Logger::crit(QString("Database: Unable to create process type %1").arg(bacteria.name));
+        Logger::crit(QString("Database: Unable to bacteria type %1").arg(bacteria.name));
         Logger::crit(QString("SQL error: %1").arg(query.lastError().text()));
         return -1;
     }
 
-    Logger::info(QString("Database: Create process type %1").arg(bacteria.name));
+    Logger::info(QString("Database: Create bacteria %1").arg(bacteria.name));
     return query.lastInsertId().toInt();
 }
 

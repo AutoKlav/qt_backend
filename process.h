@@ -48,7 +48,10 @@ public:
     static QMap<QString, QList<QString>> getFilteredTargetFAndProcessLengthValues(QString productName, QString productQuantity);
     static QList<ProcessType> getProcessTypes();
     static QList<Bacteria> getBacteria();
+
     static int createProcessType(ProcessType processType);
+    static int createBacteria(Bacteria bacteria);
+
     static int deleteProcess(int id);
     static int deleteProcessType(int id);
     static int deleteBacteria(int id);

@@ -42,6 +42,7 @@ private:
         Status setVariable(grpc::ServerContext *context, const autoklav::SetVariable *request, autoklav::Status *replay) override;
         Status getBacteria(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::BacteriaList *replay) override;
         Status createProcessType(grpc::ServerContext *context, const autoklav::ProcessTypeRequest *request, autoklav::Status *replay) override;
+        Status createBacteria(grpc::ServerContext *context, const autoklav::BacteriaRequest *request, autoklav::Status *replay) override;
         Status deleteProcessType(grpc::ServerContext *context, const autoklav::TypeRequest *request, autoklav::Status *replay) override;
         Status deleteProcess(grpc::ServerContext *context, const autoklav::TypeRequest *request, autoklav::Status *replay) override;
         Status deleteBacteria(grpc::ServerContext *context, const autoklav::TypeRequest *request, autoklav::Status *replay) override;
@@ -241,6 +242,26 @@ Status GRpcServer::Impl::AutoklavServiceImpl::createProcessType(grpc::ServerCont
     return Status::OK;
 }
 
+
+Status GRpcServer::Impl::AutoklavServiceImpl::createBacteria(grpc::ServerContext *context, const autoklav::BacteriaRequest *request, autoklav::Status *replay)
+{
+    Q_UNUSED(context);
+
+    const Bacteria bacteria = {
+        .name = QString::fromUtf8(request->name().c_str()).trimmed(),
+        .description = QString::fromUtf8(request->description()).trimmed(),
+        .d0 = request->d0(),
+        .z = request->z()
+    };
+
+    bool success = invokeOnMainThreadBlocking([bacteria](){
+        return Process::createBacteria(bacteria);
+    });
+
+    setStatusReply(replay, !success);
+    return Status::OK;
+}
+
 Status GRpcServer::Impl::AutoklavServiceImpl::deleteBacteria(grpc::ServerContext *context, const autoklav::TypeRequest *request, autoklav::Status *replay)
 {
     Q_UNUSED(context);
@@ -248,7 +269,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::deleteBacteria(grpc::ServerContext
     const auto id = request->id();
 
     bool success = invokeOnMainThreadBlocking([id](){
-        return Process::deleteProcessType(id);
+        return Process::deleteBacteria(id);
     });
 
     setStatusReply(replay, !success);
@@ -262,7 +283,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::deleteProcess(grpc::ServerContext 
     const auto id = request->id();
 
     bool success = invokeOnMainThreadBlocking([id](){
-        return Process::deleteProcessType(id);
+        return Process::deleteProcess(id);
     });
 
     setStatusReply(replay, !success);
