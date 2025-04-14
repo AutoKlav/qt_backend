@@ -517,7 +517,7 @@ int DbManager::deleteBacteria(int id)
     query.bindValue(":id", id);
 
     if (!query.exec()) {
-        Logger::crit(QString("Database: Unable to delete process type %1").arg(id));
+        Logger::crit(QString("Database: Unable to delete bacteria %1").arg(id));
         Logger::crit(QString("SQL error: %1").arg(query.lastError().text()));
         return -1;
     }
