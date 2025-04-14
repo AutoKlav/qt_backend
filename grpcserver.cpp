@@ -367,11 +367,18 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getUniqueProcesses(grpc::ServerCon
         bacteriaMessage->set_d0(process.bacteria.d0);
         bacteriaMessage->set_z(process.bacteria.z);
 
+
+        // Convert cooling time from milliseconds to minutes
+        uint coolingTimeMinutes = process.targetCoolingTime.toDouble() / (60 * 1000);
+        processInfo->set_targetcoolingtime(std::to_string(coolingTimeMinutes));
+
+        // Convert heating time from milliseconds to minutes
+        uint heatingTimeMinutes = process.targetHeatingTime.toDouble() / (60 * 1000);
+        processInfo->set_targetheatingtime(std::to_string(heatingTimeMinutes));
+
         processInfo->set_productname(process.productName.toStdString());
         processInfo->set_productquantity(process.productQuantity.toStdString());
-        processInfo->set_targetf(process.targetF.toStdString());
-        processInfo->set_targetcoolingtime(process.targetCoolingTime.toStdString());
-        processInfo->set_targetheatingtime(process.targetHeatingTime.toStdString());
+        processInfo->set_targetf(process.targetF.toStdString());        
     }
 
     return Status::OK;
