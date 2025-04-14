@@ -19,6 +19,11 @@ QList<ProcessRow> Process::getAllProcesses() {
     return processes;
 }
 
+QList<ProcessRow> Process::getUniqueProcesses() {
+    auto processes = DbManager::instance().getUniqueProcesses();
+    return processes;
+}
+
 QString Process::getName()
 {
     return name;
@@ -87,7 +92,22 @@ int Process::createProcessType(ProcessType processType)
     return DbManager::instance().createProcessType(processType);
 }
 
+int Process::createBacteria(Bacteria bacteria)
+{
+    return DbManager::instance().createBacteria(bacteria);
+}
+
 int Process::deleteProcessType(int id)
 {
     return DbManager::instance().deleteProcessType(id);
+}
+
+int Process::deleteProcess(int id)
+{
+    return DbManager::instance().deleteProcess(id);
+}
+
+int Process::deleteBacteria(int id)
+{
+    return DbManager::instance().deleteBacteria(id);
 }

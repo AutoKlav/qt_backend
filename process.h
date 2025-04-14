@@ -43,12 +43,18 @@ public:
     explicit Process();
     explicit Process(QString name, ProcessInfo info, QObject *parent = nullptr);
     static QList<ProcessRow> getAllProcesses();
+    static QList<ProcessRow> getUniqueProcesses();
     static QList<QString> getFilteredProcessValues(QString columnName);
     static QMap<QString, QList<QString>> getFilteredTargetFAndProcessLengthValues(QString productName, QString productQuantity);
     static QList<ProcessType> getProcessTypes();
     static QList<Bacteria> getBacteria();
+
     static int createProcessType(ProcessType processType);
+    static int createBacteria(Bacteria bacteria);
+
+    static int deleteProcess(int id);
     static int deleteProcessType(int id);
+    static int deleteBacteria(int id);
 
     int getId();
     ProcessInfo getInfo();
