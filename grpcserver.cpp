@@ -33,6 +33,7 @@ private:
     public:
         Status getStatus(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay) override;
         Status getAllProcesses(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::ProcessInfoList *replay) override;
+        Status getUniqueProcesses(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::ProcessInfoList *replay) override;
         Status getDistinctProcessValues(grpc::ServerContext *context, const autoklav::ProcessFilterRequest *request, autoklav::FilteredProcessList *replay) override;
         Status getFilteredModeValues(grpc::ServerContext *context, const autoklav::ProcessModeFilterRequest *request, autoklav::FilteredModeProcessList *replay) override;
         Status getAllProcessTypes(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::ProcessTypesList *replay) override;
@@ -42,6 +43,8 @@ private:
         Status getBacteria(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::BacteriaList *replay) override;
         Status createProcessType(grpc::ServerContext *context, const autoklav::ProcessTypeRequest *request, autoklav::Status *replay) override;
         Status deleteProcessType(grpc::ServerContext *context, const autoklav::TypeRequest *request, autoklav::Status *replay) override;
+        Status deleteProcess(grpc::ServerContext *context, const autoklav::TypeRequest *request, autoklav::Status *replay) override;
+        Status deleteBacteria(grpc::ServerContext *context, const autoklav::TypeRequest *request, autoklav::Status *replay) override;
         Status startProcess(grpc::ServerContext *context, const autoklav::StartProcessRequest *request, autoklav::Status *replay) override;
         Status stopProcess(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay) override;
         Status getSensorPinValues(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::SensorValues *replay) override;
@@ -238,7 +241,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::createProcessType(grpc::ServerCont
     return Status::OK;
 }
 
-Status GRpcServer::Impl::AutoklavServiceImpl::deleteProcessType(grpc::ServerContext *context, const autoklav::TypeRequest *request, autoklav::Status *replay)
+Status GRpcServer::Impl::AutoklavServiceImpl::deleteBacteria(grpc::ServerContext *context, const autoklav::TypeRequest *request, autoklav::Status *replay)
 {
     Q_UNUSED(context);
 
@@ -252,6 +255,33 @@ Status GRpcServer::Impl::AutoklavServiceImpl::deleteProcessType(grpc::ServerCont
     return Status::OK;
 }
 
+Status GRpcServer::Impl::AutoklavServiceImpl::deleteProcess(grpc::ServerContext *context, const autoklav::TypeRequest *request, autoklav::Status *replay)
+{
+    Q_UNUSED(context);
+
+    const auto id = request->id();
+
+    bool success = invokeOnMainThreadBlocking([id](){
+        return Process::deleteProcessType(id);
+    });
+
+    setStatusReply(replay, !success);
+    return Status::OK;
+}
+
+Status GRpcServer::Impl::AutoklavServiceImpl::deleteProcessType(grpc::ServerContext *context, const autoklav::TypeRequest *request, autoklav::Status *replay)
+{
+    Q_UNUSED(context);
+
+    const auto id = request->id();
+
+    bool success = invokeOnMainThreadBlocking([id](){
+        return Process::deleteProcessType(id);
+    });
+
+    setStatusReply(replay, !success);
+    return Status::OK;
+}
 
 Status GRpcServer::Impl::AutoklavServiceImpl::stopProcess(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay)
 {
@@ -297,6 +327,33 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getAllProcesses(grpc::ServerContex
     return Status::OK;
 }
 
+Status GRpcServer::Impl::AutoklavServiceImpl::getUniqueProcesses(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::ProcessInfoList *replay)
+{
+    Q_UNUSED(context);
+    Q_UNUSED(request);
+
+    const auto processes = Process::getAllProcesses();
+
+    for (const auto& process : processes) {
+        auto processInfo = replay->add_processes();
+
+        processInfo->set_id(process.id);
+        
+        // Access and populate the nested Bacteria message
+        auto bacteriaMessage = processInfo->mutable_bacteria();
+        bacteriaMessage->set_id(process.bacteria.id);
+        bacteriaMessage->set_name(process.bacteria.name.toStdString());
+        bacteriaMessage->set_d0(process.bacteria.d0);
+        bacteriaMessage->set_z(process.bacteria.z);
+
+        processInfo->set_productname(process.productName.toStdString());
+        processInfo->set_productquantity(process.productQuantity.toStdString());
+        processInfo->set_targetf(process.targetF.toStdString());
+        
+    }
+
+    return Status::OK;
+}
 
 Status GRpcServer::Impl::AutoklavServiceImpl::getBacteria(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::BacteriaList *replay)
 {

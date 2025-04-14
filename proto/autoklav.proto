@@ -13,11 +13,13 @@ service Autoklav {
     // Process
     rpc getAllProcesses(Empty) returns (ProcessInfoList);
     rpc getDistinctProcessValues(ProcessFilterRequest) returns (FilteredProcessList);
+    rpc getUniqueProcesses(Empty) returns (ProcessInfoList);
     rpc getFilteredModeValues(ProcessModeFilterRequest) returns (FilteredModeProcessList);
     rpc getProcessLogs(ProcessLogRequest) returns (ProcessLogList);
     rpc getAllProcessTypes(Empty) returns (ProcessTypesList);
     rpc createProcessType(ProcessTypeRequest) returns (Status);    
     rpc deleteProcessType(TypeRequest) returns (Status);
+    rpc deleteProcess(TypeRequest) returns (Status);
     rpc startProcess(StartProcessRequest) returns (Status);
     rpc stopProcess(Empty) returns (Status);
 
@@ -28,6 +30,7 @@ service Autoklav {
 
     // Bacteria
     rpc getBacteria(Empty) returns (BacteriaList);
+    rpc deleteBacteria(TypeRequest) returns (Status);
 
     // StateMachine
     rpc getStateMachineValues(Empty) returns (StateMachineValues);
