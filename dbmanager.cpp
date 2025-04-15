@@ -210,6 +210,7 @@ QList<ProcessRow> DbManager::getUniqueProcesses() {
         };
 
         const ProcessType processType = {
+            .name = processTypeName, // TODO finish this
             .customTemp = customTemp,
             .maintainTemp = maintainTemp,
         };
