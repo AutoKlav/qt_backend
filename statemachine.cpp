@@ -162,7 +162,7 @@ StateMachineValues StateMachine::calculateStateMachineValues()
     const auto d0 = processInfo.bacteria.d0;
 
     if (processConfig.mode == Mode::TARGETF) {
-        updateStateMachineValues.dTemp = updateStateMachineValues.tempK - processConfig.customTemp;
+        updateStateMachineValues.dTemp = updateStateMachineValues.tempK - processConfig.processType.customTemp;
 
     } else if (processConfig.mode == Mode::TIME) {
         // avoid calculations it time is selected
@@ -300,8 +300,8 @@ void StateMachine::autoklavControl()
 
     case State::HEATING:
 
-        if(stateMachineValues.temp < processConfig.maintainTemp) {
-            Logger::info(QString("Wait until %1 reaches %2").arg(QString::number(stateMachineValues.temp)).arg(QString::number(processConfig.maintainTemp)));
+        if(stateMachineValues.temp < processConfig.processType.maintainTemp) {
+            Logger::info(QString("Wait until %1 reaches %2").arg(QString::number(stateMachineValues.temp)).arg(QString::number(processConfig.processType.maintainTemp)));
             break;
         }
 
@@ -312,9 +312,9 @@ void StateMachine::autoklavControl()
 
     case State::STERILIZING:
 
-        if (stateMachineValues.temp > processConfig.maintainTemp + 0.5) {                        
+        if (stateMachineValues.temp > processConfig.processType.maintainTemp + 0.5) {
             Sensor::mapDigitalSensor[CONSTANTS::STEAM_HEATING]->send(0);
-        } else if (stateMachineValues.temp < processConfig.maintainTemp - 0.5) {
+        } else if (stateMachineValues.temp < processConfig.processType.maintainTemp - 0.5) {
             Sensor::mapDigitalSensor[CONSTANTS::STEAM_HEATING]->send(1);
         }        
 
@@ -352,7 +352,7 @@ void StateMachine::autoklavControl()
         Sensor::mapDigitalSensor[CONSTANTS::FILL_TANK_WITH_WATER]->send(0);
 
         if (processConfig.mode == Mode::TARGETF) {
-            if(stateMachineValues.tempK > processConfig.finishTemp) {
+            if(stateMachineValues.tempK > processConfig.processType.finishTemp) {
                 Logger::info("Wait until tempK reaches finish temp");
                 break;
             }

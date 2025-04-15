@@ -24,7 +24,7 @@ struct ProcessInfo {
     QString batchLTO, productName, productQuantity;
     QString processStart, processLength, targetHeatingTime, targetCoolingTime;;
     QString targetF;
-    Bacteria bacteria;
+    Bacteria bacteria;    
 };
 
 struct ProcessRow : ProcessInfo {

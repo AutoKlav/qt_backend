@@ -185,13 +185,19 @@ Status GRpcServer::Impl::AutoklavServiceImpl::startProcess(grpc::ServerContext *
 {
     Q_UNUSED(context);
 
-    const StateMachine::ProcessConfig processConfig = {
-        .type = static_cast<StateMachine::Type>(request->processconfig().type()),
+    const ProcessType processType = {
+        .id = static_cast<int>(request->processconfig().processtype().id()),
+        .name = QString::fromUtf8(request->processconfig().processtype().name()).trimmed(),
+        .type = QString::fromUtf8(request->processconfig().processtype().name()).trimmed(),
+        .customTemp = request->processconfig().processtype().customtemp(),
+        .finishTemp = request->processconfig().processtype().finishtemp(),
+        .maintainTemp  = request->processconfig().processtype().maintaintemp()
+    };
+
+    const StateMachine::ProcessConfig processConfig = {        
         .heatingType = static_cast<StateMachine::HeatingType>(request->processconfig().heatingtype()),
-        .customTemp = request->processconfig().customtemp(),
-        .mode = static_cast<StateMachine::Mode>(request->processconfig().mode()),        
-        .maintainTemp = request->processconfig().maintaintemp(),
-        .finishTemp = request->processconfig().finishtemp(),
+        .processType = processType,
+        .mode = static_cast<StateMachine::Mode>(request->processconfig().mode()),
     };
 
     const Bacteria bacteria = {
@@ -203,15 +209,15 @@ Status GRpcServer::Impl::AutoklavServiceImpl::startProcess(grpc::ServerContext *
     };
 
     const ProcessInfo processInfo = {
-        .batchLTO = QString::fromUtf8(request->processinfo().batchlto()).trimmed(),
+        .batchLTO = QString::fromUtf8(request->processinfo().batchlto()).trimmed(),        
         .productName = QString::fromUtf8(request->processinfo().productname()).trimmed(),
         .productQuantity = QString::fromUtf8(request->processinfo().productquantity()).trimmed(),
         .processStart = QString::fromUtf8(request->processinfo().processstart()),
         .processLength = QString::fromUtf8(request->processinfo().processlength()),
         .targetHeatingTime = QString::fromUtf8(request->processinfo().targetheatingtime()),
         .targetCoolingTime = QString::fromUtf8(request->processinfo().targetcoolingtime()),
-        .targetF = QString::fromUtf8(request->processinfo().targetf()),        
-        .bacteria = bacteria,        
+        .targetF = QString::fromUtf8(request->processinfo().targetf()),
+        .bacteria = bacteria,
     };
 
     bool success = invokeOnMainThreadBlocking([processConfig, processInfo](){

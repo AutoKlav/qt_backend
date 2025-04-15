@@ -22,10 +22,6 @@ public:
         READY, STARTING, FILLING, HEATING, STERILIZING,  COOLING, FINISHING, FINISHED
     };
 
-    enum Type {
-        STERILIZATION, PASTERIZATION, CUSTOM
-    };
-
     enum Mode {
         TARGETF, TIME
     };
@@ -34,13 +30,10 @@ public:
         STEAM, ELECTRIC, STEAM_ELECTRIC
     };
 
-    struct ProcessConfig {
-        Type type;
+    struct ProcessConfig {        
         HeatingType heatingType;
-        double customTemp;
-        Mode mode;        
-        double maintainTemp;
-        double finishTemp;
+        ProcessType processType;
+        Mode mode;
     };
 
     bool start(ProcessConfig processConfig, ProcessInfo processInfo);
