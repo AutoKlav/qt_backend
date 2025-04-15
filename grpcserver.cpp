@@ -218,7 +218,6 @@ Status GRpcServer::Impl::AutoklavServiceImpl::startProcess(grpc::ServerContext *
         .targetCoolingTime = QString::fromUtf8(request->processinfo().targetcoolingtime()),
         .targetF = QString::fromUtf8(request->processinfo().targetf()),
         .bacteria = bacteria,
-        .processTypeId = processType.id
     };
 
     bool success = invokeOnMainThreadBlocking([processConfig, processInfo](){
