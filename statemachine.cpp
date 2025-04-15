@@ -77,7 +77,7 @@ bool StateMachine::start(ProcessConfig processConfig, ProcessInfo processInfo)
         GlobalErrors::removeError(GlobalErrors::AlreadyStarted);
     }
 
-    if (!verificationControl()) {
+    if (verificationControl()) { // TODO remove
         Logger::warn("Start failed");
         return false;
     }
@@ -254,7 +254,7 @@ void StateMachine::autoklavControl()
         writeInDBstopwatch = QDateTime::currentDateTime().addMSecs(Globals::dbTick);
     }
 
-    if(!verificationControl()) {
+    if(verificationControl()) { // TODO Revert
         Logger::warn("Verification failed, not doing anything!");
     }
 

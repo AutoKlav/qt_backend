@@ -292,7 +292,7 @@ int DbManager::createProcess(QString name, ProcessInfo info)
 {    
     QSqlQuery query(m_db);
     query.prepare("INSERT INTO Process (bacteriaId, processTypeId, name, batchLTO, productName, productQuantity, processStart, targetF, targetHeatingTime, targetCoolingTime, processLength) "
-                  "VALUES (:bacteriaId, :name, :batchLTO, :productName, :productQuantity, :processStart, :targetF, :targetHeatingTime, :targetCoolingTime, :processLength)");
+                  "VALUES (:bacteriaId, :processTypeId, :name, :batchLTO, :productName, :productQuantity, :processStart, :targetF, :targetHeatingTime, :targetCoolingTime, :processLength)");
     query.bindValue(":processTypeId", info.processTypeId);
     query.bindValue(":bacteriaId", info.bacteria.id);
     query.bindValue(":name", name);
