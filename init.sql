@@ -83,6 +83,9 @@ create table Process
    bacteriaId      INTEGER
         references Bacteria(id)
         on delete set null,
+   processTypeId INTEGER
+        references ProcessType(id)
+        on delete set null,
     name            TEXT
         unique,
     batchLTO        TEXT,
@@ -95,7 +98,7 @@ create table Process
     processLength   TEXT
 );
 
-INSERT INTO Process (id, bacteriaId, name, batchLTO, productName, productQuantity, processStart, processLength, targetF, targetCoolingTime, targetHeatingTime) VALUES (55,1, '2024-11-28T17:28:53', 'LTO324325345', 'Testni podaci', 'sint aliqua do laborum', '2024-11-28T17:28:53', '56363634654', null, null, null);
+INSERT INTO Process (id, bacteriaId, processTypeId, name, batchLTO, productName, productQuantity, processStart, processLength, targetF, targetCoolingTime, targetHeatingTime) VALUES (55,1, 0, '2024-11-28T17:28:53', 'LTO324325345', 'Testni podaci', 'sint aliqua do laborum', '2024-11-28T17:28:53', '56363634654', null, null, null);
 
 CREATE INDEX idx_process_start ON Process(processStart);
 

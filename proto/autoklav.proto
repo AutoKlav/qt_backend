@@ -44,17 +44,6 @@ message TypeRequest {
     int32 id = 1;
 }
 
-message PortInfo {
-  string name = 1; 
-  string description = 2;
-  string manufacturer = 3;
-  string serialNumber = 4;
-}
-
-message PortListResponse {
-  repeated PortInfo ports = 1;
-}
-
 message Status {
     int32 code = 1;
     int32 errors = 2;
@@ -163,12 +152,6 @@ message StateMachineValues {
     string timestamp = 11;
 }
 
-enum ProcessConfigType {
-    STERILIZATION = 0;
-    PASTERIZATION = 1;
-    CUSTOM = 2;
-}
-
 enum HeatingType {
     STEAM = 0;
     ELECTRIC = 1;
@@ -179,13 +162,10 @@ enum ProcessConfigMode {
     TIME = 1;
 }
 
-message ProcessConfig {
-    ProcessConfigType type = 1;
-    HeatingType heatingType = 2;
-    double customTemp = 3;
-    ProcessConfigMode mode = 4;
-    double maintainTemp = 5;
-    double finishTemp = 6;    
+message ProcessConfig {    
+    HeatingType heatingType = 1;
+    ProcessType processType = 2;
+    ProcessConfigMode mode = 3;    
 }
 
 message ProcessInfo {
@@ -198,7 +178,7 @@ message ProcessInfo {
     string targetF = 7;
     string targetHeatingTime = 8;
     string targetCoolingTime = 9;
-    string processLength = 10;     
+    string processLength = 10;
 }
 
 message BacteriaList {
