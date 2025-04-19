@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(NewAutoklav LANGUAGES CXX)
+project(Autoklav LANGUAGES CXX)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -78,7 +78,7 @@ target_link_libraries(ServerRunner
     Qt6::Core
 )
 
-add_executable(NewAutoklav
+add_executable(Autoklav
   main.cpp
   dbmanager.cpp dbmanager.h
   globalerrors.cpp globalerrors.h
@@ -97,7 +97,7 @@ add_executable(NewAutoklav
   modbus.h modbus.cpp
 )
 
-target_link_libraries(NewAutoklav
+target_link_libraries(Autoklav
     PRIVATE
     Qt6::Core
     Qt6::Concurrent    
@@ -107,7 +107,7 @@ target_link_libraries(NewAutoklav
 )
 
 include(GNUInstallDirs)
-install(TARGETS NewAutoklav
+install(TARGETS Autoklav
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
