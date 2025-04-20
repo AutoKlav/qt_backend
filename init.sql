@@ -76,6 +76,23 @@ INSERT INTO Bacteria (id, name, description, d0, z, dateCreated, dateModified) V
 -- Process
 drop table if exists ProcessLog;
 drop table if exists Process;
+drop table if exists ProcessType;
+
+create table ProcessType
+(
+    id               INTEGER
+        primary key autoincrement,
+    name             TEXT not null,
+    type             TEXT,
+    customTemp       REAL,
+    finishTemp       REAL,
+    maintainTemp     REAL
+);
+
+INSERT INTO ProcessType (id, name, type, customTemp, finishTemp, maintainTemp) VALUES (0, 'Sterilizacija', 'sterilizacija', 121.11, 30, 116 );
+INSERT INTO ProcessType (id, name, type, customTemp, finishTemp, maintainTemp) VALUES (1, 'Pasterizacija', 'pasterizacija', 70, 70, 6);
+INSERT INTO ProcessType (id, name, type, customTemp, finishTemp, maintainTemp) VALUES (2, 'Prilagođeno', null, null, null, null);
+
 create table Process
 (
     id              INTEGER
@@ -101,22 +118,6 @@ create table Process
 INSERT INTO Process (id, bacteriaId, processTypeId, name, batchLTO, productName, productQuantity, processStart, processLength, targetF, targetCoolingTime, targetHeatingTime) VALUES (55,1, 0, '2024-11-28T17:28:53', 'LTO324325345', 'Testni podaci', 'sint aliqua do laborum', '2024-11-28T17:28:53', '56363634654', null, null, null);
 
 CREATE INDEX idx_process_start ON Process(processStart);
-
-drop table if exists ProcessType;
-create table ProcessType
-(
-    id               INTEGER
-        primary key autoincrement,
-    name             TEXT not null,
-    type             TEXT,
-    customTemp       REAL,
-    finishTemp       REAL,
-    maintainTemp     REAL
-);
-
-INSERT INTO ProcessType (id, name, type, customTemp, finishTemp, maintainTemp) VALUES (0, 'Sterilizacija', 'sterilizacija', 121.11, 30, 116 );
-INSERT INTO ProcessType (id, name, type, customTemp, finishTemp, maintainTemp) VALUES (1, 'Pasterizacija', 'pasterizacija', 70, 70, 6);
-INSERT INTO ProcessType (id, name, type, customTemp, finishTemp, maintainTemp) VALUES (2, 'Prilagođeno', null, null, null, null);
 
 -- ProcessLog
 drop table if exists ProcessLog;

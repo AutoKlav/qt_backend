@@ -50,9 +50,7 @@ void Modbus::readInputRegisters()
                 for (uint i = 0; i < unit.valueCount(); i++) {
                     // Update sensor value if sensor exists
                     if (Sensor::mapAnalogSensor.contains(i)) {
-                        //TODO remove this and update arduino code
-                        auto readValue = unit.value(i);// > 64000 ? 0 : unit.value(i);
-                        Logger::info(QString("Read %1").arg(readValue));
+                        Logger::info(QString("Read %1").arg(unit.value(i)));
                         Sensor::mapAnalogSensor[i]->setValue(unit.value(i));
                     } else {
                         Logger::crit(QString("Sensor '%1' not found in AnalogSensor database.").arg(i));
