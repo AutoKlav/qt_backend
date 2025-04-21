@@ -24,10 +24,10 @@ CREATE TABLE AnalogSensor (
 
 -- Analog Inputs
 INSERT INTO AnalogSensor (id, alias, minValue, maxValue) VALUES (0, 'temp', -53.640776699029125, 194.6601941747573);
-INSERT INTO AnalogSensor (id, alias, minValue, maxValue) VALUES (1, 'expansionTemp', -51.666666666666664, 191.9047619047619);
-INSERT INTO AnalogSensor (id, alias, minValue, maxValue) VALUES (2, 'heaterTemp', -53.03579952267303, 194.77923627684964);
-INSERT INTO AnalogSensor (id, alias, minValue, maxValue) VALUES (3, 'tankTemp', -52.76, 202.57);
-INSERT INTO AnalogSensor (id, alias, minValue, maxValue) VALUES (4, 'tempK', -50.03157894736842, 192.10526315789474);
+INSERT INTO AnalogSensor (id, alias, minValue, maxValue) VALUES (1, 'tempK', -50.03157894736842, 192.10526315789474);
+INSERT INTO AnalogSensor (id, alias, minValue, maxValue) VALUES (2, 'expansionTemp', -51.666666666666664, 191.9047619047619);
+INSERT INTO AnalogSensor (id, alias, minValue, maxValue) VALUES (3, 'heaterTemp', -53.03579952267303, 194.77923627684964);
+INSERT INTO AnalogSensor (id, alias, minValue, maxValue) VALUES (4, 'tankTemp', -52.76, 202.57);
 INSERT INTO AnalogSensor (id, alias, minValue, maxValue) VALUES (5, 'tankWaterLevel', -52.33, 120.25);
 INSERT INTO AnalogSensor (id, alias, minValue, maxValue) VALUES (6, 'pressure', -0.977, 4.439);
 INSERT INTO AnalogSensor (id, alias, minValue, maxValue) VALUES (7, 'steamPressure', -0.00598, 16.16966);
