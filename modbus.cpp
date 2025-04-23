@@ -37,6 +37,7 @@ void Modbus::readInputRegisters()
 {
     if (!modbusClient || modbusClient->state() != QModbusDevice::ConnectedState) {
         Logger::crit("Modbus client not connected. Cannot read input registers.");
+
         return;
     }
 
@@ -61,8 +62,10 @@ void Modbus::readInputRegisters()
                 }
             } else {
                 Logger::crit(QString("Read error: %1").arg(reply->errorString()));
+                GlobalErrors::setError(GlobalErrors::ModbusReadRegisterError);
             }
             reply->deleteLater();
+            GlobalErrors::removeError(GlobalErrors::ModbusReadRegisterError);
 
             // Add a delay before the next read request
             QTimer::singleShot(READ_INTERVAL_MS, this, &Modbus::readInputRegisters);
@@ -72,38 +75,10 @@ void Modbus::readInputRegisters()
     }
 }
 
-void Modbus::writeMultipleCoils()
-{
-    if (!modbusClient || modbusClient->state() != QModbusDevice::ConnectedState) {        
-        Logger::crit("Modbus client not connected. Cannot write coils.");
-        return;
-    }
-
-    QVector<quint16> coilValues = {1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1};
-    QModbusDataUnit writeUnit(QModbusDataUnit::Coils, 0, coilValues.size());
-
-    for (int i = 0; i < coilValues.size(); ++i) {
-        writeUnit.setValue(i, coilValues[i]);
-    }
-
-    if (auto *reply = modbusClient->sendWriteRequest(writeUnit, 1)) {
-        connect(reply, &QModbusReply::finished, this, [reply]() {
-            if (reply->error() == QModbusDevice::NoError) {                
-                Logger::info("Coils written successfully!");
-            } else {
-                Logger::crit(QString("Write error: %1").arg(reply->errorString()));
-            }
-            reply->deleteLater();
-        });
-    } else {
-        Logger::crit(QString("Write request failed: %1").arg(modbusClient->errorString()));
-    }
-}
-
 void Modbus::writeSingleCoil(int coilAddress, bool value)
 {
     if (!modbusClient || modbusClient->state() != QModbusDevice::ConnectedState) {        
-        Logger::crit("Modbus client not connected. Cannot write to coil.");
+        Logger::crit("Modbus client not connected. Cannot write to coil.");        
         return;
     }
 
@@ -113,13 +88,15 @@ void Modbus::writeSingleCoil(int coilAddress, bool value)
     if (auto *reply = modbusClient->sendWriteRequest(writeUnit, 1)) {
         connect(reply, &QModbusReply::finished, this, [reply]() {
             if (reply->error() != QModbusDevice::NoError) {
-                Logger::crit(QString("Write error: %1").arg(reply->errorString()));                
+                Logger::crit(QString("Write error: %1").arg(reply->errorString()));
+                GlobalErrors::setError(GlobalErrors::ModbusWriteCoilError);
             } 
 
             reply->deleteLater();
+            GlobalErrors::removeError(GlobalErrors::ModbusWriteCoilError);
         });
     } else {
-        Logger::crit(QString("Write request failed: %1").arg(modbusClient->errorString()));
+        Logger::crit(QString("Write request failed: %1").arg(modbusClient->errorString()));        
     }
 }
 
@@ -137,12 +114,14 @@ void Modbus::onStateChanged(QModbusDevice::State state)
 {
     if (state == QModbusDevice::ConnectedState) {
         Logger::info("Modbus client successfully connected.");
+        GlobalErrors::removeError(GlobalErrors::ModbusError);
         retryTimer.stop();
 
         // Start reading input registers after connection
         QTimer::singleShot(1000, this, &Modbus::readInputRegisters);
     } else if (state == QModbusDevice::UnconnectedState) {
         Logger::info("Modbus client disconnected. Will attempt reconnection.");
+        GlobalErrors::setError(GlobalErrors::ModbusError);
         retryTimer.start();
     }
 }
@@ -150,7 +129,7 @@ void Modbus::onStateChanged(QModbusDevice::State state)
 
 void Modbus::attemptReconnect()
 {
-    if (modbusClient->state() == QModbusDevice::ConnectedState) {
+    if (modbusClient->state() == QModbusDevice::ConnectedState) {        
         return;
     }
 

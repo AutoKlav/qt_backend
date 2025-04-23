@@ -15,6 +15,8 @@ public:
         BurnerError = 0x20,
         WaterShortageError = 0x40, 
         AlreadyStarted = 0x80,
+        ModbusWriteCoilError = 0x100,
+        ModbusReadRegisterError = 0x200,
     };
     Q_DECLARE_FLAGS(Errors, Error);
 
@@ -31,6 +33,8 @@ public:
     static const QString BURNER_ERROR;
     static const QString WATER_SHORTAGE_ERROR;
     static const QString ALREADY_STARTED;
+    static const QString MODBUS_WRITE_COIL_ERROR;
+    static const QString MODBUS_READ_REGISTER_ERROR;
 
     static void setError(Error error);
     static void removeError(Error error);
