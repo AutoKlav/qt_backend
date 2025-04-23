@@ -32,10 +32,12 @@ namespace CONSTANTS {
 
     // default steam heating
     inline ushort STEAM_HEATING = 6;  // heating
-    // electric heating
-    inline const ushort ELECTRIC_HEATING = 7;  // electricHeating
 
-    inline const ushort PUMP = 8;  // pump
+    inline const ushort PUMP = 7;  // pump
+
+    // electric heating
+    inline const ushort ELECTRIC_HEATING = 8;  // electricHeating
+
     inline const ushort INCREASE_PRESSURE = 9;  // increasePressure
     inline const ushort EXTENSION_COOLING = 10;  // extensionCooling
     inline const ushort ALARM_SIGNAL = 11;  // alarmSignal

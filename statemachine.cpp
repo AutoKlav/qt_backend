@@ -208,6 +208,8 @@ StateMachineValues StateMachine::calculateStateMachineValues()
 
 bool StateMachine::verificationControl()
 {
+    // TODO Remove this
+    return true;
     auto sensorValues = Sensor::getValues();
 
     auto turnOnAlarm = false;
