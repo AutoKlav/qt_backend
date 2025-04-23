@@ -10,11 +10,11 @@
 #include "modbus.h"
 
 qint64 Sensor::lastDataTime = 0;
-QList<Sensor> Sensor::analogSensors = QList<Sensor>();
-QList<Sensor> Sensor::digitalSensors = QList<Sensor>();
+QList<Sensor> Sensor::inputPins = QList<Sensor>();
+QList<Sensor> Sensor::outputPins = QList<Sensor>();
 
-QMap<ushort, Sensor *> Sensor::mapAnalogSensor = QMap<ushort, Sensor *>();
-QMap<ushort, Sensor *> Sensor::mapDigitalSensor = QMap<ushort, Sensor *>();
+QMap<ushort, Sensor *> Sensor::mapInputPin = QMap<ushort, Sensor *>();
+QMap<ushort, Sensor *> Sensor::mapOutputPin = QMap<ushort, Sensor *>();
 
 Sensor::Sensor(ushort id, double minValue, double maxValue)
     : id{id}, minValue{minValue}, maxValue{maxValue}
@@ -39,8 +39,8 @@ void Sensor::send(double newValue)
 bool Sensor::setRelayState(ushort id, ushort value)
 {
     // Update sensor value if sensor exists
-    if (mapDigitalSensor.contains(id)) {
-        Sensor::mapDigitalSensor[id]->send(value);
+    if (mapOutputPin.contains(id)) {
+        Sensor::mapOutputPin[id]->send(value);
     } else {
         Logger::crit(QString("Sensor '%1' cannot be set to '%2' since it is not found in database.").arg(id).arg(value));
         GlobalErrors::setError(GlobalErrors::DbError);
@@ -79,18 +79,18 @@ SensorValues Sensor::getValues()
 
     SensorValues values;
     
-    values.temp = mapAnalogSensor[CONSTANTS::TEMP]->value;
-    values.expansionTemp = mapAnalogSensor[CONSTANTS::EXPANSION_TEMP]->value;
-    values.heaterTemp = mapAnalogSensor[CONSTANTS::HEATER_TEMP]->value;
-    values.tankTemp = mapAnalogSensor[CONSTANTS::TANK_TEMP]->value;
-    values.tempK = mapAnalogSensor[CONSTANTS::TEMP_K]->value;
-    values.tankWaterLevel = mapAnalogSensor[CONSTANTS::TANK_WATER_LEVEL]->value;
-    values.pressure = mapAnalogSensor[CONSTANTS::PRESSURE]->value;
-    values.steamPressure = mapAnalogSensor[CONSTANTS::STEAM_PRESSURE]->value;
+    values.temp = mapInputPin[CONSTANTS::TEMP]->value;
+    values.expansionTemp = mapInputPin[CONSTANTS::EXPANSION_TEMP]->value;
+    values.heaterTemp = mapInputPin[CONSTANTS::HEATER_TEMP]->value;
+    values.tankTemp = mapInputPin[CONSTANTS::TANK_TEMP]->value;
+    values.tempK = mapInputPin[CONSTANTS::TEMP_K]->value;
+    values.tankWaterLevel = mapInputPin[CONSTANTS::TANK_WATER_LEVEL]->value;
+    values.pressure = mapInputPin[CONSTANTS::PRESSURE]->value;
+    values.steamPressure = mapInputPin[CONSTANTS::STEAM_PRESSURE]->value;
 
-    values.doorClosed = mapAnalogSensor[CONSTANTS::DOOR_CLOSED]->value;
-    values.burnerFault = mapAnalogSensor[CONSTANTS::BURNER_FAULT]->value;
-    values.waterShortage = mapAnalogSensor[CONSTANTS::WATER_SHORTAGE]->value;
+    values.doorClosed = mapInputPin[CONSTANTS::DOOR_CLOSED]->value;
+    values.burnerFault = mapInputPin[CONSTANTS::BURNER_FAULT]->value;
+    values.waterShortage = mapInputPin[CONSTANTS::WATER_SHORTAGE]->value;
     
     return values;
 }
@@ -104,18 +104,18 @@ SensorValues Sensor::getPinValues()
 
     SensorValues values;
 
-    values.temp = mapAnalogSensor[CONSTANTS::TEMP]->pinValue;
-    values.expansionTemp = mapAnalogSensor[CONSTANTS::EXPANSION_TEMP]->pinValue;
-    values.heaterTemp = mapAnalogSensor[CONSTANTS::HEATER_TEMP]->pinValue;
-    values.tankTemp = mapAnalogSensor[CONSTANTS::TANK_TEMP]->pinValue;
-    values.tempK = mapAnalogSensor[CONSTANTS::TEMP_K]->pinValue;
-    values.tankWaterLevel = mapAnalogSensor[CONSTANTS::TANK_WATER_LEVEL]->pinValue;
-    values.pressure = mapAnalogSensor[CONSTANTS::PRESSURE]->pinValue;
-    values.steamPressure = mapAnalogSensor[CONSTANTS::STEAM_PRESSURE]->pinValue;
+    values.temp = mapInputPin[CONSTANTS::TEMP]->pinValue;
+    values.expansionTemp = mapInputPin[CONSTANTS::EXPANSION_TEMP]->pinValue;
+    values.heaterTemp = mapInputPin[CONSTANTS::HEATER_TEMP]->pinValue;
+    values.tankTemp = mapInputPin[CONSTANTS::TANK_TEMP]->pinValue;
+    values.tempK = mapInputPin[CONSTANTS::TEMP_K]->pinValue;
+    values.tankWaterLevel = mapInputPin[CONSTANTS::TANK_WATER_LEVEL]->pinValue;
+    values.pressure = mapInputPin[CONSTANTS::PRESSURE]->pinValue;
+    values.steamPressure = mapInputPin[CONSTANTS::STEAM_PRESSURE]->pinValue;
 
-    values.doorClosed = mapAnalogSensor[CONSTANTS::DOOR_CLOSED]->pinValue;
-    values.burnerFault = mapAnalogSensor[CONSTANTS::BURNER_FAULT]->pinValue;
-    values.waterShortage = mapAnalogSensor[CONSTANTS::WATER_SHORTAGE]->pinValue;
+    values.doorClosed = mapInputPin[CONSTANTS::DOOR_CLOSED]->pinValue;
+    values.burnerFault = mapInputPin[CONSTANTS::BURNER_FAULT]->pinValue;
+    values.waterShortage = mapInputPin[CONSTANTS::WATER_SHORTAGE]->pinValue;
 
     return values;
 }
@@ -130,32 +130,32 @@ SensorRelayValues Sensor::getRelayValues()
 
     SensorRelayValues relayValues;
     
-    relayValues.fillTankWithWater = mapDigitalSensor[CONSTANTS::FILL_TANK_WITH_WATER]->value;
-    relayValues.cooling = mapDigitalSensor[CONSTANTS::COOLING]->value;
-    relayValues.tankHeating = mapDigitalSensor[CONSTANTS::TANK_HEATING]->value;
-    relayValues.coolingHelper = mapDigitalSensor[CONSTANTS::COOLING_HELPER]->value;
-    relayValues.autoklavFill = mapDigitalSensor[CONSTANTS::AUTOKLAV_FILL]->value;
-    relayValues.waterDrain = mapDigitalSensor[CONSTANTS::WATER_DRAIN]->value;
-    relayValues.heating = mapDigitalSensor[CONSTANTS::STEAM_HEATING]->value;
-    relayValues.pump = mapDigitalSensor[CONSTANTS::PUMP]->value;
-    relayValues.electricHeating = mapDigitalSensor[CONSTANTS::ELECTRIC_HEATING]->value;
-    relayValues.increasePressure = mapDigitalSensor[CONSTANTS::INCREASE_PRESSURE]->value;
-    relayValues.extensionCooling = mapDigitalSensor[CONSTANTS::EXTENSION_COOLING]->value;
-    relayValues.alarmSignal = mapDigitalSensor[CONSTANTS::ALARM_SIGNAL]->value;
+    relayValues.fillTankWithWater = mapOutputPin[CONSTANTS::FILL_TANK_WITH_WATER]->value;
+    relayValues.cooling = mapOutputPin[CONSTANTS::COOLING]->value;
+    relayValues.tankHeating = mapOutputPin[CONSTANTS::TANK_HEATING]->value;
+    relayValues.coolingHelper = mapOutputPin[CONSTANTS::COOLING_HELPER]->value;
+    relayValues.autoklavFill = mapOutputPin[CONSTANTS::AUTOKLAV_FILL]->value;
+    relayValues.waterDrain = mapOutputPin[CONSTANTS::WATER_DRAIN]->value;
+    relayValues.heating = mapOutputPin[CONSTANTS::STEAM_HEATING]->value;
+    relayValues.pump = mapOutputPin[CONSTANTS::PUMP]->value;
+    relayValues.electricHeating = mapOutputPin[CONSTANTS::ELECTRIC_HEATING]->value;
+    relayValues.increasePressure = mapOutputPin[CONSTANTS::INCREASE_PRESSURE]->value;
+    relayValues.extensionCooling = mapOutputPin[CONSTANTS::EXTENSION_COOLING]->value;
+    relayValues.alarmSignal = mapOutputPin[CONSTANTS::ALARM_SIGNAL]->value;
     
     return relayValues;
 }
 
-bool Sensor::updateAnalogSensor(ushort id, double minValue, double maxValue)
+bool Sensor::updateInputPin(ushort id, double minValue, double maxValue)
 {
-    if (!DbManager::instance().updateAnalogSensor(id, minValue, maxValue))
+    if (!DbManager::instance().updateInputPin(id, minValue, maxValue))
         return false;
 
-    if (mapAnalogSensor.contains(id))
+    if (mapInputPin.contains(id))
         return false;
 
-    mapAnalogSensor[id]->minValue = minValue;
-    mapAnalogSensor[id]->maxValue = maxValue;
+    mapInputPin[id]->minValue = minValue;
+    mapInputPin[id]->maxValue = maxValue;
 
     return true;
 }

@@ -50,7 +50,7 @@ private:
         Status stopProcess(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay) override;
         Status getSensorPinValues(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::SensorValues *replay) override;
         Status getSensorRelayValues(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::SensorRelayValues *replay) override;
-        Status updateAnalogSensor(grpc::ServerContext *context, const autoklav::UpdateAnalogSensorRequest *request, autoklav::Status *replay) override;
+        Status updateInputPin(grpc::ServerContext *context, const autoklav::UpdateInputPinRequest *request, autoklav::Status *replay) override;
         Status getStateMachineValues(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::StateMachineValues *replay) override;
         Status setRelayStatus(grpc::ServerContext *context, const autoklav::SetRelay *request, autoklav::Status *replay) override;
 
@@ -165,7 +165,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::setRelayStatus(grpc::ServerContext
     return Status::OK;
 }
 
-Status GRpcServer::Impl::AutoklavServiceImpl::updateAnalogSensor(grpc::ServerContext *context, const autoklav::UpdateAnalogSensorRequest *request, autoklav::Status *replay)
+Status GRpcServer::Impl::AutoklavServiceImpl::updateInputPin(grpc::ServerContext *context, const autoklav::UpdateInputPinRequest *request, autoklav::Status *replay)
 {
     Q_UNUSED(context);
 
@@ -174,7 +174,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::updateAnalogSensor(grpc::ServerCon
     const auto maxValue = request->maxvalue();
 
     bool success = invokeOnMainThreadBlocking([id, minValue, maxValue](){
-        return Sensor::updateAnalogSensor(id, minValue, maxValue);
+        return Sensor::updateInputPin(id, minValue, maxValue);
     });
 
     setStatusReply(replay, !success);

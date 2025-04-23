@@ -12,52 +12,52 @@ INSERT INTO Globals VALUES ( "expansionLowerTemp", "90" );
 INSERT INTO Globals VALUES ( "heaterWaterLevel", "40" );
 INSERT INTO Globals VALUES ( "maintainWaterTankTemp", "95" );
 
--- AnalogSensor, used for reading and displaying sensor data through Modbus network from server PLC 
-DROP TABLE IF EXISTS AnalogSensor;
+-- InputPin, used for reading and displaying sensor data through Modbus network from server PLC 
+DROP TABLE IF EXISTS InputPin;
 
-CREATE TABLE AnalogSensor (
+CREATE TABLE InputPin (
     id INTEGER PRIMARY KEY,
     alias TEXT,
     minValue REAL NOT NULL,
     maxValue REAL NOT NULL
 );
 
--- Analog Inputs
-INSERT INTO AnalogSensor (id, alias, minValue, maxValue) VALUES (0, 'temp', -53.640776699029125, 194.6601941747573);
-INSERT INTO AnalogSensor (id, alias, minValue, maxValue) VALUES (1, 'tempK', -50.03157894736842, 192.10526315789474);
-INSERT INTO AnalogSensor (id, alias, minValue, maxValue) VALUES (2, 'expansionTemp', -51.666666666666664, 191.9047619047619);
-INSERT INTO AnalogSensor (id, alias, minValue, maxValue) VALUES (3, 'heaterTemp', -53.03579952267303, 194.77923627684964);
-INSERT INTO AnalogSensor (id, alias, minValue, maxValue) VALUES (4, 'tankTemp', -52.76, 202.57);
-INSERT INTO AnalogSensor (id, alias, minValue, maxValue) VALUES (5, 'tankWaterLevel', -52.33, 120.25);
-INSERT INTO AnalogSensor (id, alias, minValue, maxValue) VALUES (6, 'pressure', -0.977, 4.439);
-INSERT INTO AnalogSensor (id, alias, minValue, maxValue) VALUES (7, 'steamPressure', -0.00598, 16.16966);
+-- Input pins
+INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (0, 'temp', -53.640776699029125, 194.6601941747573);
+INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (1, 'tempK', -50.03157894736842, 192.10526315789474);
+INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (2, 'expansionTemp', -51.666666666666664, 191.9047619047619);
+INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (3, 'heaterTemp', -53.03579952267303, 194.77923627684964);
+INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (4, 'tankTemp', -52.76, 202.57);
+INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (5, 'tankWaterLevel', -52.33, 120.25);
+INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (6, 'pressure', -0.977, 4.439);
+INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (7, 'steamPressure', -0.00598, 16.16966);
 
--- Digital Inputs read through Analog Inputs, converted from [analogMin, analogMax] to [0, 1]
-INSERT INTO AnalogSensor (id, alias, minValue, maxValue) VALUES (8, 'doorClosed', 0, 1);
-INSERT INTO AnalogSensor (id, alias, minValue, maxValue) VALUES (9, 'burnerFault', 0, 1);
-INSERT INTO AnalogSensor (id, alias, minValue, maxValue) VALUES (10, 'waterShortage', 0, 1);
+-- Digital Pins read through Analog Inputs, converted from [analogMin, analogMax] to [0, 1]
+INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (8, 'doorClosed', 0, 1);
+INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (9, 'burnerFault', 0, 1);
+INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (10, 'waterShortage', 0, 1);
 
--- DigitalSensor, used for sending commands to the PLC through Modbus network, QT acts as clients that sends commands to the server PLC
-DROP TABLE IF EXISTS DigitalSensor;
+-- OutputPin, used for sending commands to the PLC through Modbus network, QT acts as clients that sends commands to the server PLC
+DROP TABLE IF EXISTS OutputPin;
 
-CREATE TABLE DigitalSensor (
+CREATE TABLE OutputPin (
     id INTEGER PRIMARY KEY,
     alias TEXT
 );
 
 -- Digital Outputs
-INSERT INTO DigitalSensor (id, alias) VALUES (0, 'fillTankWithWater');
-INSERT INTO DigitalSensor (id, alias) VALUES (1, 'cooling');
-INSERT INTO DigitalSensor (id, alias) VALUES (2, 'tankHeating');
-INSERT INTO DigitalSensor (id, alias) VALUES (3, 'coolingHelper');
-INSERT INTO DigitalSensor (id, alias) VALUES (4, 'autoklavFill');
-INSERT INTO DigitalSensor (id, alias) VALUES (5, 'waterDrain');
-INSERT INTO DigitalSensor (id, alias) VALUES (6, 'heating');
-INSERT INTO DigitalSensor (id, alias) VALUES (7, 'pump');
-INSERT INTO DigitalSensor (id, alias) VALUES (8, 'electricHeating');
-INSERT INTO DigitalSensor (id, alias) VALUES (9, 'increasePressure');
-INSERT INTO DigitalSensor (id, alias) VALUES (10, 'extensionCooling');
-INSERT INTO DigitalSensor (id, alias) VALUES (11, 'alarmSignal');
+INSERT INTO OutputPin (id, alias) VALUES (0, 'fillTankWithWater');
+INSERT INTO OutputPin (id, alias) VALUES (1, 'cooling');
+INSERT INTO OutputPin (id, alias) VALUES (2, 'tankHeating');
+INSERT INTO OutputPin (id, alias) VALUES (3, 'coolingHelper');
+INSERT INTO OutputPin (id, alias) VALUES (4, 'autoklavFill');
+INSERT INTO OutputPin (id, alias) VALUES (5, 'waterDrain');
+INSERT INTO OutputPin (id, alias) VALUES (6, 'heating');
+INSERT INTO OutputPin (id, alias) VALUES (7, 'pump');
+INSERT INTO OutputPin (id, alias) VALUES (8, 'electricHeating');
+INSERT INTO OutputPin (id, alias) VALUES (9, 'increasePressure');
+INSERT INTO OutputPin (id, alias) VALUES (10, 'extensionCooling');
+INSERT INTO OutputPin (id, alias) VALUES (11, 'alarmSignal');
 
 -- Bacteria
 drop table if exists Bacteria;

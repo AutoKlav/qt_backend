@@ -29,17 +29,17 @@ void StateMachine::tick()
 void StateMachine::triggerAlarm()
 {
     Logger::warn("Alarm triggered!");
-    Sensor::mapDigitalSensor[CONSTANTS::ALARM_SIGNAL]->send(1);
-    Sensor::mapDigitalSensor[CONSTANTS::ALARM_SIGNAL]->send(0);
+    Sensor::mapOutputPin[CONSTANTS::ALARM_SIGNAL]->send(1);
+    Sensor::mapOutputPin[CONSTANTS::ALARM_SIGNAL]->send(0);
 }
 
 void StateMachine::pipeControl()
 {
     if (stateMachineValues.expansionTemp > Globals::expansionUpperTemp) {
-        Sensor::mapDigitalSensor[CONSTANTS::EXTENSION_COOLING]->sendIfNew(1);
+        Sensor::mapOutputPin[CONSTANTS::EXTENSION_COOLING]->sendIfNew(1);
     }
     else if (stateMachineValues.expansionTemp < Globals::expansionLowerTemp) {
-        Sensor::mapDigitalSensor[CONSTANTS::EXTENSION_COOLING]->sendIfNew(0);
+        Sensor::mapOutputPin[CONSTANTS::EXTENSION_COOLING]->sendIfNew(0);
     }
 }
 
@@ -50,17 +50,17 @@ void StateMachine::tankControl()
 
         // Maintain temp of water inside tank ±1
         if (stateMachineValues.tankTemp > Globals::maintainWaterTankTemp + 1) {
-            Sensor::mapDigitalSensor[CONSTANTS::TANK_HEATING]->sendIfNew(0);
+            Sensor::mapOutputPin[CONSTANTS::TANK_HEATING]->sendIfNew(0);
         } else if (stateMachineValues.tankTemp < Globals::maintainWaterTankTemp - 1) {
             if (isRunning()) // Turn on heaters only while process is running
-                Sensor::mapDigitalSensor[CONSTANTS::TANK_HEATING]->sendIfNew(1);
+                Sensor::mapOutputPin[CONSTANTS::TANK_HEATING]->sendIfNew(1);
         }
     } else {
-        Sensor::mapDigitalSensor[CONSTANTS::TANK_HEATING]->sendIfNew(0);
+        Sensor::mapOutputPin[CONSTANTS::TANK_HEATING]->sendIfNew(0);
     }
 
     if (stateMachineValues.tankWaterLevel > 100 && state != State::COOLING) {
-        Sensor::mapDigitalSensor[CONSTANTS::FILL_TANK_WITH_WATER]->sendIfNew(0);
+        Sensor::mapOutputPin[CONSTANTS::FILL_TANK_WITH_WATER]->sendIfNew(0);
     }
 }
 
@@ -107,18 +107,18 @@ bool StateMachine::stop()
     Logger::info("End process");
     timer.stop();
 
-    Sensor::mapDigitalSensor[CONSTANTS::FILL_TANK_WITH_WATER]->send(0);
-    Sensor::mapDigitalSensor[CONSTANTS::COOLING]->send(0);
-    Sensor::mapDigitalSensor[CONSTANTS::TANK_HEATING]->send(0);
-    Sensor::mapDigitalSensor[CONSTANTS::COOLING_HELPER]->send(0);
-    Sensor::mapDigitalSensor[CONSTANTS::AUTOKLAV_FILL]->send(0);
-    Sensor::mapDigitalSensor[CONSTANTS::WATER_DRAIN]->send(0);
-    Sensor::mapDigitalSensor[CONSTANTS::STEAM_HEATING]->send(0);
-    Sensor::mapDigitalSensor[CONSTANTS::PUMP]->send(0);
-    Sensor::mapDigitalSensor[CONSTANTS::ELECTRIC_HEATING]->send(0);
-    Sensor::mapDigitalSensor[CONSTANTS::INCREASE_PRESSURE]->send(0);
-    Sensor::mapDigitalSensor[CONSTANTS::EXTENSION_COOLING]->send(0);
-    Sensor::mapDigitalSensor[CONSTANTS::ALARM_SIGNAL]->send(0);
+    Sensor::mapOutputPin[CONSTANTS::FILL_TANK_WITH_WATER]->send(0);
+    Sensor::mapOutputPin[CONSTANTS::COOLING]->send(0);
+    Sensor::mapOutputPin[CONSTANTS::TANK_HEATING]->send(0);
+    Sensor::mapOutputPin[CONSTANTS::COOLING_HELPER]->send(0);
+    Sensor::mapOutputPin[CONSTANTS::AUTOKLAV_FILL]->send(0);
+    Sensor::mapOutputPin[CONSTANTS::WATER_DRAIN]->send(0);
+    Sensor::mapOutputPin[CONSTANTS::STEAM_HEATING]->send(0);
+    Sensor::mapOutputPin[CONSTANTS::PUMP]->send(0);
+    Sensor::mapOutputPin[CONSTANTS::ELECTRIC_HEATING]->send(0);
+    Sensor::mapOutputPin[CONSTANTS::INCREASE_PRESSURE]->send(0);
+    Sensor::mapOutputPin[CONSTANTS::EXTENSION_COOLING]->send(0);
+    Sensor::mapOutputPin[CONSTANTS::ALARM_SIGNAL]->send(0);
 
     state = State::READY;    
     stateMachineValues = StateMachineValues();
@@ -267,7 +267,7 @@ void StateMachine::autoklavControl()
     case State::STARTING:
         Logger::info("StateMachine: Starting");
 
-        Sensor::mapDigitalSensor[CONSTANTS::AUTOKLAV_FILL]->send(1);
+        Sensor::mapOutputPin[CONSTANTS::AUTOKLAV_FILL]->send(1);
         stopwatch1 = QDateTime::currentDateTime().addMSecs(3*60*1000); // 3 minutes
 
         state = State::FILLING;
@@ -281,20 +281,20 @@ void StateMachine::autoklavControl()
             break;
         }
 
-        Sensor::mapDigitalSensor[CONSTANTS::PUMP]->send(1);
-        Sensor::mapDigitalSensor[CONSTANTS::STEAM_HEATING]->send(1);
+        Sensor::mapOutputPin[CONSTANTS::PUMP]->send(1);
+        Sensor::mapOutputPin[CONSTANTS::STEAM_HEATING]->send(1);
 
 
         if(stateMachineValues.pressure < 0.16)
             break;
 
-        Sensor::mapDigitalSensor[CONSTANTS::AUTOKLAV_FILL]->send(0);
-        Sensor::mapDigitalSensor[CONSTANTS::INCREASE_PRESSURE]->send(1);
+        Sensor::mapOutputPin[CONSTANTS::AUTOKLAV_FILL]->send(0);
+        Sensor::mapOutputPin[CONSTANTS::INCREASE_PRESSURE]->send(1);
 
         if(stateMachineValues.pressure < 1.5)
             break;
 
-        Sensor::mapDigitalSensor[CONSTANTS::INCREASE_PRESSURE]->send(0);
+        Sensor::mapOutputPin[CONSTANTS::INCREASE_PRESSURE]->send(0);
 
         state = State::HEATING;
         Logger::info("StateMachine: Heating");
@@ -315,9 +315,9 @@ void StateMachine::autoklavControl()
     case State::STERILIZING:
 
         if (stateMachineValues.temp > processConfig.processType.maintainTemp + 0.5) {
-            Sensor::mapDigitalSensor[CONSTANTS::STEAM_HEATING]->send(0);
+            Sensor::mapOutputPin[CONSTANTS::STEAM_HEATING]->send(0);
         } else if (stateMachineValues.temp < processConfig.processType.maintainTemp - 0.5) {
-            Sensor::mapDigitalSensor[CONSTANTS::STEAM_HEATING]->send(1);
+            Sensor::mapOutputPin[CONSTANTS::STEAM_HEATING]->send(1);
         }        
 
         if (processConfig.mode == Mode::TARGETF) {            
@@ -334,10 +334,10 @@ void StateMachine::autoklavControl()
             }
         }
 
-        Sensor::mapDigitalSensor[CONSTANTS::STEAM_HEATING]->send(0);
-        Sensor::mapDigitalSensor[CONSTANTS::COOLING]->send(1);
-        Sensor::mapDigitalSensor[CONSTANTS::COOLING_HELPER]->send(1);
-        Sensor::mapDigitalSensor[CONSTANTS::FILL_TANK_WITH_WATER]->send(1);
+        Sensor::mapOutputPin[CONSTANTS::STEAM_HEATING]->send(0);
+        Sensor::mapOutputPin[CONSTANTS::COOLING]->send(1);
+        Sensor::mapOutputPin[CONSTANTS::COOLING_HELPER]->send(1);
+        Sensor::mapOutputPin[CONSTANTS::FILL_TANK_WITH_WATER]->send(1);
 
         if(stateMachineValues.tankWaterLevel < 95) {
             Logger::info("Wait until tank water level is reached");
@@ -350,8 +350,8 @@ void StateMachine::autoklavControl()
 
     case State::COOLING:        
 
-        Sensor::mapDigitalSensor[CONSTANTS::COOLING]->send(0);
-        Sensor::mapDigitalSensor[CONSTANTS::FILL_TANK_WITH_WATER]->send(0);
+        Sensor::mapOutputPin[CONSTANTS::COOLING]->send(0);
+        Sensor::mapOutputPin[CONSTANTS::FILL_TANK_WITH_WATER]->send(0);
 
         if (processConfig.mode == Mode::TARGETF) {
             if(stateMachineValues.tempK > processConfig.processType.finishTemp) {
@@ -366,9 +366,9 @@ void StateMachine::autoklavControl()
             }
         }
 
-        Sensor::mapDigitalSensor[CONSTANTS::COOLING_HELPER]->send(0);
-        Sensor::mapDigitalSensor[CONSTANTS::PUMP]->send(0);
-        Sensor::mapDigitalSensor[CONSTANTS::WATER_DRAIN]->send(1);
+        Sensor::mapOutputPin[CONSTANTS::COOLING_HELPER]->send(0);
+        Sensor::mapOutputPin[CONSTANTS::PUMP]->send(0);
+        Sensor::mapOutputPin[CONSTANTS::WATER_DRAIN]->send(1);
 
         state = State::FINISHING;
         coolingTime = coolingStart.msecsTo(QDateTime::currentDateTime());
@@ -383,10 +383,10 @@ void StateMachine::autoklavControl()
             break;
         }
 
-        Sensor::mapDigitalSensor[CONSTANTS::WATER_DRAIN]->send(0);
-        Sensor::mapDigitalSensor[CONSTANTS::EXTENSION_COOLING]->sendIfNew(0);
-        Sensor::mapDigitalSensor[CONSTANTS::TANK_HEATING]->sendIfNew(0);
-        Sensor::mapDigitalSensor[CONSTANTS::FILL_TANK_WITH_WATER]->sendIfNew(0);
+        Sensor::mapOutputPin[CONSTANTS::WATER_DRAIN]->send(0);
+        Sensor::mapOutputPin[CONSTANTS::EXTENSION_COOLING]->sendIfNew(0);
+        Sensor::mapOutputPin[CONSTANTS::TANK_HEATING]->sendIfNew(0);
+        Sensor::mapOutputPin[CONSTANTS::FILL_TANK_WITH_WATER]->sendIfNew(0);
 
         state = State::FINISHED;
         Logger::info("StateMachine: Finished");
@@ -395,10 +395,10 @@ void StateMachine::autoklavControl()
     case State::FINISHED:
         timer.stop();
 
-        Sensor::mapDigitalSensor[CONSTANTS::ALARM_SIGNAL]->send(1);
-        Sensor::mapDigitalSensor[CONSTANTS::ALARM_SIGNAL]->send(0);
-        Sensor::mapDigitalSensor[CONSTANTS::ALARM_SIGNAL]->send(1);
-        Sensor::mapDigitalSensor[CONSTANTS::ALARM_SIGNAL]->send(0);
+        Sensor::mapOutputPin[CONSTANTS::ALARM_SIGNAL]->send(1);
+        Sensor::mapOutputPin[CONSTANTS::ALARM_SIGNAL]->send(0);
+        Sensor::mapOutputPin[CONSTANTS::ALARM_SIGNAL]->send(1);
+        Sensor::mapOutputPin[CONSTANTS::ALARM_SIGNAL]->send(0);
 
         Logger::info("StateMachine: Ready");
 

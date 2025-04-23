@@ -59,11 +59,11 @@ public:
     ushort pinValue; // Raw data used for calibration
 
     static qint64 lastDataTime;
-    static QList<Sensor> analogSensors;
-    static QList<Sensor> digitalSensors;
-    static QMap<ushort, Sensor *> mapAnalogSensor;
-    static QMap<ushort, Sensor *> mapDigitalSensor;
-    static bool updateAnalogSensor(ushort id, double minValue, double maxValue);
+    static QList<Sensor> inputPins;
+    static QList<Sensor> outputPins;
+    static QMap<ushort, Sensor *> mapInputPin;
+    static QMap<ushort, Sensor *> mapOutputPin;
+    static bool updateInputPin(ushort id, double minValue, double maxValue);
 };
 
 #endif // SENSOR_H

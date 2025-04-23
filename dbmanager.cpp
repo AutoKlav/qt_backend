@@ -76,52 +76,52 @@ bool DbManager::updateGlobal(QString name, QString value)
     return true;
 }
 
-void DbManager::loadAnalogSensors()
+void DbManager::loadInputPins()
 {
     // Get number of sensors
-    QSqlQuery count_query("SELECT COUNT(*) FROM AnalogSensor", m_db);
+    QSqlQuery count_query("SELECT COUNT(*) FROM InputPin", m_db);
 
     // Resize Sensor::sensors to number of sensors
     if (count_query.exec() && count_query.next()) {
-        Sensor::analogSensors.reserve(count_query.value(0).toInt());
+        Sensor::inputPins.reserve(count_query.value(0).toInt());
     }
 
-    QSqlQuery query("SELECT * FROM AnalogSensor", m_db);
+    QSqlQuery query("SELECT * FROM InputPin", m_db);
     while (query.next()) {
         auto id = query.value(0).toUInt();
         auto alias = query.value(1).toString(); // alias is not used anywhere, just provides descriptions for virtual arduino pins
         auto minValue = query.value(2).toDouble();
         auto maxValue = query.value(3).toDouble();
 
-        Sensor::analogSensors.append(Sensor(id, minValue, maxValue));
-        Sensor::mapAnalogSensor.insert(id, &Sensor::analogSensors.last());
+        Sensor::inputPins.append(Sensor(id, minValue, maxValue));
+        Sensor::mapInputPin.insert(id, &Sensor::inputPins.last());
     }
 }
 
 void DbManager::loadDigitalSensors()
 {
     // Get number of sensors
-    QSqlQuery count_query("SELECT COUNT(*) FROM DigitalSensor", m_db);
+    QSqlQuery count_query("SELECT COUNT(*) FROM OutputPin", m_db);
 
     // Resize Sensor::sensors to number of sensors
     if (count_query.exec() && count_query.next()) {
-        Sensor::digitalSensors.reserve(count_query.value(0).toInt());
+        Sensor::outputPins.reserve(count_query.value(0).toInt());
     }
 
-    QSqlQuery query("SELECT * FROM DigitalSensor", m_db);
+    QSqlQuery query("SELECT * FROM OutputPin", m_db);
     while (query.next()) {
         auto id = query.value(0).toUInt();
         auto alias = query.value(1).toString(); // alias is not used anywhere, just provides descriptions for virtual arduino pins
 
-        Sensor::digitalSensors.append(Sensor(id));
-        Sensor::mapDigitalSensor.insert(id, &Sensor::digitalSensors.last());
+        Sensor::outputPins.append(Sensor(id));
+        Sensor::mapOutputPin.insert(id, &Sensor::outputPins.last());
     }
 }
 
-bool DbManager::updateAnalogSensor(uint id, double newMinValue, double newMaxValue)
+bool DbManager::updateInputPin(uint id, double newMinValue, double newMaxValue)
 {
     QSqlQuery query(m_db);
-    query.prepare("UPDATE AnalogSensor SET minValue = :minValue, maxValue = :maxValue WHERE id = :id");
+    query.prepare("UPDATE InputPin SET minValue = :minValue, maxValue = :maxValue WHERE id = :id");
     query.bindValue(":id", id);
     query.bindValue(":minValue", newMinValue);
     query.bindValue(":maxValue", newMaxValue);

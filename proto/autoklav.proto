@@ -26,7 +26,7 @@ service Autoklav {
     // Sensor
     rpc getSensorPinValues(Empty) returns (SensorValues);
     rpc getSensorRelayValues(Empty) returns (SensorRelayValues);
-    rpc updateAnalogSensor(UpdateAnalogSensorRequest) returns (Status);
+    rpc updateInputPin(UpdateInputPinRequest) returns (Status);
 
     // Bacteria
     rpc getBacteria(Empty) returns (BacteriaList);
@@ -101,7 +101,7 @@ message ProcessModeFilterRequest {
     string productQuantity = 2;
 }
 
-message UpdateAnalogSensorRequest {
+message UpdateInputPinRequest {
     uint32 id = 1;
     double minValue = 2;
     double maxValue = 3; 

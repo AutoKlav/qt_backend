@@ -9,7 +9,7 @@ Master::Master(QObject *parent)
 {
     auto &db = DbManager::instance();
     db.loadGlobals();
-    db.loadAnalogSensors();
+    db.loadInputPins();
     db.loadDigitalSensors();
 
     //Serial::instance().open();
