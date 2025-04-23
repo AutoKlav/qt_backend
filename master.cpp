@@ -10,7 +10,7 @@ Master::Master(QObject *parent)
     auto &db = DbManager::instance();
     db.loadGlobals();
     db.loadInputPins();
-    db.loadDigitalSensors();
+    db.loadOutputPins();
 
     //Serial::instance().open();
     Modbus &modbusApp = Modbus::instance();

@@ -98,7 +98,7 @@ void DbManager::loadInputPins()
     }
 }
 
-void DbManager::loadDigitalSensors()
+void DbManager::loadOutputPins()
 {
     // Get number of sensors
     QSqlQuery count_query("SELECT COUNT(*) FROM OutputPin", m_db);

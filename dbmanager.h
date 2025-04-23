@@ -40,7 +40,7 @@ public:
 
     // Sensors
     void loadInputPins();
-    void loadDigitalSensors();
+    void loadOutputPins();
     bool updateInputPin(uint id, double newMinValue, double newMaxValue);
 
     // Process
