@@ -384,7 +384,15 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getUniqueProcesses(grpc::ServerCon
 
         processInfo->set_productname(process.productName.toStdString());
         processInfo->set_productquantity(process.productQuantity.toStdString());
-        processInfo->set_targetf(process.targetF.toStdString());        
+        processInfo->set_targetf(process.targetF.toStdString());
+
+        auto processType = processInfo->mutable_processtype();
+        processType->set_id(process.processType.id);
+        processType->set_name(process.processType.name.toStdString());
+        processType->set_type(process.processType.type.toStdString());
+        processType->set_customtemp(process.processType.customTemp);
+        processType->set_finishtemp(process.processType.finishTemp);
+        processType->set_maintaintemp(process.processType.maintainTemp);
     }
 
     return Status::OK;

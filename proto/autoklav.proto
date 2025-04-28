@@ -179,6 +179,7 @@ message ProcessInfo {
     string targetHeatingTime = 8;
     string targetCoolingTime = 9;
     string processLength = 10;
+    ProcessType processType = 11;
 }
 
 message BacteriaList {

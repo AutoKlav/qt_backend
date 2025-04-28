@@ -183,7 +183,45 @@ QList<ProcessRow> DbManager::getAllProcessesOrderedDesc()
 }
 
 QList<ProcessRow> DbManager::getUniqueProcesses() {
-    QSqlQuery query("SELECT MAX(Process.id) AS id, Process.productName, Process.productQuantity, Process.targetF, Process.targetHeatingTime, Process.targetCoolingTime, Bacteria.id AS bacteriaId, Bacteria.name AS bacteriaName, Bacteria.description AS bacteriaDescription, Bacteria.d0 AS d0, Bacteria.z AS z,ProcessType.id as processTypeId,  ProcessType.name AS processTypeName, ProcessType.customTemp AS customTemp, ProcessType.maintainTemp AS maintainTemp FROM Process LEFT JOIN Bacteria ON Process.bacteriaId = Bacteria.id LEFT JOIN ProcessType ON Process.processTypeId = ProcessType.id GROUP BY Process.productName, Process.productQuantity, Process.targetF, Process.targetHeatingTime, Process.targetCoolingTime, Bacteria.id, Bacteria.name, Bacteria.description, Bacteria.d0, Bacteria.z, ProcessType.name, ProcessType.customTemp, ProcessType.maintainTemp ORDER BY id DESC;", m_db);
+
+    QSqlQuery query(
+        "SELECT MAX(Process.id) AS id, "
+        "Process.productName, "
+        "Process.productQuantity, "
+        "Process.targetF, "
+        "Process.targetHeatingTime, "
+        "Process.targetCoolingTime, "
+        "Bacteria.id AS bacteriaId, "
+        "Bacteria.name AS bacteriaName, "
+        "Bacteria.description AS bacteriaDescription, "
+        "Bacteria.d0 AS d0, "
+        "Bacteria.z AS z, "
+        "ProcessType.id as processTypeId, "
+        "ProcessType.name AS processTypeName, "
+        "ProcessType.customTemp AS customTemp, "
+        "ProcessType.finishTemp AS finishTemp, "
+        "ProcessType.maintainTemp AS maintainTemp "
+        "FROM Process "
+        "LEFT JOIN Bacteria ON Process.bacteriaId = Bacteria.id "
+        "LEFT JOIN ProcessType ON Process.processTypeId = ProcessType.id "
+        "GROUP BY Process.productName, "
+        "Process.productQuantity, "
+        "Process.targetF, "
+        "Process.targetHeatingTime, "
+        "Process.targetCoolingTime, "
+        "Bacteria.id, "
+        "Bacteria.name, "
+        "Bacteria.description, "
+        "Bacteria.d0, "
+        "Bacteria.z, "
+        "ProcessType.name, "
+        "ProcessType.customTemp, "
+        "ProcessType.finishTemp, "
+        "ProcessType.maintainTemp "
+        "ORDER BY id DESC;",
+        m_db
+        );
+
     QList<ProcessRow> processes;
     while (query.next()) {
         auto id = query.value(0).toInt();
@@ -195,11 +233,13 @@ QList<ProcessRow> DbManager::getUniqueProcesses() {
         auto bacteriaId = query.value(6).toInt();
         auto bacteriaName = query.value(7).toString();
         auto bacteriaDescription = query.value(8).toString();
-        auto d0 = query.value(9).toDouble();
+        auto d0 = query.value(9).toDouble();        
         auto z = query.value(10).toDouble();
-        auto processTypeName = query.value(11).toString();
-        auto customTemp = query.value(12).toDouble();
-        auto maintainTemp = query.value(13).toDouble();
+        auto processTypeId = query.value(11).toInt();
+        auto processTypeName = query.value(12).toString();
+        auto customTemp = query.value(13).toDouble();
+        auto finishTemp = query.value(14).toDouble();
+        auto maintainTemp = query.value(15).toDouble();
 
         const Bacteria bacteria = {
             .id = bacteriaId,
@@ -210,8 +250,10 @@ QList<ProcessRow> DbManager::getUniqueProcesses() {
         };
 
         const ProcessType processType = {
-            .name = processTypeName, // TODO finish this
+            .id = processTypeId,
+            .name = processTypeName,
             .customTemp = customTemp,
+            .finishTemp = finishTemp,
             .maintainTemp = maintainTemp,
         };
 
@@ -223,6 +265,7 @@ QList<ProcessRow> DbManager::getUniqueProcesses() {
         info.bacteria = bacteria;
         info.targetHeatingTime = targetHeatingTime;
         info.targetCoolingTime = targetCoolingTime;
+        info.processType = processType;
 
         processes.append(info);
     }
