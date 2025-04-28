@@ -204,6 +204,8 @@ QList<ProcessRow> DbManager::getUniqueProcesses() {
         "FROM Process "
         "LEFT JOIN Bacteria ON Process.bacteriaId = Bacteria.id "
         "LEFT JOIN ProcessType ON Process.processTypeId = ProcessType.id "
+        "WHERE Process.targetHeatingTime > 0 "
+        "AND Process.targetCoolingTime > 0 "
         "GROUP BY Process.productName, "
         "Process.productQuantity, "
         "Process.targetF, "
