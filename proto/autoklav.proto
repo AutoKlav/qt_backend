@@ -163,9 +163,8 @@ enum ProcessConfigMode {
 }
 
 message ProcessConfig {    
-    HeatingType heatingType = 1;
-    ProcessType processType = 2;
-    ProcessConfigMode mode = 3;    
+    HeatingType heatingType = 1;    
+    ProcessConfigMode mode = 2;    
 }
 
 message ProcessInfo {
