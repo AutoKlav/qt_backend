@@ -24,7 +24,7 @@ CREATE TABLE InputPin (
 
 -- Input pins
 INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (0, 'temp', -53.640776699029125, 194.6601941747573);
-INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (1, 'tempK', -50.03157894736842, 192.10526315789474);
+INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (1, 'tempK', -48.75775862068964, 208.125);
 INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (2, 'expansionTemp', -51.666666666666664, 191.9047619047619);
 INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (3, 'heaterTemp', -53.03579952267303, 194.77923627684964);
 INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (4, 'tankTemp', -52.76, 202.57);
