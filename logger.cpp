@@ -7,6 +7,7 @@ Q_LOGGING_CATEGORY(logCritical, "Critical")
 
 void Logger::messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
+    /* [OLD] Use log file
     if (m_logFile == nullptr) {
         // Get appData folder
         auto path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
@@ -21,7 +22,9 @@ void Logger::messageHandler(QtMsgType type, const QMessageLogContext &context, c
         m_logFile->open(QFile::Append | QFile::Text);
     }
 
-    QTextStream out(m_logFile.get());
+    QTextStream out(m_logFile.get()); */
+
+    QTextStream out(stdout);
     // Write the date of recording
     out << QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss.zzz ");
     // By type determine to what level belongs message
