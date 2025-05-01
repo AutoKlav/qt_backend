@@ -28,9 +28,9 @@ INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (1, 'tempK', -50.031
 INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (2, 'expansionTemp', -51.666666666666664, 191.9047619047619);
 INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (3, 'heaterTemp', -53.03579952267303, 194.77923627684964);
 INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (4, 'tankTemp', -52.76, 202.57);
-INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (5, 'tankWaterLevel', -52.33, 120.25);
-INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (6, 'pressure', -0.977, 4.439);
-INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (7, 'steamPressure', -0.00598, 16.16966);
+INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (5, 'tankWaterLevel', -43.731249999999875, 167.46874999999994);
+INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (7, 'pressure', -1.08, 5.064);
+INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (6, 'steamPressure', -0.00598, 16.16966);
 
 -- Digital Pins read through Analog Inputs, converted from [analogMin, analogMax] to [0, 1]
 INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (8, 'doorClosed', 0, 1);
@@ -89,8 +89,8 @@ create table ProcessType
     maintainTemp     REAL
 );
 
-INSERT INTO ProcessType (id, name, type, customTemp, finishTemp, maintainTemp) VALUES (0, 'Sterilizacija', 'sterilizacija', 121.11, 30, 116 );
-INSERT INTO ProcessType (id, name, type, customTemp, finishTemp, maintainTemp) VALUES (1, 'Pasterizacija', 'pasterizacija', 70, 70, 6);
+INSERT INTO ProcessType (id, name, type, customTemp, finishTemp, maintainTemp) VALUES (0, 'Sterilizacija', 'sterilizacija', 121.11, 40, 116 );
+INSERT INTO ProcessType (id, name, type, customTemp, finishTemp, maintainTemp) VALUES (1, 'Pasterizacija', 'pasterizacija', 78, 40, 78);
 INSERT INTO ProcessType (id, name, type, customTemp, finishTemp, maintainTemp) VALUES (2, 'Prilagođeno', null, null, null, null);
 
 create table Process

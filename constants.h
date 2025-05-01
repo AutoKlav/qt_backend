@@ -14,8 +14,8 @@ namespace CONSTANTS {
     inline const ushort TANK_TEMP = 4;  // tankTemp
     inline const ushort TEMP_K = 1;  // tempK
     inline const ushort TANK_WATER_LEVEL = 5;  // tankWaterLevel
-    inline const ushort PRESSURE = 6;  // pressure
-    inline const ushort STEAM_PRESSURE = 7;  // steamPressure
+    inline const ushort PRESSURE = 7;  // pressure
+    inline const ushort STEAM_PRESSURE = 6;  // steamPressure
 
     // Digital input constants
     inline const ushort DOOR_CLOSED = 8;  // doorClosed
