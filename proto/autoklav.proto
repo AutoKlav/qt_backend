@@ -163,9 +163,8 @@ enum ProcessConfigMode {
 }
 
 message ProcessConfig {    
-    HeatingType heatingType = 1;
-    ProcessType processType = 2;
-    ProcessConfigMode mode = 3;    
+    HeatingType heatingType = 1;    
+    ProcessConfigMode mode = 2;    
 }
 
 message ProcessInfo {
@@ -179,6 +178,7 @@ message ProcessInfo {
     string targetHeatingTime = 8;
     string targetCoolingTime = 9;
     string processLength = 10;
+    ProcessType processType = 11;
 }
 
 message BacteriaList {
