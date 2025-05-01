@@ -54,10 +54,10 @@ INSERT INTO OutputPin (id, alias) VALUES (4, 'autoklavFill');
 INSERT INTO OutputPin (id, alias) VALUES (5, 'waterDrain');
 INSERT INTO OutputPin (id, alias) VALUES (6, 'heating');
 INSERT INTO OutputPin (id, alias) VALUES (7, 'pump');
-INSERT INTO OutputPin (id, alias) VALUES (8, 'electricHeating');
-INSERT INTO OutputPin (id, alias) VALUES (9, 'increasePressure');
+INSERT INTO OutputPin (id, alias) VALUES (11, 'electricHeating');
+INSERT INTO OutputPin (id, alias) VALUES (8, 'increasePressure');
 INSERT INTO OutputPin (id, alias) VALUES (10, 'extensionCooling');
-INSERT INTO OutputPin (id, alias) VALUES (11, 'alarmSignal');
+INSERT INTO OutputPin (id, alias) VALUES (9, 'alarmSignal');
 
 -- Bacteria
 drop table if exists Bacteria;
