@@ -23,11 +23,11 @@ CREATE TABLE InputPin (
 );
 
 -- Input pins
-INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (0, 'temp', -53.640776699029125, 194.6601941747573);
-INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (1, 'tempK', -48.75775862068964, 208.125);
-INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (2, 'expansionTemp', -51.666666666666664, 191.9047619047619);
-INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (3, 'heaterTemp', -53.03579952267303, 194.77923627684964);
-INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (4, 'tankTemp', -52.76, 202.57);
+INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (0, 'temp', -49.9694, 219.7522);
+INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (1, 'tempK', -49.9694, 219.7522);
+INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (2, 'expansionTemp', -49.9694, 219.7522);
+INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (3, 'heaterTemp', -49.9694, 219.7522);
+INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (4, 'tankTemp', -49.9694, 219.7522);
 INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (5, 'tankWaterLevel', -43.731249999999875, 167.46874999999994);
 INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (7, 'pressure', -1.08, 5.064);
 INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (6, 'steamPressure', -0.00598, 16.16966);
