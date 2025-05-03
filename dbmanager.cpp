@@ -21,6 +21,8 @@ DbManager::DbManager()
         qFatal("Unable to find database directory.");
     }
 
+    //auto path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+
     m_db = QSqlDatabase::addDatabase("QSQLITE", QString::number((quint64)QThread::currentThread(), 16));
     m_db.setDatabaseName(path + "/db.sqlite");
 
