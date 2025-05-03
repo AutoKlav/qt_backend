@@ -148,7 +148,7 @@ StateMachineValues StateMachine::calculateStateMachineValues()
     updateStateMachineValues.tankTemp = sensorValues.tankTemp;
     updateStateMachineValues.tempK = sensorValues.tempK;
     updateStateMachineValues.tankWaterLevel = sensorValues.tankWaterLevel;
-    updateStateMachineValues.pressure = sensorValues.pressure * 10; // not accurate but Deda wants it so it looks better
+    updateStateMachineValues.pressure = sensorValues.pressure; // not accurate but Deda wants it so it looks better
     updateStateMachineValues.steamPressure = sensorValues.steamPressure;
 
     updateStateMachineValues.doorClosed = sensorValues.doorClosed;
