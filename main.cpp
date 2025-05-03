@@ -8,8 +8,7 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
-    // Uncomment for file logging
-    // qInstallMessageHandler(Logger::messageHandler);
+    qInstallMessageHandler(Logger::messageHandler);
 
     Master::instance();
 
