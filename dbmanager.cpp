@@ -561,18 +561,39 @@ int DbManager::deleteProcessType(int id)
 
 int DbManager::deleteProcess(int id)
 {
-    QSqlQuery query(m_db);
-    query.prepare("DELETE FROM Process WHERE id = :id");
-    query.bindValue(":id", id);
+    QSqlDatabase::database().transaction(); // Start transaction
 
-    if (!query.exec()) {
-        Logger::crit(QString("Database: Unable to delete process %1").arg(id));
-        Logger::crit(QString("SQL error: %1").arg(query.lastError().text()));
+    // First delete all related ProcessLog entries
+    QSqlQuery deleteLogsQuery(m_db);
+    deleteLogsQuery.prepare("DELETE FROM ProcessLog WHERE processId = :id");
+    deleteLogsQuery.bindValue(":id", id);
+
+    if (!deleteLogsQuery.exec()) {
+        Logger::crit(QString("Database: Unable to delete process logs for process %1").arg(id));
+        Logger::crit(QString("SQL error: %1").arg(deleteLogsQuery.lastError().text()));
+        QSqlDatabase::database().rollback(); // Rollback on error
         return -1;
     }
 
-    Logger::info(QString("Database: Delete process %1").arg(id));
-    return query.numRowsAffected();
+    // Then delete the Process
+    QSqlQuery deleteProcessQuery(m_db);
+    deleteProcessQuery.prepare("DELETE FROM Process WHERE id = :id");
+    deleteProcessQuery.bindValue(":id", id);
+
+    if (!deleteProcessQuery.exec()) {
+        Logger::crit(QString("Database: Unable to delete process %1").arg(id));
+        Logger::crit(QString("SQL error: %1").arg(deleteProcessQuery.lastError().text()));
+        QSqlDatabase::database().rollback(); // Rollback on error
+        return -1;
+    }
+
+    if (!QSqlDatabase::database().commit()) { // Commit transaction
+        Logger::crit(QString("Database: Commit failed when deleting process %1").arg(id));
+        return -1;
+    }
+
+    Logger::info(QString("Database: Deleted process %1 and its logs").arg(id));
+    return deleteProcessQuery.numRowsAffected();
 }
 
 int DbManager::deleteBacteria(int id)

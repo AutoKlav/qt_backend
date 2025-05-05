@@ -71,7 +71,12 @@ create table Bacteria
     dateCreated DATETIME not null,
     dateModified DATETIME
 );
-INSERT INTO Bacteria (id, name, description, d0, z, dateCreated, dateModified) VALUES (1, 'clostridium botulinum', 'G pozitivna, anaerobna bakterija', 0.2, 10, CURRENT_TIMESTAMP,null);
+
+INSERT INTO Bacteria (id, name, description, d0, z, dateCreated, dateModified) VALUES 
+(1, 'Clostridium botulinum', 'G pozitivna, anaerobna bakterija', 0.2, 10, CURRENT_TIMESTAMP, NULL),
+(2, 'Clostridium thermosaccharolyticum', 'G pozitivna, anaerobna bakterija', 4.0, 9, CURRENT_TIMESTAMP, NULL),
+(3, 'Clostridium sporogenes', 'G pozitivna, anaerobna bakterija', 1.0, 10, CURRENT_TIMESTAMP, NULL),
+(4, 'Bacillus stearothermophilus', 'G pozitivna, termofilna bakterija', 5.0, 12.2, CURRENT_TIMESTAMP, NULL);
 
 -- Process
 drop table if exists ProcessLog;

@@ -22,6 +22,7 @@ public:
     inline static double expansionLowerTemp = 90;
     inline static double heaterWaterLevel = 40;
     inline static double maintainWaterTankTemp = 95;
+    inline static double tankWaterLevelThreshold = 95;
 
     inline static QHash<QString, VarRefType> variables = {
         {"stateMachineTick",        std::ref(stateMachineTick)},
@@ -32,7 +33,8 @@ public:
         {"expansionUpperTemp",      std::ref(expansionUpperTemp)},
         {"expansionLowerTemp",      std::ref(expansionLowerTemp)},
         {"heaterWaterLevel",        std::ref(heaterWaterLevel)},
-        {"maintainWaterTankTemp",   std::ref(maintainWaterTankTemp)}
+        {"maintainWaterTankTemp",   std::ref(maintainWaterTankTemp)},
+        {"tankWaterLevelThreshold", std::ref(tankWaterLevelThreshold)}        
     };
 
     static bool setVariable(const QString &key, const QString &newValue);

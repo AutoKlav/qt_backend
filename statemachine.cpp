@@ -339,21 +339,28 @@ void StateMachine::autoklavControl()
                 coolingStart = QDateTime::currentDateTime();
                 break;
             }
+        
         }
+
+        state = State::PRECOOLING;
+        Logger::info("StateMachine: Pre cooling");
+        break;
+
+    case State::PRECOOLING:
+
         Sensor::mapOutputPin[CONSTANTS::STEAM_HEATING]->send(0);
         Sensor::mapOutputPin[CONSTANTS::COOLING]->send(1);
         Sensor::mapOutputPin[CONSTANTS::COOLING_HELPER]->send(1);
         Sensor::mapOutputPin[CONSTANTS::FILL_TANK_WITH_WATER]->send(1);
 
-        if(stateMachineValues.tankWaterLevel < 95) {
-            Logger::info("Wait until tank water level is reached");
+        if(stateMachineValues.tankWaterLevel < Globals::tankWaterLevelThreshold) {
+            Logger::info(QString("Wait until tank water level %1 is reached").arg(Globals::tankWaterLevelThreshold));
             break;
         }
 
         state = State::COOLING;
-        Logger::info("StateMachine: Cooling");        
+        Logger::info("StateMachine: Cooling");
         break;
-
     case State::COOLING:        
 
         Sensor::mapOutputPin[CONSTANTS::COOLING]->send(0);

@@ -19,7 +19,7 @@ public:
     ~StateMachine() = default;
 
     enum State {
-        READY, STARTING, FILLING, HEATING, STERILIZING,  COOLING, FINISHING, FINISHED
+        READY, STARTING, FILLING, HEATING, STERILIZING,PRECOOLING,  COOLING, FINISHING, FINISHED
     };
 
     enum Mode {
