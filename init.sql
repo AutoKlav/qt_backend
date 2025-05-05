@@ -90,13 +90,11 @@ create table ProcessType
     name             TEXT not null,
     type             TEXT,
     customTemp       REAL,
-    finishTemp       REAL,
     maintainTemp     REAL
 );
 
-INSERT INTO ProcessType (id, name, type, customTemp, finishTemp, maintainTemp) VALUES (0, 'Sterilizacija', 'sterilizacija', 121.11, 40, 116 );
-INSERT INTO ProcessType (id, name, type, customTemp, finishTemp, maintainTemp) VALUES (1, 'Pasterizacija', 'pasterizacija', 78, 40, 78);
-INSERT INTO ProcessType (id, name, type, customTemp, finishTemp, maintainTemp) VALUES (2, 'Prilagođeno', null, null, null, null);
+INSERT INTO ProcessType (id, name, type, customTemp, maintainTemp) VALUES (0, 'Sterilizacija', 'sterilizacija', 121.11, 116 );
+INSERT INTO ProcessType (id, name, type, customTemp, maintainTemp) VALUES (1, 'Pasterizacija', 'pasterizacija', 78, 78);
 
 create table Process
 (
@@ -117,10 +115,11 @@ create table Process
     targetF         TEXT,
     targetHeatingTime TEXT,
     targetCoolingTime TEXT,
-    processLength   TEXT
+    processLength   TEXT,
+    finishTemp   TEXT
 );
 
-INSERT INTO Process (id, bacteriaId, processTypeId, name, batchLTO, productName, productQuantity, processStart, processLength, targetF, targetCoolingTime, targetHeatingTime) VALUES (55,1, 0, '2024-11-28T17:28:53', 'LTO324325345', 'Testni podaci', 'sint aliqua do laborum', '2024-11-28T17:28:53', '56363634654', null, null, null);
+INSERT INTO Process (id, bacteriaId, processTypeId, name, batchLTO, productName, productQuantity, processStart, processLength, targetF, targetCoolingTime, targetHeatingTime, finishTemp) VALUES (55,1, 0, '2024-11-28T17:28:53', 'LTO324325345', 'Testni podaci', 'sint aliqua do laborum', '2024-11-28T17:28:53', '56363634654', null, null, null, null);
 
 CREATE INDEX idx_process_start ON Process(processStart);
 
