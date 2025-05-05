@@ -53,18 +53,16 @@ message Status {
 message ProcessTypeRequest {
     string name = 1;
     string type = 2;
-    double customTemp = 3;
-    double finishTemp = 4;
-    double maintainTemp = 5;
+    double customTemp = 3;    
+    double maintainTemp = 4;
 }
 
 message ProcessType {
     int32 id = 1;
     string name = 2;
     string type = 3;
-    double customTemp = 4;
-    double finishTemp = 5;
-    double maintainTemp = 6;
+    double customTemp = 4;    
+    double maintainTemp = 5;
 }
 
 message ProcessTypesList {
@@ -179,6 +177,7 @@ message ProcessInfo {
     string targetCoolingTime = 9;
     string processLength = 10;
     ProcessType processType = 11;
+    string finishTemp = 12;
 }
 
 message BacteriaList {

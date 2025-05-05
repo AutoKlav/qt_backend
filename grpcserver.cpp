@@ -189,8 +189,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::startProcess(grpc::ServerContext *
         .id = static_cast<int>(request->processinfo().processtype().id()),
         .name = QString::fromUtf8(request->processinfo().processtype().name()).trimmed(),
         .type = QString::fromUtf8(request->processinfo().processtype().name()).trimmed(),
-        .customTemp = request->processinfo().processtype().customtemp(),
-        .finishTemp = request->processinfo().processtype().finishtemp(),
+        .customTemp = request->processinfo().processtype().customtemp(),        
         .maintainTemp  = request->processinfo().processtype().maintaintemp()
     };
 
@@ -217,6 +216,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::startProcess(grpc::ServerContext *
         .targetHeatingTime = QString::fromUtf8(request->processinfo().targetheatingtime()),
         .targetCoolingTime = QString::fromUtf8(request->processinfo().targetcoolingtime()),
         .targetF = QString::fromUtf8(request->processinfo().targetf()),
+        .finishTemp = QString::fromUtf8(request->processinfo().finishtemp()),
         .bacteria = bacteria,
     };
 
@@ -235,8 +235,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::createProcessType(grpc::ServerCont
     const ProcessType processType = {
         .name = QString::fromStdString(request->name()),
         .type = QString::fromStdString(request->type()),
-        .customTemp = request->customtemp(),
-        .finishTemp = request->finishtemp(),
+        .customTemp = request->customtemp(),        
         .maintainTemp = request->maintaintemp()
     };
 
@@ -385,13 +384,13 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getUniqueProcesses(grpc::ServerCon
         processInfo->set_productname(process.productName.toStdString());
         processInfo->set_productquantity(process.productQuantity.toStdString());
         processInfo->set_targetf(process.targetF.toStdString());
+        processInfo->set_finishtemp(process.finishTemp.toStdString());
 
         auto processType = processInfo->mutable_processtype();
         processType->set_id(process.processType.id);
         processType->set_name(process.processType.name.toStdString());
         processType->set_type(process.processType.type.toStdString());
-        processType->set_customtemp(process.processType.customTemp);
-        processType->set_finishtemp(process.processType.finishTemp);
+        processType->set_customtemp(process.processType.customTemp);        
         processType->set_maintaintemp(process.processType.maintainTemp);
     }
 
@@ -482,8 +481,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getAllProcessTypes(grpc::ServerCon
         processTypeInfo->set_id(processType.id);
         processTypeInfo->set_name(processType.name.toStdString());
         processTypeInfo->set_type(processType.type.toStdString());
-        processTypeInfo->set_customtemp(processType.customTemp);
-        processTypeInfo->set_finishtemp(processType.finishTemp);
+        processTypeInfo->set_customtemp(processType.customTemp);        
         processTypeInfo->set_maintaintemp(processType.maintainTemp);
     }
 

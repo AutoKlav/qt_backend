@@ -10,18 +10,18 @@
 
 DbManager::DbManager()
 {
-    QString path;
-    if (QDir("C:/Development/db").exists()) {
-        path = "C:/Development/db";
-    } else if (QDir("C:/db").exists()) {
-        path = "C:/db";
-    } else {
-        Logger::crit("Database: No valid database directory found.");
-        GlobalErrors::setError(GlobalErrors::DbError);
-        qFatal("Unable to find database directory.");
-    }
+    // QString path;
+    // if (QDir("C:/Development/db").exists()) {
+    //     path = "C:/Development/db";
+    // } else if (QDir("C:/db").exists()) {
+    //     path = "C:/db";
+    // } else {
+    //     Logger::crit("Database: No valid database directory found.");
+    //     GlobalErrors::setError(GlobalErrors::DbError);
+    //     qFatal("Unable to find database directory.");
+    // }
 
-    //auto path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    auto path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 
     m_db = QSqlDatabase::addDatabase("QSQLITE", QString::number((quint64)QThread::currentThread(), 16));
     m_db.setDatabaseName(path + "/db.sqlite");
@@ -209,7 +209,7 @@ QList<ProcessRow> DbManager::getUniqueProcesses() {
         "ProcessType.id as processTypeId, "
         "ProcessType.name AS processTypeName, "
         "ProcessType.customTemp AS customTemp, "
-        "ProcessType.finishTemp AS finishTemp, "
+        "Process.finishTemp AS finishTemp, "
         "ProcessType.maintainTemp AS maintainTemp "
         "FROM Process "
         "LEFT JOIN Bacteria ON Process.bacteriaId = Bacteria.id "
@@ -228,7 +228,7 @@ QList<ProcessRow> DbManager::getUniqueProcesses() {
         "Bacteria.z, "
         "ProcessType.name, "
         "ProcessType.customTemp, "
-        "ProcessType.finishTemp, "
+        "Process.finishTemp, "
         "ProcessType.maintainTemp "
         "ORDER BY id DESC;",
         m_db
@@ -250,7 +250,7 @@ QList<ProcessRow> DbManager::getUniqueProcesses() {
         auto processTypeId = query.value(11).toInt();
         auto processTypeName = query.value(12).toString();
         auto customTemp = query.value(13).toDouble();
-        auto finishTemp = query.value(14).toDouble();
+        auto finishTemp = query.value(14).toString();
         auto maintainTemp = query.value(15).toDouble();
 
         const Bacteria bacteria = {
@@ -264,8 +264,7 @@ QList<ProcessRow> DbManager::getUniqueProcesses() {
         const ProcessType processType = {
             .id = processTypeId,
             .name = processTypeName,
-            .customTemp = customTemp,
-            .finishTemp = finishTemp,
+            .customTemp = customTemp,            
             .maintainTemp = maintainTemp,
         };
 
@@ -278,6 +277,7 @@ QList<ProcessRow> DbManager::getUniqueProcesses() {
         info.targetHeatingTime = targetHeatingTime;
         info.targetCoolingTime = targetCoolingTime;
         info.processType = processType;
+        info.finishTemp = finishTemp;
 
         processes.append(info);
     }
@@ -355,8 +355,8 @@ QList<ProcessLogInfoRow> DbManager::getAllProcessLogs(int processId)
 int DbManager::createProcess(QString name, ProcessInfo info)
 {    
     QSqlQuery query(m_db);
-    query.prepare("INSERT INTO Process (bacteriaId, processTypeId, name, batchLTO, productName, productQuantity, processStart, targetF, targetHeatingTime, targetCoolingTime, processLength) "
-                  "VALUES (:bacteriaId, :processTypeId, :name, :batchLTO, :productName, :productQuantity, :processStart, :targetF, :targetHeatingTime, :targetCoolingTime, :processLength)");
+    query.prepare("INSERT INTO Process (bacteriaId, processTypeId, name, batchLTO, productName, productQuantity, processStart, targetF, targetHeatingTime, targetCoolingTime, processLength, finishTemp) "
+                  "VALUES (:bacteriaId, :processTypeId, :name, :batchLTO, :productName, :productQuantity, :processStart, :targetF, :targetHeatingTime, :targetCoolingTime, :processLength, :finishTemp)");
     query.bindValue(":bacteriaId", info.bacteria.id);
     query.bindValue(":processTypeId", info.processType.id);
     query.bindValue(":name", name);
@@ -368,6 +368,7 @@ int DbManager::createProcess(QString name, ProcessInfo info)
     query.bindValue(":targetHeatingTime", info.targetHeatingTime);
     query.bindValue(":targetCoolingTime", info.targetCoolingTime);
     query.bindValue(":processLength", info.processLength);
+    query.bindValue(":finishTemp", info.finishTemp);
 
     if (!query.exec()) {
         Logger::crit(QString("Database: Unable to create process log %1").arg(name));
@@ -487,12 +488,11 @@ QMap<QString, QList<QString>> DbManager::getFilteredTargetFAndProcessLengthValue
 int DbManager::createProcessType(ProcessType processType)
 {
     QSqlQuery query(m_db);
-    query.prepare("INSERT INTO ProcessType (name, type, customTemp, finishTemp, maintainTemp) "
-                  "VALUES (:name, :type, :customTemp, :finishTemp, :maintainTemp)");
+    query.prepare("INSERT INTO ProcessType (name, type, customTemp, maintainTemp) "
+                  "VALUES (:name, :type, :customTemp, :maintainTemp)");
     query.bindValue(":name", processType.name);
     query.bindValue(":type", processType.type);
-    query.bindValue(":customTemp", processType.customTemp);
-    query.bindValue(":finishTemp", processType.finishTemp);    
+    query.bindValue(":customTemp", processType.customTemp);    
     query.bindValue(":maintainTemp", processType.maintainTemp);
 
     if (!query.exec()) {
@@ -676,11 +676,10 @@ QList<ProcessType> DbManager::getProcessTypes()
         auto id = query.value(0).toInt();
         auto name = query.value(1).toString();
         auto type = query.value(2).toString();
-        auto customTemp = query.value(3).toDouble();
-        auto finishTemp = query.value(4).toDouble();
-        auto maintainTemp = query.value(5).toDouble();
+        auto customTemp = query.value(3).toDouble();        
+        auto maintainTemp = query.value(4).toDouble();
 
-        types.append({id, name, type, customTemp, finishTemp, maintainTemp});
+        types.append({id, name, type, customTemp, maintainTemp});
     }
 
     return types;
