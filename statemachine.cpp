@@ -37,9 +37,11 @@ void StateMachine::pipeControl()
 {
     if (stateMachineValues.expansionTemp > Globals::expansionUpperTemp) {
         Sensor::mapOutputPin[CONSTANTS::EXTENSION_COOLING]->sendIfNew(1);
+        Logger::info(QString("Pipe cooling on, expansionTemp > %1").arg(stateMachineValues.expansionTemp));
     }
     else if (stateMachineValues.expansionTemp < Globals::expansionLowerTemp) {
         Sensor::mapOutputPin[CONSTANTS::EXTENSION_COOLING]->sendIfNew(0);
+        Logger::info(QString("Pipe cooling off, expansionTemp < %1").arg(stateMachineValues.expansionTemp));
     }
 }
 
@@ -51,16 +53,21 @@ void StateMachine::tankControl()
         // Maintain temp of water inside tank ±1
         if (stateMachineValues.tankTemp > Globals::maintainWaterTankTemp + 1) {
             Sensor::mapOutputPin[CONSTANTS::TANK_HEATING]->sendIfNew(0);
+            Logger::info(QString("Tank heating off, tankTemp > %1").arg(stateMachineValues.tankTemp));
         } else if (stateMachineValues.tankTemp < Globals::maintainWaterTankTemp - 1) {
-            if (isRunning()) // Turn on heaters only while process is running
+            if (isRunning()) { // Turn on heaters only while process is running            
                 Sensor::mapOutputPin[CONSTANTS::TANK_HEATING]->sendIfNew(1);
+                Logger::info(QString("Tank heating on, tankTemp < %1").arg(stateMachineValues.tankTemp));
+            }
         }
     } else {
         Sensor::mapOutputPin[CONSTANTS::TANK_HEATING]->sendIfNew(0);
+        Logger::info(QString("Tank heating off, tankWaterLevel <= %1").arg(stateMachineValues.tankWaterLevel));
     }
 
     if (stateMachineValues.tankWaterLevel > 100 && state != State::COOLING) {
         Sensor::mapOutputPin[CONSTANTS::FILL_TANK_WITH_WATER]->sendIfNew(0);
+        Logger::info(QString("Tank filling off, tankWaterLevel > %1 && state").arg(stateMachineValues.tankWaterLevel));
     }
 }
 
@@ -321,19 +328,18 @@ void StateMachine::autoklavControl()
         }        
 
         if (processConfig.mode == Mode::TARGETF) {            
-            if (stateMachineValues.sumFr < processInfo.targetF.toDouble()){
-                Logger::info("Wait until sumfr is reached");
+            if (stateMachineValues.sumFr < processInfo.targetF.toDouble()) {
+                Logger::info(QString("Wait until sumfr %1 is reached").arg(QString::number(processInfo.targetF.toDouble())));
                 break;
             }
         } else if (processConfig.mode == Mode::TIME) {
-            if (heatingStart.msecsTo(QDateTime::currentDateTime()) < processInfo.targetHeatingTime.toDouble()){
-                Logger::info("Wait until target time is reached");
+            if (heatingStart.msecsTo(QDateTime::currentDateTime()) < processInfo.targetHeatingTime.toDouble()) {
+                Logger::info(QString("Wait until target time %1 is reached").arg(QString::number(processInfo.targetHeatingTime.toDouble())));
                 heatingTime = heatingStart.msecsTo(QDateTime::currentDateTime());
                 coolingStart = QDateTime::currentDateTime();
                 break;
             }
         }
-
         Sensor::mapOutputPin[CONSTANTS::STEAM_HEATING]->send(0);
         Sensor::mapOutputPin[CONSTANTS::COOLING]->send(1);
         Sensor::mapOutputPin[CONSTANTS::COOLING_HELPER]->send(1);
