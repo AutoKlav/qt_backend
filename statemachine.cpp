@@ -114,6 +114,14 @@ bool StateMachine::stop()
     Logger::info("End process");
     timer.stop();
 
+    if (process) {
+        auto processInfo = process->getInfo();
+        processInfo.processLength = QString::number(stateMachineValues.time);
+        processInfo.targetCoolingTime = QString::number(coolingTime);
+        processInfo.targetHeatingTime = QString::number(heatingTime);
+        process->setInfo(processInfo);
+    }
+
     Sensor::mapOutputPin[CONSTANTS::FILL_TANK_WITH_WATER]->send(0);
     Sensor::mapOutputPin[CONSTANTS::COOLING]->send(0);
     Sensor::mapOutputPin[CONSTANTS::TANK_HEATING]->send(0);
@@ -385,14 +393,14 @@ void StateMachine::autoklavControl()
 
         state = State::FINISHING;
         coolingTime = coolingStart.msecsTo(QDateTime::currentDateTime());
-        stopwatch1 = QDateTime::currentDateTime().addMSecs(10*60*1000); // 10 minutes
+        stopwatch1 = QDateTime::currentDateTime().addMSecs(1000); // 10 minutes TODO change this later
         Logger::info("StateMachine: Finishing");
         break;
 
     case State::FINISHING:
 
         if(QDateTime::currentDateTime() < stopwatch1){
-            Logger::info("Wait 10min");
+            Logger::info("Wait 1s"); // TODO revert this
             break;
         }
 
