@@ -116,9 +116,7 @@ bool StateMachine::stop()
 
     if (process) {
         auto processInfo = process->getInfo();
-        processInfo.processLength = QString::number(stateMachineValues.time);
-        processInfo.targetCoolingTime = QString::number(coolingTime);
-        processInfo.targetHeatingTime = QString::number(heatingTime);
+        processInfo.processLength = QString::number(stateMachineValues.time);        
         process->setInfo(processInfo);
     }
 
@@ -425,9 +423,7 @@ void StateMachine::autoklavControl()
 
         if (process) {
             auto processInfo = process->getInfo();
-            processInfo.processLength = QString::number(stateMachineValues.time);
-            processInfo.targetCoolingTime = QString::number(coolingTime);
-            processInfo.targetHeatingTime = QString::number(heatingTime);
+            processInfo.processLength = QString::number(stateMachineValues.time);            
             process->setInfo(processInfo);
         }
 
