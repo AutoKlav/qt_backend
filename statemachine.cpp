@@ -182,14 +182,14 @@ StateMachineValues StateMachine::calculateStateMachineValues()
         updateStateMachineValues.dTemp = NAN;
     }
 
-    updateStateMachineValues.Dr = k * d0 * qPow(10, -1.0/z*updateStateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
-    updateStateMachineValues.Fr = 1.0 / (k * d0) * qPow(10, 1.0/z*updateStateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
-    updateStateMachineValues.r = 1.0 / d0 * qPow(10, 1.0/z*updateStateMachineValues.dTemp) * (Globals::stateMachineTick / 60000.0);
+    updateStateMachineValues.Dr = k * d0 * qPow(10, -1.0 / z * updateStateMachineValues.dTemp);
+    updateStateMachineValues.Fr = 1.0 / (k * d0) * qPow(10, 1.0 / z * updateStateMachineValues.dTemp);
+    updateStateMachineValues.r = 1.0 / d0 * qPow(10, 1.0 / z * updateStateMachineValues.dTemp);
 
 
     updateStateMachineValues.time = processStart.msecsTo(QDateTime::currentDateTime());
-    updateStateMachineValues.sumFr = stateMachineValues.sumFr + updateStateMachineValues.Fr;
-    updateStateMachineValues.sumr = stateMachineValues.sumr + updateStateMachineValues.r;
+    updateStateMachineValues.sumFr = stateMachineValues.sumFr + updateStateMachineValues.Fr * (Globals::stateMachineTick / 60000.0);
+    updateStateMachineValues.sumr = stateMachineValues.sumr + updateStateMachineValues.r * (Globals::stateMachineTick / 60000.0);
 
     //const double tickFactor = Globals::stateMachineTick / 60000.0;
     //const double tempFactor = qPow(10, 1.0 / z * updateStateMachineValues.dTemp);
@@ -261,7 +261,7 @@ bool StateMachine::verificationControl()
 
 
 void StateMachine::autoklavControl()
-{    
+{
     stateMachineValues = calculateStateMachineValues();
 
     if(QDateTime::currentDateTime() > writeInDBstopwatch) {
