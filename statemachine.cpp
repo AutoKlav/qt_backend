@@ -93,7 +93,7 @@ bool StateMachine::start(ProcessConfig processConfig, ProcessInfo processInfo)
     this->processInfo = processInfo;
     state = State::STARTING;
 
-    processStart = QDateTime::currentDateTime();
+    processStart = QDateTime::currentDateTime();    
 
     // Fetch first time values and abort start if door is not closed
     stateMachineValues = calculateStateMachineValues();    
@@ -373,7 +373,7 @@ void StateMachine::autoklavControl()
         Sensor::mapOutputPin[CONSTANTS::FILL_TANK_WITH_WATER]->send(0);
 
         if (processConfig.mode == Mode::TARGETF) {
-            if(stateMachineValues.tempK > processConfig.processType.finishTemp) {
+            if(stateMachineValues.tempK > processInfo.finishTemp.toDouble()) {
                 Logger::info("Wait until tempK reaches finish temp");
                 break;
             }

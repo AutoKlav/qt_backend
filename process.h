@@ -9,8 +9,7 @@ struct ProcessType {
     int id;
     QString name;
     QString type;
-    double customTemp;
-    double finishTemp;
+    double customTemp;    
     double maintainTemp;
 };
 
