@@ -175,7 +175,7 @@ StateMachineValues StateMachine::calculateStateMachineValues()
     const auto d0 = processInfo.bacteria.d0;
 
     if (processConfig.mode == Mode::TARGETF) {
-        updateStateMachineValues.dTemp = updateStateMachineValues.tempK - processConfig.processType.customTemp;
+        updateStateMachineValues.dTemp = updateStateMachineValues.tempK - processInfo.processType.customTemp;
 
     } else if (processConfig.mode == Mode::TIME) {
         // avoid calculations it time is selected
@@ -315,8 +315,8 @@ void StateMachine::autoklavControl()
 
     case State::HEATING:
 
-        if(stateMachineValues.temp < processConfig.processType.maintainTemp) {
-            Logger::info(QString("Wait until %1 reaches %2").arg(QString::number(stateMachineValues.temp)).arg(QString::number(processConfig.processType.maintainTemp)));
+        if(stateMachineValues.temp < processInfo.processType.maintainTemp) {
+            Logger::info(QString("Wait until %1 reaches %2").arg(QString::number(stateMachineValues.temp)).arg(QString::number(processInfo.processType.maintainTemp)));
             break;
         }
 
@@ -327,9 +327,9 @@ void StateMachine::autoklavControl()
 
     case State::STERILIZING:
 
-        if (stateMachineValues.temp > processConfig.processType.maintainTemp + 0.5) {
+        if (stateMachineValues.temp > processInfo.processType.maintainTemp + 0.5) {
             Sensor::mapOutputPin[CONSTANTS::STEAM_HEATING]->send(0);
-        } else if (stateMachineValues.temp < processConfig.processType.maintainTemp - 0.5) {
+        } else if (stateMachineValues.temp < processInfo.processType.maintainTemp - 0.5) {
             Sensor::mapOutputPin[CONSTANTS::STEAM_HEATING]->send(1);
         }        
 

@@ -31,8 +31,7 @@ public:
     };
 
     struct ProcessConfig {        
-        HeatingType heatingType;
-        ProcessType processType;
+        HeatingType heatingType;        
         Mode mode;
     };
 

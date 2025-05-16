@@ -194,8 +194,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::startProcess(grpc::ServerContext *
     };
 
     const StateMachine::ProcessConfig processConfig = {        
-        .heatingType = static_cast<StateMachine::HeatingType>(request->processconfig().heatingtype()),
-        .processType = processType,
+        .heatingType = static_cast<StateMachine::HeatingType>(request->processconfig().heatingtype()),        
         .mode = static_cast<StateMachine::Mode>(request->processconfig().mode()),
     };
 
@@ -218,6 +217,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::startProcess(grpc::ServerContext *
         .targetF = QString::fromUtf8(request->processinfo().targetf()),
         .finishTemp = QString::fromUtf8(request->processinfo().finishtemp()),
         .bacteria = bacteria,
+        .processType = processType
     };
 
     bool success = invokeOnMainThreadBlocking([processConfig, processInfo](){
