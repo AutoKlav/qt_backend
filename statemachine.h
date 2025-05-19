@@ -41,6 +41,7 @@ public:
     int getState();    
 
     StateMachineValues getValues();
+    StateMachineValues readInputPinValues();
     StateMachineValues calculateStateMachineValues();
     
     static StateMachine &instance();

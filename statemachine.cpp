@@ -147,10 +147,16 @@ inline bool StateMachine::isRunning()
 
 StateMachineValues StateMachine::getValues()
 {
+    // If Process is not started, display only input pin values
+    if(!isRunning()){
+        return readInputPinValues();
+    }
+
     return stateMachineValues;
 }
 
-StateMachineValues StateMachine::calculateStateMachineValues()
+// This method is reused for displaying input values before and after process starts but only common data
+StateMachineValues StateMachine::readInputPinValues()
 {
     StateMachineValues updateStateMachineValues = {};
 
@@ -168,6 +174,13 @@ StateMachineValues StateMachine::calculateStateMachineValues()
     updateStateMachineValues.doorClosed = sensorValues.doorClosed;
     updateStateMachineValues.burnerFault = sensorValues.burnerFault;
     updateStateMachineValues.waterShortage = sensorValues.waterShortage;
+
+    return updateStateMachineValues;    
+}
+
+StateMachineValues StateMachine::calculateStateMachineValues()
+{
+    StateMachineValues updateStateMachineValues = readInputPinValues();    
 
     updateStateMachineValues.state = state;
 
@@ -282,7 +295,7 @@ void StateMachine::autoklavControl()
         Logger::info("StateMachine: Starting");
 
         Sensor::mapOutputPin[CONSTANTS::AUTOKLAV_FILL]->send(1);
-        stopwatch1 = QDateTime::currentDateTime().addMSecs(3*60*1000); // 3 minutes
+        stopwatch1 = QDateTime::currentDateTime().addMSecs(60*1000); // 3 minutes
 
         state = State::FILLING;
         Logger::info("StateMachine: Filling");
