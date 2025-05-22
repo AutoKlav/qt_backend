@@ -32,16 +32,15 @@ void Modbus::connectToServer(const QString &ip, int port)
     attemptReconnect(); // Start initial connection
 }
 
-
 void Modbus::readInputRegisters()
 {
     if (!modbusClient || modbusClient->state() != QModbusDevice::ConnectedState) {
         Logger::crit("Modbus client not connected. Cannot read input registers.");
-
         return;
     }
 
-    QModbusDataUnit readUnit(QModbusDataUnit::InputRegisters, 0, 11);
+    // Reading UINT16 values (40051-40051+n, function code 03)
+    QModbusDataUnit readUnit(QModbusDataUnit::InputRegisters, 0x32, 8); // Starting at 0x32 (50 decimal) for 8 registers
 
     if (auto *reply = modbusClient->sendReadRequest(readUnit, 1)) {
         connect(reply, &QModbusReply::finished, this, [this, reply]() {
@@ -49,15 +48,19 @@ void Modbus::readInputRegisters()
                 const QModbusDataUnit unit = reply->result();
 
                 for (uint i = 0; i < unit.valueCount(); i++) {
-                    // Update sensor value if sensor exists
+                    quint16 rawValue = unit.value(i);
+                    float scaledValue = rawValue * 0.001f; // Scale factor for UINT16
+
                     if (Sensor::mapInputPin.contains(i)) {
-                        Logger::info(QString("Read i:%1  value:%2").arg(i).arg(unit.value(i)));
-                        Sensor::mapInputPin[i]->setValue(unit.value(i));
+                        //Logger::info(QString("AI%1 - Raw: %2, Scaled: %3")
+                        //                 .arg(i)
+                        //                 .arg(rawValue)
+                        //s                 .arg(scaledValue));
+                        Sensor::mapInputPin[i]->setValue(scaledValue);
                     } else {
-                        Logger::crit(QString("Sensor '%1' not found in InputPin database.").arg(i));
+                        Logger::crit(QString("Sensor '%1' not found").arg(i));
                         GlobalErrors::setError(GlobalErrors::DbError);
                     }
-
                     lastDataTime = QDateTime::currentMSecsSinceEpoch();
                 }
             } else {
@@ -66,8 +69,6 @@ void Modbus::readInputRegisters()
             }
             reply->deleteLater();
             GlobalErrors::removeError(GlobalErrors::ModbusReadRegisterError);
-
-            // Add a delay before the next read request
             QTimer::singleShot(READ_INTERVAL_MS, this, &Modbus::readInputRegisters);
         });
     } else {
@@ -77,26 +78,34 @@ void Modbus::readInputRegisters()
 
 void Modbus::writeSingleCoil(int coilAddress, bool value)
 {
-    if (!modbusClient || modbusClient->state() != QModbusDevice::ConnectedState) {        
-        Logger::crit("Modbus client not connected. Cannot write to coil.");        
+    if (!modbusClient || modbusClient->state() != QModbusDevice::ConnectedState) {
+        Logger::crit("Modbus client not connected. Cannot write to coil.");
         return;
     }
 
     QModbusDataUnit writeUnit(QModbusDataUnit::Coils, coilAddress, 1);
-    writeUnit.setValue(0, value);
+    writeUnit.setValue(0, value ? 0xFF00 : 0x0000);  // Modbus spec: 0xFF00=ON, 0x0000=OFF
 
     if (auto *reply = modbusClient->sendWriteRequest(writeUnit, 1)) {
-        connect(reply, &QModbusReply::finished, this, [reply]() {
+        connect(reply, &QModbusReply::finished, this, [this, coilAddress, value, reply]() {
             if (reply->error() != QModbusDevice::NoError) {
-                Logger::crit(QString("Write error: %1").arg(reply->errorString()));
+                Logger::crit(QString("Failed to write coil %1: %2")
+                                 .arg(coilAddress)
+                                 .arg(reply->errorString()));
                 GlobalErrors::setError(GlobalErrors::ModbusWriteCoilError);
-            } 
-
+            } else {
+                Logger::info(QString("Successfully set DO%1 to %2")
+                                 .arg(coilAddress)
+                                 .arg(value ? "ON" : "OFF"));
+            }
             reply->deleteLater();
             GlobalErrors::removeError(GlobalErrors::ModbusWriteCoilError);
         });
     } else {
-        Logger::crit(QString("Write request failed: %1").arg(modbusClient->errorString()));        
+        Logger::crit(QString("Write request failed for DO%1: %2")
+                         .arg(coilAddress)
+                         .arg(modbusClient->errorString()));
+        GlobalErrors::setError(GlobalErrors::ModbusWriteCoilError);
     }
 }
 
