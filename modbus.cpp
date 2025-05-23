@@ -14,6 +14,9 @@ Modbus::Modbus(QObject *parent)
 
     retryTimer.setInterval(WAIT_TIME_MS);
     connect(&retryTimer, &QTimer::timeout, this, &Modbus::attemptReconnect);
+
+    writeQueueTimer.setInterval(WRITE_DELAY_MS);
+    connect(&writeQueueTimer, &QTimer::timeout, this, &Modbus::processWriteQueue);
 }
 
 Modbus &Modbus::instance()
@@ -83,11 +86,40 @@ void Modbus::writeSingleCoil(int coilAddress, bool value)
         return;
     }
 
+    // Add to queue instead of writing immediately
+    coilWriteQueue.enqueue(qMakePair(coilAddress, value));
+
+    if (!writeQueueTimer.isActive() && !isWriting) {
+        writeQueueTimer.start();
+    }
+}
+
+void Modbus::processWriteQueue()
+{
+    if (isWriting || coilWriteQueue.isEmpty()) {
+        if (coilWriteQueue.isEmpty()) {
+            writeQueueTimer.stop();
+        }
+        return;
+    }
+
+    if (!modbusClient || modbusClient->state() != QModbusDevice::ConnectedState) {
+        writeQueueTimer.stop();
+        return;
+    }
+
+    isWriting = true;
+    QPair<int, bool> operation = coilWriteQueue.dequeue();
+    int coilAddress = operation.first;
+    bool value = operation.second;
+
     QModbusDataUnit writeUnit(QModbusDataUnit::Coils, coilAddress, 1);
-    writeUnit.setValue(0, value ? 0xFF00 : 0x0000);  // Modbus spec: 0xFF00=ON, 0x0000=OFF
+    writeUnit.setValue(0, value ? 0xFF00 : 0x0000);
 
     if (auto *reply = modbusClient->sendWriteRequest(writeUnit, 1)) {
         connect(reply, &QModbusReply::finished, this, [this, coilAddress, value, reply]() {
+            isWriting = false;
+
             if (reply->error() != QModbusDevice::NoError) {
                 Logger::crit(QString("Failed to write coil %1: %2")
                                  .arg(coilAddress)
@@ -98,14 +130,22 @@ void Modbus::writeSingleCoil(int coilAddress, bool value)
                                  .arg(coilAddress)
                                  .arg(value ? "ON" : "OFF"));
             }
+
             reply->deleteLater();
             GlobalErrors::removeError(GlobalErrors::ModbusWriteCoilError);
+
+            // Process next item immediately if available
+            QTimer::singleShot(0, this, &Modbus::processWriteQueue);
         });
     } else {
+        isWriting = false;
         Logger::crit(QString("Write request failed for DO%1: %2")
                          .arg(coilAddress)
                          .arg(modbusClient->errorString()));
         GlobalErrors::setError(GlobalErrors::ModbusWriteCoilError);
+
+        // Retry after delay
+        QTimer::singleShot(WRITE_DELAY_MS, this, &Modbus::processWriteQueue);
     }
 }
 
