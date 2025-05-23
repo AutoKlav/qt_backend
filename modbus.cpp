@@ -126,9 +126,9 @@ void Modbus::processWriteQueue()
                                  .arg(reply->errorString()));
                 GlobalErrors::setError(GlobalErrors::ModbusWriteCoilError);
             } else {
-                Logger::info(QString("Successfully set DO%1 to %2")
-                                 .arg(coilAddress)
-                                 .arg(value ? "ON" : "OFF"));
+                //Logger::info(QString("Successfully set DO%1 to %2")
+                                 //.arg(coilAddress)
+                                 //.arg(value ? "ON" : "OFF"));
             }
 
             reply->deleteLater();
