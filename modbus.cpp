@@ -35,47 +35,104 @@ void Modbus::connectToServer(const QString &ip, int port)
     attemptReconnect(); // Start initial connection
 }
 
-void Modbus::readInputRegisters()
+void Modbus::readAllInputs()
 {
     if (!modbusClient || modbusClient->state() != QModbusDevice::ConnectedState) {
-        Logger::crit("Modbus client not connected. Cannot read input registers.");
+        Logger::crit("Modbus client not connected. Cannot read inputs.");
         return;
     }
 
+    // First read analog inputs
+    readAnalogInputs();
+}
+
+void Modbus::readAnalogInputs()
+{
     // Reading UINT16 values (40051-40051+n, function code 03)
-    QModbusDataUnit readUnit(QModbusDataUnit::InputRegisters, 0x32, 8); // Starting at 0x32 (50 decimal) for 8 registers
+    QModbusDataUnit readUnit(QModbusDataUnit::HoldingRegisters, 0x32, 8);
 
     if (auto *reply = modbusClient->sendReadRequest(readUnit, 1)) {
         connect(reply, &QModbusReply::finished, this, [this, reply]() {
             if (reply->error() == QModbusDevice::NoError) {
                 const QModbusDataUnit unit = reply->result();
 
+                // Process analog inputs (AI0-AI7) -> mapInputPin[0-7]
                 for (uint i = 0; i < unit.valueCount(); i++) {
                     quint16 rawValue = unit.value(i);
-                    float scaledValue = rawValue * 0.001f; // Scale factor for UINT16
+                    float scaledValue = rawValue * 0.001f;
 
                     if (Sensor::mapInputPin.contains(i)) {
-                        //Logger::info(QString("AI%1 - Raw: %2, Scaled: %3")
-                        //                 .arg(i)
-                        //                 .arg(rawValue)
-                        //s                 .arg(scaledValue));
+                        Logger::info(QString("AI%1 -> mapInputPin[%2] - Raw: %3, Scaled: %4")
+                                         .arg(i).arg(i).arg(rawValue).arg(scaledValue));
                         Sensor::mapInputPin[i]->setValue(scaledValue);
                     } else {
-                        Logger::crit(QString("Sensor '%1' not found").arg(i));
+                        Logger::crit(QString("Analog sensor at mapInputPin[%1] not found").arg(i));
                         GlobalErrors::setError(GlobalErrors::DbError);
                     }
-                    lastDataTime = QDateTime::currentMSecsSinceEpoch();
                 }
+
+                // After analog inputs are read, read digital inputs
+                readDigitalInputsSequential();
+
             } else {
-                Logger::crit(QString("Read error: %1").arg(reply->errorString()));
+                Logger::crit(QString("Analog input read error: %1").arg(reply->errorString()));
                 GlobalErrors::setError(GlobalErrors::ModbusReadRegisterError);
+                // Still try to read digital inputs even if analog failed
+                readDigitalInputsSequential();
             }
             reply->deleteLater();
-            GlobalErrors::removeError(GlobalErrors::ModbusReadRegisterError);
-            QTimer::singleShot(READ_INTERVAL_MS, this, &Modbus::readInputRegisters);
         });
     } else {
-        Logger::crit(QString("Read request failed: %1").arg(modbusClient->errorString()));
+        Logger::crit(QString("Analog input read request failed: %1").arg(modbusClient->errorString()));
+        // Try digital inputs anyway
+        readDigitalInputsSequential();
+    }
+}
+
+void Modbus::readDigitalInputsSequential()
+{
+    // Read 3 digital inputs (DI0, DI1, DI2) → Modbus addresses 0x0000, 0x0001, 0x0002
+    QModbusDataUnit readUnit(QModbusDataUnit::DiscreteInputs, 0x0000, 3);
+
+    if (auto *reply = modbusClient->sendReadRequest(readUnit, 1)) {
+        connect(reply, &QModbusReply::finished, this, [this, reply]() {
+            if (reply->error() == QModbusDevice::NoError) {
+                const QModbusDataUnit unit = reply->result();
+
+                // Process DI0 (mapInputPin[8]), DI1 (mapInputPin[9]), DI2 (mapInputPin[10])
+                for (uint i = 0; i < unit.valueCount()-5; i++) { // With 8 DI, we read first 3
+                    bool digitalState = unit.value(i) == 1;
+                    float digitalValue = digitalState ? 1.0f : 0.0f;
+
+                    uint mapIndex = i + 8; // Maps DI0 → 8, DI1 → 9, DI2 → 10
+
+                    if (Sensor::mapInputPin.contains(mapIndex)) {
+                        Logger::info(QString("DI%1 -> mapInputPin[%2] - State: %3, Value: %4")
+                                         .arg(i).arg(mapIndex)
+                                         .arg(digitalState ? "ON" : "OFF")
+                                         .arg(digitalValue));
+                        Sensor::mapInputPin[mapIndex]->setValue(digitalValue);
+                    } else {
+                        Logger::crit(QString("Digital sensor at mapInputPin[%1] not found").arg(mapIndex));
+                        GlobalErrors::setError(GlobalErrors::DbError);
+                    }
+                }
+            } else {
+                Logger::crit(QString("Digital input read error: %1").arg(reply->errorString()));
+                GlobalErrors::setError(GlobalErrors::ModbusReadRegisterError);
+            }
+
+            reply->deleteLater();
+            GlobalErrors::removeError(GlobalErrors::ModbusReadRegisterError);
+            lastDataTime = QDateTime::currentMSecsSinceEpoch();
+
+            // Schedule next read cycle
+            QTimer::singleShot(READ_INTERVAL_MS, this, &Modbus::readAllInputs);
+        });
+    } else {
+        Logger::crit(QString("Digital input read request failed: %1").arg(modbusClient->errorString()));
+        // Schedule next read cycle even if this failed
+        QTimer::singleShot(READ_INTERVAL_MS, this, &Modbus::readAllInputs);
     }
 }
 
@@ -167,7 +224,7 @@ void Modbus::onStateChanged(QModbusDevice::State state)
         retryTimer.stop();
 
         // Start reading input registers after connection
-        QTimer::singleShot(1000, this, &Modbus::readInputRegisters);
+        QTimer::singleShot(1000, this, &Modbus::readAllInputs);
     } else if (state == QModbusDevice::UnconnectedState) {
         Logger::info("Modbus client disconnected. Will attempt reconnection.");
         GlobalErrors::setError(GlobalErrors::ModbusError);

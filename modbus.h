@@ -21,8 +21,8 @@ public:
     static qint64 lastDataTime;    
 
     void connectToServer(const QString &ip, int port);
-    void readInputRegisters();
-    void writeSingleCoil(int coilAddress, bool value);
+    void startReading();
+    void writeSingleCoil(int coilAddress, bool value);    
 
 private:
     explicit Modbus(QObject *parent = nullptr);
@@ -32,6 +32,11 @@ private:
     static constexpr int WAIT_TIME_MS = 2000; /**< The wait time in milliseconds for reconnection attempts. */
     static constexpr int READ_INTERVAL_MS = 1000; /**< The wait time in milliseconds for reconnection attempts. */
     void attemptReconnect();
+
+    // Methods for sequential reading
+    void readAllInputs();                    // Entry point for reading cycle
+    void readAnalogInputs();                 // Read AI0-AI7 -> mapInputPin[0-7]
+    void readDigitalInputsSequential();      // Read DI0-DI3 -> mapInputPin[8-11]
 
     QQueue<QPair<int, bool>> coilWriteQueue;
     QTimer writeQueueTimer;
