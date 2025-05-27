@@ -58,16 +58,25 @@ void Sensor::sendIfNew(double newValue)
     send(newValue);
 }
 
-void Sensor::setValue(ushort newPinValue)
+void Sensor::setValue(uint newPinValue)
 {    
     pinValue = newPinValue;
 
-    // Determine the scaling factor based on the maxValue, analog Values will have maxValues above 1,
-    // in order to scale them properly scaling factor should be 1023
-    double scalingFactor = maxValue > 1 ? 1024 : 1.0;
+    double scalingFactor;
+
+    if(id < 7){
+        // for 4-20mA range
+        scalingFactor = (newPinValue - 4000.0) / (20000.0 - 4000.0);
+    } else if ( id == 7) {
+        // for 0-10v
+        scalingFactor = (newPinValue - 0.0) / (10000.0 - 0.0);
+    } else {
+        // DI pins, should be between 0 and 1
+        scalingFactor = newPinValue;
+    }
 
     // Calculate the new value based on the scaling factor and the min/max range
-    value = (newPinValue / scalingFactor) * (maxValue - minValue) + minValue;
+    value = scalingFactor * (maxValue - minValue) + minValue;
 }
 
 /**

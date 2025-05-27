@@ -58,13 +58,12 @@ void Modbus::readAnalogInputs()
 
                 // Process analog inputs (AI0-AI7) -> mapInputPin[0-7]
                 for (uint i = 0; i < unit.valueCount(); i++) {
-                    quint16 rawValue = unit.value(i);
-                    float scaledValue = rawValue * 0.001f;
+                    quint16 rawValue = unit.value(i);                    
 
                     if (Sensor::mapInputPin.contains(i)) {
-                        Logger::info(QString("AI%1 -> mapInputPin[%2] - Raw: %3, Scaled: %4")
-                                         .arg(i).arg(i).arg(rawValue).arg(scaledValue));
-                        Sensor::mapInputPin[i]->setValue(scaledValue);
+                        Logger::info(QString("AI%1 -> mapInputPin[%2] - Raw: %3")
+                                         .arg(i).arg(i).arg(rawValue));
+                        Sensor::mapInputPin[i]->setValue(rawValue);
                     } else {
                         Logger::crit(QString("Analog sensor at mapInputPin[%1] not found").arg(i));
                         GlobalErrors::setError(GlobalErrors::DbError);

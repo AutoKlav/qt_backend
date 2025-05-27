@@ -44,7 +44,7 @@ public:
 
     void send(double newValue);
     void sendIfNew(double newValue);
-    void setValue(ushort newPinValue);
+    void setValue(uint newPinValue);
     
     static SensorValues getValues();
     static SensorValues getPinValues();
