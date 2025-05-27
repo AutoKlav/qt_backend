@@ -62,7 +62,7 @@ void Modbus::readAnalogInputs()
                     float scaledValue = rawValue * 0.001f;
 
                     if (Sensor::mapInputPin.contains(i)) {
-                        Logger::info(QString("AI%1 -> mapInputPin[%2] - Raw: %3, Scaled: %4mA")
+                        Logger::info(QString("AI%1 -> mapInputPin[%2] - Raw: %3, Scaled: %4")
                                          .arg(i).arg(i).arg(rawValue).arg(scaledValue));
                         Sensor::mapInputPin[i]->setValue(scaledValue);
                     } else {
