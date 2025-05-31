@@ -46,44 +46,95 @@ void Modbus::readAllInputs()
     readAnalogInputs();
 }
 
+// void Modbus::readAnalogInputs()
+// {
+//     // Reading UINT16 values (40051-40051+n, function code 03)
+//     QModbusDataUnit readUnit(QModbusDataUnit::HoldingRegisters, 0x32, 8);
+
+//     if (auto *reply = modbusClient->sendReadRequest(readUnit, 1)) {
+//         connect(reply, &QModbusReply::finished, this, [this, reply]() {
+//             if (reply->error() == QModbusDevice::NoError) {
+//                 const QModbusDataUnit unit = reply->result();
+
+//                 // Process analog inputs (AI0-AI7) -> mapInputPin[0-7]
+//                 for (uint i = 0; i < unit.valueCount(); i++) {
+//                     quint16 rawValue = unit.value(i);                    
+
+//                     if (Sensor::mapInputPin.contains(i)) {
+//                         Logger::info(QString("AI%1 -> mapInputPin[%2] - Raw: %3")
+//                                          .arg(i).arg(i).arg(rawValue));
+//                         Sensor::mapInputPin[i]->setValue(rawValue);
+//                     } else {
+//                         Logger::crit(QString("Analog sensor at mapInputPin[%1] not found").arg(i));
+//                         GlobalErrors::setError(GlobalErrors::DbError);
+//                     }
+//                 }
+
+//                 // After analog inputs are read, read digital inputs
+//                 readDigitalInputsSequential();
+
+//             } else {
+//                 Logger::crit(QString("Analog input read error: %1").arg(reply->errorString()));
+//                 GlobalErrors::setError(GlobalErrors::ModbusReadRegisterError);
+//                 // Still try to read digital inputs even if analog failed
+//                 readDigitalInputsSequential();
+//             }
+//             reply->deleteLater();
+//         });
+//     } else {
+//         Logger::crit(QString("Analog input read request failed: %1").arg(modbusClient->errorString()));
+//         // Try digital inputs anyway
+//         readDigitalInputsSequential();
+//     }
+// }
+
 void Modbus::readAnalogInputs()
 {
-    // Reading UINT16 values (40051-40051+n, function code 03)
-    QModbusDataUnit readUnit(QModbusDataUnit::HoldingRegisters, 0x32, 8);
+    // Reading Float32 values (42101-42102 for AI0, etc.) - 8 channels = 16 registers
+    QModbusDataUnit readUnit(QModbusDataUnit::HoldingRegisters, 0x0834, 16);
 
     if (auto *reply = modbusClient->sendReadRequest(readUnit, 1)) {
         connect(reply, &QModbusReply::finished, this, [this, reply]() {
             if (reply->error() == QModbusDevice::NoError) {
                 const QModbusDataUnit unit = reply->result();
 
-                // Process analog inputs (AI0-AI7) -> mapInputPin[0-7]
-                for (uint i = 0; i < unit.valueCount(); i++) {
-                    quint16 rawValue = unit.value(i);                    
+                // Process Float32 values (every 2 registers = 1 Float32)
+                for (uint i = 0; i < unit.valueCount(); i += 2) {
+                    if (i + 1 >= unit.valueCount()) {
+                        Logger::crit("Incomplete Float32 data received");
+                        break;
+                    }
 
-                    if (Sensor::mapInputPin.contains(i)) {
-                        Logger::info(QString("AI%1 -> mapInputPin[%2] - Raw: %3")
-                                         .arg(i).arg(i).arg(rawValue));
-                        Sensor::mapInputPin[i]->setValue(rawValue);
+                    // Combine two 16-bit registers into a 32-bit float
+                    quint32 combined = (unit.value(i+1) << 16) | unit.value(i);  // Swap register order
+                    float floatValue;
+                    memcpy(&floatValue, &combined, sizeof(float)); // Safe type punning
+
+                    uint channel = i / 2; // AI0=0, AI1=1, etc.
+                    if (Sensor::mapInputPin.contains(channel)) {
+                        Logger::info(QString("AI%1 (Float32) - Raw: 0x%2%3, Value: %4")
+                                    .arg(channel)
+                                    .arg(QString::number(unit.value(i), 16).rightJustified(4, '0'))
+                                    .arg(QString::number(unit.value(i+1), 16).rightJustified(4, '0'))
+                                    .arg(floatValue));
+                        
+                        Sensor::mapInputPin[channel]->setValue(floatValue);
                     } else {
-                        Logger::crit(QString("Analog sensor at mapInputPin[%1] not found").arg(i));
+                        Logger::crit(QString("Analog sensor at mapInputPin[%1] not found").arg(channel));
                         GlobalErrors::setError(GlobalErrors::DbError);
                     }
                 }
-
-                // After analog inputs are read, read digital inputs
-                readDigitalInputsSequential();
-
             } else {
-                Logger::crit(QString("Analog input read error: %1").arg(reply->errorString()));
+                Logger::crit(QString("Float32 read error: %1").arg(reply->errorString()));
                 GlobalErrors::setError(GlobalErrors::ModbusReadRegisterError);
-                // Still try to read digital inputs even if analog failed
-                readDigitalInputsSequential();
             }
             reply->deleteLater();
+            
+            // Proceed to read digital inputs
+            readDigitalInputsSequential();
         });
     } else {
-        Logger::crit(QString("Analog input read request failed: %1").arg(modbusClient->errorString()));
-        // Try digital inputs anyway
+        Logger::crit(QString("Float32 read request failed: %1").arg(modbusClient->errorString()));
         readDigitalInputsSequential();
     }
 }
