@@ -64,16 +64,18 @@ void Sensor::setValue(uint newPinValue)
 
     double scalingFactor;
 
-    if(id < 7){
-        // for 4-20mA range
-        scalingFactor = (newPinValue - 4000.0) / (20000.0 - 4000.0);
-    } else if ( id == 7) {
-        // for 0-10v
-        scalingFactor = (newPinValue - 0.0) / (10000.0 - 0.0);
-    } else {
-        // DI pins, should be between 0 and 1
-        scalingFactor = newPinValue;
-    }
+    // if(id < 7){
+    //     // for 4-20mA range
+    //     scalingFactor = (newPinValue - 4000.0) / (20000.0 - 4000.0);
+    // } else if ( id == 7) {
+    //     // for 0-10v
+    //     scalingFactor = (newPinValue - 0.0) / (10000.0 - 0.0);
+    // } else {
+    //     // DI pins, should be between 0 and 1
+    //     scalingFactor = newPinValue;
+    // }
+
+    scalingFactor = (newPinValue - 0.0) / (10000.0 - 0.0);
 
     // Calculate the new value based on the scaling factor and the min/max range
     value = scalingFactor * (maxValue - minValue) + minValue;
