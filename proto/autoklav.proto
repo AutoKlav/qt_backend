@@ -148,6 +148,8 @@ message StateMachineValues {
     double sumFr = 9;
     double sumR = 10;
     string timestamp = 11;
+    string heatingEnd = 12;
+    string coolingEnd = 13;
 }
 
 enum HeatingType {

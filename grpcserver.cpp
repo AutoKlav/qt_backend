@@ -612,6 +612,14 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getStateMachineValues(grpc::Server
     const auto stateMachineValues = invokeOnMainThreadBlocking([](){
         return StateMachine::instance().getValues();
     });
+
+    const auto getHeatingEnd = invokeOnMainThreadBlocking([](){
+        return StateMachine::instance().getHeatingEnd();
+    });
+
+    const auto getCoolingEnd = invokeOnMainThreadBlocking([](){
+        return StateMachine::instance().getCoolingEnd();
+    });
      
     replay->set_elapsedtime(stateMachineValues.time);
 
@@ -636,6 +644,9 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getStateMachineValues(grpc::Server
     replay->set_r(stateMachineValues.r);
     replay->set_sumfr(stateMachineValues.sumFr);
     replay->set_sumr(stateMachineValues.sumr);
+
+    replay->set_heatingend(getHeatingEnd.toStdString());
+    replay->set_coolingend(getCoolingEnd.toStdString());
 
     return Status::OK;
 }

@@ -68,7 +68,7 @@ void StateMachine::tankControl()
 
     if (stateMachineValues.tankWaterLevel > 100 && state != State::COOLING) {
         Sensor::mapOutputPin[CONSTANTS::FILL_TANK_WITH_WATER]->sendIfNew(0);
-        Logger::info(QString("Tank filling off, tankWaterLevel >= 100 and not cooling").arg(stateMachineValues.tankWaterLevel));
+        Logger::info(QString("Tank filling off, tankWaterLevel >= 100 (%1) and not cooling").arg(stateMachineValues.tankWaterLevel));
     }
 }
 
@@ -107,6 +107,11 @@ bool StateMachine::start(ProcessConfig processConfig, ProcessInfo processInfo)
     timer.start(Globals::stateMachineTick);
     writeInDBstopwatch = QDateTime::currentDateTime().addMSecs(Globals::dbTick);
 
+
+    // clear hardcoded ending values, empty string ("") can be used as well
+    heatingEnd.clear();
+    coolingEnd.clear();
+
     return true;
 }
 
@@ -134,7 +139,12 @@ bool StateMachine::stop()
     Sensor::mapOutputPin[CONSTANTS::EXTENSION_COOLING]->send(0);
     Sensor::mapOutputPin[CONSTANTS::ALARM_SIGNAL]->send(0);
 
-    state = State::READY;    
+    state = State::READY;
+
+    // clear hardcoded ending values, empty string ("") can be used as well
+    heatingEnd.clear();
+    coolingEnd.clear();
+
     stateMachineValues = StateMachineValues();
 
     return true;
@@ -295,7 +305,7 @@ void StateMachine::autoklavControl()
         Logger::info("StateMachine: Starting");
 
         Sensor::mapOutputPin[CONSTANTS::AUTOKLAV_FILL]->send(1);
-        stopwatch1 = QDateTime::currentDateTime().addMSecs(60*1000); // 3 minutes
+        stopwatch1 = QDateTime::currentDateTime().addMSecs(0*60*1000); // 3 minutes TODO revert
 
         state = State::FILLING;
         Logger::info("StateMachine: Filling");
@@ -312,18 +322,23 @@ void StateMachine::autoklavControl()
         Sensor::mapOutputPin[CONSTANTS::STEAM_HEATING]->send(1);
 
 
-        if(stateMachineValues.pressure < 0.16)
+        if(stateMachineValues.pressure < 0.16){
+            Logger::info(QString("Wait until pressure %1 is reached").arg(QString::number(stateMachineValues.pressure)));
             break;
+        }
 
         Sensor::mapOutputPin[CONSTANTS::AUTOKLAV_FILL]->send(0);
         Sensor::mapOutputPin[CONSTANTS::INCREASE_PRESSURE]->send(1);
 
-        if(stateMachineValues.pressure < 1.5)
+        if(stateMachineValues.pressure < 1.5){
+            Logger::info(QString("Wait until pressure %1 is reached").arg(QString::number(stateMachineValues.pressure)));
             break;
-
+        }
+           
         Sensor::mapOutputPin[CONSTANTS::INCREASE_PRESSURE]->send(0);
 
         state = State::HEATING;
+                
         Logger::info("StateMachine: Heating");
         break;
 
@@ -331,11 +346,13 @@ void StateMachine::autoklavControl()
 
         if(stateMachineValues.temp < processInfo.processType.maintainTemp) {
             Logger::info(QString("Wait until %1 reaches %2").arg(QString::number(stateMachineValues.temp)).arg(QString::number(processInfo.processType.maintainTemp)));
-            break;
+            //break; TODO revert
         }
 
         state = State::STERILIZING;
-        heatingStart =  QDateTime::currentDateTime();
+        heatingStart = QDateTime::currentDateTime();
+        heatingEnd = (heatingStart.addMSecs(static_cast<qint64>(processInfo.targetHeatingTime.toDouble()))).toString(Qt::ISODate);
+
         Logger::info("StateMachine: Sterilizing");
         break;
 
@@ -355,8 +372,9 @@ void StateMachine::autoklavControl()
         } else if (processConfig.mode == Mode::TIME) {
             if (heatingStart.msecsTo(QDateTime::currentDateTime()) < processInfo.targetHeatingTime.toDouble()) {
                 Logger::info(QString("Wait until target time %1 is reached").arg(QString::number(processInfo.targetHeatingTime.toDouble())));
-                heatingTime = heatingStart.msecsTo(QDateTime::currentDateTime());
+                                
                 coolingStart = QDateTime::currentDateTime();
+
                 break;
             }
         
@@ -379,8 +397,11 @@ void StateMachine::autoklavControl()
         }
 
         state = State::COOLING;
+        coolingEnd = (coolingStart.addMSecs(static_cast<qint64>(processInfo.targetCoolingTime.toDouble()))).toString(Qt::ISODate);
+
         Logger::info("StateMachine: Cooling");
         break;
+
     case State::COOLING:        
 
         Sensor::mapOutputPin[CONSTANTS::COOLING]->send(0);
@@ -388,7 +409,7 @@ void StateMachine::autoklavControl()
 
         if (processConfig.mode == Mode::TARGETF) {
             if(stateMachineValues.tempK > processInfo.finishTemp.toDouble()) {
-                Logger::info("Wait until tempK reaches finish temp");
+                Logger::info(QString("Wait until tempK %1 is reached").arg(QString::number(processInfo.finishTemp.toDouble())));
                 break;
             }
 
@@ -404,7 +425,6 @@ void StateMachine::autoklavControl()
         Sensor::mapOutputPin[CONSTANTS::WATER_DRAIN]->send(1);
 
         state = State::FINISHING;
-        coolingTime = coolingStart.msecsTo(QDateTime::currentDateTime());
         stopwatch1 = QDateTime::currentDateTime().addMSecs(1000); // 10 minutes TODO change this later
         Logger::info("StateMachine: Finishing");
         break;
@@ -412,7 +432,7 @@ void StateMachine::autoklavControl()
     case State::FINISHING:
 
         if(QDateTime::currentDateTime() < stopwatch1){
-            Logger::info("Wait 1s"); // TODO revert this
+            Logger::info("Wait 1s"); // TODO revert this to 10 minutes
             break;
         }
 
@@ -442,6 +462,11 @@ void StateMachine::autoklavControl()
         }
 
         state = State::READY;
+
+        // clear hardcoded ending values, empty string ("") can be used as well
+        heatingEnd.clear();
+        coolingEnd.clear();
+
         stateMachineValues = StateMachineValues();
         break;
     }

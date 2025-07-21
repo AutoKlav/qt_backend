@@ -75,7 +75,7 @@ void Sensor::setValue(uint newPinValue)
     //     scalingFactor = newPinValue;
     // }
 
-    scalingFactor = (newPinValue - 0.0) / (10000.0 - 0.0);
+    scalingFactor = (newPinValue - 0.0) / (1024.0 - 0.0);
 
     // Calculate the new value based on the scaling factor and the min/max range
     value = scalingFactor * (maxValue - minValue) + minValue;
