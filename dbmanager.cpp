@@ -201,6 +201,7 @@ QList<ProcessRow> DbManager::getUniqueProcesses() {
         "Process.targetF, "
         "Process.targetHeatingTime, "
         "Process.targetCoolingTime, "
+        "Process.processLength, "
         "Bacteria.id AS bacteriaId, "
         "Bacteria.name AS bacteriaName, "
         "Bacteria.description AS bacteriaDescription, "
@@ -242,16 +243,17 @@ QList<ProcessRow> DbManager::getUniqueProcesses() {
         auto targetF = query.value(3).toString();
         auto targetHeatingTime = query.value(4).toString();
         auto targetCoolingTime = query.value(5).toString();
-        auto bacteriaId = query.value(6).toInt();
-        auto bacteriaName = query.value(7).toString();
-        auto bacteriaDescription = query.value(8).toString();
-        auto d0 = query.value(9).toDouble();        
-        auto z = query.value(10).toDouble();
-        auto processTypeId = query.value(11).toInt();
-        auto processTypeName = query.value(12).toString();
-        auto customTemp = query.value(13).toDouble();
-        auto finishTemp = query.value(14).toString();
-        auto maintainTemp = query.value(15).toDouble();
+        auto processLength = query.value(6).toString();
+        auto bacteriaId = query.value(7).toInt();
+        auto bacteriaName = query.value(8).toString();
+        auto bacteriaDescription = query.value(9).toString();
+        auto d0 = query.value(10).toDouble();
+        auto z = query.value(11).toDouble();
+        auto processTypeId = query.value(12).toInt();
+        auto processTypeName = query.value(13).toString();
+        auto customTemp = query.value(14).toDouble();
+        auto finishTemp = query.value(15).toString();
+        auto maintainTemp = query.value(16).toDouble();
 
         const Bacteria bacteria = {
             .id = bacteriaId,
@@ -276,6 +278,7 @@ QList<ProcessRow> DbManager::getUniqueProcesses() {
         info.bacteria = bacteria;
         info.targetHeatingTime = targetHeatingTime;
         info.targetCoolingTime = targetCoolingTime;
+        info.processLength = processLength;
         info.processType = processType;
         info.finishTemp = finishTemp;
 

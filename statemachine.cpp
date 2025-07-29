@@ -211,7 +211,7 @@ StateMachineValues StateMachine::calculateStateMachineValues()
     updateStateMachineValues.r = 1.0 / d0 * qPow(10, 1.0 / z * updateStateMachineValues.dTemp);
 
 
-    updateStateMachineValues.time = processStart.msecsTo(QDateTime::currentDateTime());
+    updateStateMachineValues.time = processStart.msecsTo(QDateTime::currentDateTime()) / 1000.0; // in seconds
     updateStateMachineValues.sumFr = stateMachineValues.sumFr + updateStateMachineValues.Fr * (Globals::stateMachineTick / 60000.0);
     updateStateMachineValues.sumr = stateMachineValues.sumr + updateStateMachineValues.r * (Globals::stateMachineTick / 60000.0);
 

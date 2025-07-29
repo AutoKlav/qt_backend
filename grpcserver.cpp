@@ -384,6 +384,7 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getUniqueProcesses(grpc::ServerCon
         processInfo->set_productname(process.productName.toStdString());
         processInfo->set_productquantity(process.productQuantity.toStdString());
         processInfo->set_targetf(process.targetF.toStdString());
+        processInfo->set_processlength(process.processLength.toStdString());
         processInfo->set_finishtemp(process.finishTemp.toStdString());
 
         auto processType = processInfo->mutable_processtype();
