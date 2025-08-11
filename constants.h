@@ -8,19 +8,19 @@
 */
 namespace CONSTANTS {
     // Analog sensor constants
-    inline const ushort TEMP = 0;  // temp
-    inline const ushort EXPANSION_TEMP = 2;  // expansionTemp
-    inline const ushort HEATER_TEMP = 3;  // heaterTemp
-    inline const ushort TANK_TEMP = 4;  // tankTemp
-    inline const ushort TEMP_K = 1;  // tempK
-    inline const ushort TANK_WATER_LEVEL = 5;  // tankWaterLevel
-    inline const ushort PRESSURE = 7;  // pressure
-    inline const ushort STEAM_PRESSURE = 6;  // steamPressure
+    inline const ushort TEMP = 2;  // temp
+    inline const ushort TEMP_K = 3;  // tempK
+    inline const ushort EXPANSION_TEMP = 4;  // expansionTemp
+    inline const ushort HEATER_TEMP = 5;  // heaterTemp
+    inline const ushort TANK_TEMP = 6;  // tankTemp
+    inline const ushort TANK_WATER_LEVEL = 7;  // tankWaterLevel
+    inline const ushort STEAM_PRESSURE = 8;  // steamPressure
+    inline const ushort PRESSURE = 9;  // pressure
 
     // Digital input constants
-    inline const ushort DOOR_CLOSED = 8;  // doorClosed
-    inline const ushort BURNER_FAULT = 9;  // burnerFault
-    inline const ushort WATER_SHORTAGE = 10;  // waterShortage
+    inline const ushort DOOR_CLOSED = 10;  // doorClosed
+    inline const ushort BURNER_FAULT = 11;  // burnerFault
+    inline const ushort WATER_SHORTAGE = 12;  // waterShortage
 
     // Digital output constants
     inline const ushort FILL_TANK_WITH_WATER = 0;  // fillTankWithWater
