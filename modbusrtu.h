@@ -31,6 +31,7 @@ private:
     static constexpr int READ_INTERVAL_MS = 1000; /**< The wait time in milliseconds for reconnection attempts. */
 
     void attemptReconnect();  // Add reconnect method
+    void configureConnectionParameters();  // Helper to set connection parameters
 };
 
 #endif // MODBUSRTU_H

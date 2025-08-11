@@ -14,32 +14,8 @@ ModbusRTU::ModbusRTU(QObject *parent)
     connect(modbusDevice, &QModbusClient::errorOccurred, this, &ModbusRTU::onErrorOccurred);
     connect(modbusDevice, &QModbusClient::stateChanged, this, &ModbusRTU::onStateChanged);
 
-    // Configure serial parameters
-    modbusDevice->setConnectionParameter(
-        QModbusDevice::SerialPortNameParameter,
-        QVariant(QStringLiteral("COM5"))
-        );
-
-    modbusDevice->setConnectionParameter(
-        QModbusDevice::SerialBaudRateParameter,
-        QVariant(static_cast<int>(QSerialPort::Baud9600))
-        );
-
-    modbusDevice->setConnectionParameter(
-        QModbusDevice::SerialParityParameter,
-        QVariant(static_cast<int>(QSerialPort::OddParity))
-        );
-
-    modbusDevice->setConnectionParameter(
-        QModbusDevice::SerialDataBitsParameter,
-        QVariant(static_cast<int>(QSerialPort::Data8))
-        );
-
-    modbusDevice->setConnectionParameter(
-        QModbusDevice::SerialStopBitsParameter,
-        QVariant(static_cast<int>(QSerialPort::OneStop))
-        );
-
+    configureConnectionParameters();  // Set up connection parameters
+    
     // Set up periodic reading
     readTimer.setInterval(READ_INTERVAL_MS);  // Read every 1 second
     connect(&readTimer, &QTimer::timeout, this, [this]() {
@@ -53,6 +29,34 @@ ModbusRTU::ModbusRTU(QObject *parent)
     
     // Start initial connection
     attemptReconnect();
+}
+
+void ModbusRTU::configureConnectionParameters()
+{
+    modbusDevice->setConnectionParameter(
+        QModbusDevice::SerialPortNameParameter,
+        QVariant(QStringLiteral("COM5"))
+    );
+
+    modbusDevice->setConnectionParameter(
+        QModbusDevice::SerialBaudRateParameter,
+        QVariant(static_cast<int>(QSerialPort::Baud9600))
+    );
+
+    modbusDevice->setConnectionParameter(
+        QModbusDevice::SerialParityParameter,
+        QVariant(static_cast<int>(QSerialPort::OddParity))
+    );
+
+    modbusDevice->setConnectionParameter(
+        QModbusDevice::SerialDataBitsParameter,
+        QVariant(static_cast<int>(QSerialPort::Data8))
+    );
+
+    modbusDevice->setConnectionParameter(
+        QModbusDevice::SerialStopBitsParameter,
+        QVariant(static_cast<int>(QSerialPort::OneStop))
+    );
 }
 
 ModbusRTU &ModbusRTU::instance()
@@ -84,24 +88,32 @@ void ModbusRTU::readHoldingRegisters(quint8 slaveAddress, quint16 startAddr, qui
 
 void ModbusRTU::attemptReconnect()
 {
-    if (modbusDevice->state() == QModbusDevice::ConnectedState) {
+    if (modbusDevice && modbusDevice->state() == QModbusDevice::ConnectedState)
         return;
-    }
 
-    Logger::info("Attempting to reconnect to Modbus RTU device...");
+    Logger::info("Reinitializing Modbus RTU client...");
 
-    // Ensure clean state
-    if (modbusDevice->state() != QModbusDevice::UnconnectedState) {
+    // 1. Clean up the old client
+    if (modbusDevice) {
         modbusDevice->disconnectDevice();
+        modbusDevice->deleteLater();
     }
 
-    QTimer::singleShot(500, this, [this]() {
-        if (!modbusDevice->connectDevice()) {
-            Logger::crit(QString("Reconnection attempt failed: %1").arg(modbusDevice->errorString()));
-            retryTimer.start();
-        }
-    });
+    // 2. Re-create and configure
+    modbusDevice = new QModbusRtuSerialClient(this);
+    configureConnectionParameters();  
+    // (move your setConnectionParameter calls into this helper)
+
+    connect(modbusDevice, &QModbusClient::errorOccurred, this, &ModbusRTU::onErrorOccurred);
+    connect(modbusDevice, &QModbusClient::stateChanged, this, &ModbusRTU::onStateChanged);
+
+    // 3. Attempt to connect anew
+    if (!modbusDevice->connectDevice()) {
+        Logger::crit(QString("Reconnect failed: %1").arg(modbusDevice->errorString()));
+        retryTimer.start();
+    }
 }
+
 
 void ModbusRTU::onReadReady()
 {
