@@ -18,9 +18,9 @@ namespace CONSTANTS {
     inline const ushort PRESSURE = 9;  // pressure
 
     // Digital input constants
-    inline const ushort DOOR_CLOSED = 10;  // doorClosed
-    inline const ushort BURNER_FAULT = 11;  // burnerFault
-    inline const ushort WATER_SHORTAGE = 12;  // waterShortage
+    inline const ushort DOOR_CLOSED = 0;  // doorClosed
+    inline const ushort BURNER_FAULT = 1;  // burnerFault
+    inline const ushort WATER_SHORTAGE = 2;  // waterShortage
 
     // Digital output constants
     inline const ushort FILL_TANK_WITH_WATER = 0;  // fillTankWithWater
@@ -29,18 +29,12 @@ namespace CONSTANTS {
     inline const ushort COOLING_HELPER = 3;  // coolingHelper
     inline const ushort AUTOKLAV_FILL = 4;  // autoklavFill
     inline const ushort WATER_DRAIN = 5;  // waterDrain
-
-    // default steam heating
     inline ushort STEAM_HEATING = 6;  // heating
-
     inline const ushort PUMP = 7;  // pump
-
-    // electric heating
-    inline const ushort ELECTRIC_HEATING = 11;  // electricHeating
-
     inline const ushort INCREASE_PRESSURE = 8;  // increasePressure
-    inline const ushort EXTENSION_COOLING = 10;  // extensionCooling
     inline const ushort ALARM_SIGNAL = 9;  // alarmSignal
+    inline const ushort EXTENSION_COOLING = 10;  // extensionCooling
+    inline const ushort ELECTRIC_HEATING = 11;  // electricHeating
 }
 
 #endif // CONSTANTS_H
