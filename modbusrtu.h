@@ -28,7 +28,7 @@ private:
     QTimer retryTimer;
 
     static constexpr int WAIT_TIME_MS = 2000; /**< The wait time in milliseconds for reconnection attempts. */
-    static constexpr int READ_INTERVAL_MS = 1000; /**< The wait time in milliseconds for reconnection attempts. */
+    static constexpr int READ_INTERVAL_MS = 1000; /**< The interval in milliseconds for reading sensor data. */
 
     void attemptReconnect();  // Add reconnect method
 };
