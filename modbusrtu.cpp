@@ -127,7 +127,7 @@ void ModbusRTU::onReadReady()
 
         if (unit.valueCount() >= 1) {
             quint16 rawValue = unit.value(0);
-            float scaledValue = static_cast<float>(rawValue) / 10.0f;
+            uint scaledValue = static_cast<uint>(rawValue);
 
             // Use register address as the array index 'i'
             if (Sensor::mapInputPin.contains(registerAddress)) {
@@ -136,7 +136,7 @@ void ModbusRTU::onReadReady()
                                  .arg(registerAddress)
                                  .arg(scaledValue));
 
-                Sensor::mapInputPin[registerAddress]->setValue(scaledValue);
+                Sensor::mapInputPin[slaveAddress]->setValue(scaledValue);                
             } else {
                 Logger::crit(QString("Sensor not found for slave:%1 reg:%2")
                                  .arg(slaveAddress)
