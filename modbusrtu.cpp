@@ -123,24 +123,20 @@ void ModbusRTU::onReadReady()
     if (reply->error() == QModbusDevice::NoError) {
         const QModbusDataUnit unit = reply->result();
         const quint8 slaveAddress = reply->serverAddress();
-        const quint16 registerAddress = unit.startAddress();
-
+        
         if (unit.valueCount() >= 1) {
             quint16 rawValue = unit.value(0);
             uint scaledValue = static_cast<uint>(rawValue);
 
-            // Use register address as the array index 'i'
-            if (Sensor::mapInputPin.contains(registerAddress)) {
-                Logger::info(QString("Read slave:%1 reg:%2 value:%3")
+            if (Sensor::mapInputPin.contains(slaveAddress)) {
+                Logger::info(QString("Read slave:%1 value:%3")
                                  .arg(slaveAddress)
-                                 .arg(registerAddress)
                                  .arg(scaledValue));
 
                 Sensor::mapInputPin[slaveAddress]->setValue(scaledValue);                
             } else {
-                Logger::crit(QString("Sensor not found for slave:%1 reg:%2")
-                                 .arg(slaveAddress)
-                                 .arg(registerAddress));
+                Logger::crit(QString("Sensor not found for slave:%1")
+                                 .arg(slaveAddress));
                 GlobalErrors::setError(GlobalErrors::DbError);
             }
 
