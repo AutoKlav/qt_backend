@@ -33,7 +33,6 @@ void Sensor::send(double newValue)
     value = newValue; // Update the internal value
     uint pinValue = newValue;
 
-    //Modbus::instance().writeSingleCoil(id, newValue);
     const auto cwtSlaveId = 1; // I set manually to be slave id = 1
     ModbusRTU::instance().writeSingleCoil(cwtSlaveId, id, newValue);
 }
