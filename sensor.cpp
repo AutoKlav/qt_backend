@@ -7,7 +7,7 @@
 #include "logger.h"
 #include "dbmanager.h"
 #include "constants.h"
-#include "modbus.h"
+#include "modbusrtu.h"
 
 qint64 Sensor::lastDataTime = 0;
 QList<Sensor> Sensor::inputPins = QList<Sensor>();
@@ -33,7 +33,9 @@ void Sensor::send(double newValue)
     value = newValue; // Update the internal value
     uint pinValue = newValue;
 
-    Modbus::instance().writeSingleCoil(id, newValue);
+    //Modbus::instance().writeSingleCoil(id, newValue);
+    const auto cwtSlaveId = 1; // I set manually to be slave id = 1
+    ModbusRTU::instance().writeSingleCoil(cwtSlaveId, id, newValue);
 }
 
 bool Sensor::setRelayState(ushort id, ushort value)

@@ -148,6 +148,31 @@ void ModbusRTU::onReadReady()
     reply->deleteLater();
 }
 
+void ModbusRTU::writeSingleCoil(quint8 slaveAddress, quint16 coilAddress, bool value)
+{
+    if (!modbusDevice || modbusDevice->state() != QModbusDevice::ConnectedState) {
+        Logger::crit("Modbus RTU device not connected. Cannot write to coil.");
+        return;
+    }
+
+    QModbusDataUnit writeUnit(QModbusDataUnit::Coils, coilAddress, 1);
+    writeUnit.setValue(0, value ? 0xFF00 : 0x0000); // Modbus spec: 0xFF00 for ON, 0x0000 for OFF
+
+    if (auto *reply = modbusDevice->sendWriteRequest(writeUnit, slaveAddress)) {
+        connect(reply, &QModbusReply::finished, this, [this, reply]() {
+            if (reply->error() != QModbusDevice::NoError) {
+                Logger::crit(QString("Write coil error: %1").arg(reply->errorString()));
+                GlobalErrors::setError(GlobalErrors::ModbusWriteCoilError);
+            } else {
+                Logger::info("Successfully wrote coil value");
+            }
+            reply->deleteLater();
+        });
+    } else {
+        Logger::crit(QString("Write coil request failed: %1").arg(modbusDevice->errorString()));
+    }
+}
+
 void ModbusRTU::onErrorOccurred(QModbusDevice::Error error)
 {
     if (error != QModbusDevice::NoError) {
