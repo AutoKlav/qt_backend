@@ -7,6 +7,9 @@
 * @brief Constants related to the Controllino board, only ushort values are send and received through network.
 */
 namespace CONSTANTS {
+    // CWT Slave ID
+    inline const ushort CWT_SLAVE_ID = 1;
+
     // Analog sensor constants
     inline const ushort TEMP = 2;  // temp
     inline const ushort TEMP_K = 3;  // tempK

@@ -24,10 +24,9 @@ ModbusRTU::ModbusRTU(QObject *parent)
         readHoldingRegisters(CONSTANTS::TEMP_K, 1, 1);
 
         // we are reading digital inputs from
-        const auto cwtSlaveId = 1;
-        readDiscreteRegisters(cwtSlaveId, CONSTANTS::DOOR_CLOSED, 1);
-        readDiscreteRegisters(cwtSlaveId, CONSTANTS::BURNER_FAULT, 1);
-        readDiscreteRegisters(cwtSlaveId, CONSTANTS::WATER_SHORTAGE, 1);
+        readDiscreteRegisters(CONSTANTS::CWT_SLAVE_ID, CONSTANTS::DOOR_CLOSED, 1);
+        readDiscreteRegisters(CONSTANTS::CWT_SLAVE_ID, CONSTANTS::BURNER_FAULT, 1);
+        readDiscreteRegisters(CONSTANTS::CWT_SLAVE_ID, CONSTANTS::WATER_SHORTAGE, 1);
     });
 
       // Initialize retry timer
