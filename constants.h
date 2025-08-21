@@ -40,8 +40,8 @@ namespace CONSTANTS {
     inline const ushort EXTENSION_COOLING = 10;  // extensionCooling
     inline const ushort ELECTRIC_HEATING = 11;  // electricHeating
 
-    inline const qint16 MODBUS_COIL_ON = 0xFF00;  // Modbus coil ON value
-    inline const qint16 MODBUS_COIL_OFF = 0x0000;  // Modbus coil OFF value
+    inline const quint16 MODBUS_COIL_ON = 0xFF00;  // Modbus coil ON value
+    inline const quint16 MODBUS_COIL_OFF = 0x0000;  // Modbus coil OFF value
 
     inline const float SENSOR_PIN_SCALING_FACTOR = 10.0;
 }
