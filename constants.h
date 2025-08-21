@@ -17,8 +17,8 @@ namespace CONSTANTS {
     inline const ushort STEAM_PRESSURE = 8;  // steamPressure
     inline const ushort PRESSURE = 9;  // pressure
 
-    // Digital input constants
-    inline const ushort     DOOR_CLOSED = 0;  // doorClosed
+    // Digital input constants, we use raw values from cwt slave 1 and then shift them by 10 for mapInputSensor
+    inline const ushort DOOR_CLOSED = 0;  // doorClosed
     inline const ushort BURNER_FAULT = 1;  // burnerFault
     inline const ushort WATER_SHORTAGE = 2;  // waterShortage
 

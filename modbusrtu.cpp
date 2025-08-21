@@ -103,7 +103,7 @@ void ModbusRTU::readDiscreteRegisters(quint8 slaveAddress, quint16 startAddr, qu
 
     if (auto *reply = modbusDevice->sendReadRequest(readUnit, slaveAddress)) {
         if (!reply->isFinished()) {
-            connect(reply, &QModbusReply::finished, this, &ModbusRTU::onReadReady);
+            connect(reply, &QModbusReply::finished, this, &ModbusRTU::onDigitalInputReady);
         } else {
             delete reply;
         }
@@ -177,6 +177,45 @@ void ModbusRTU::onReadReady()
     }
     reply->deleteLater();
 }
+
+void ModbusRTU::onDigitalInputReady()
+{
+    auto reply = qobject_cast<QModbusReply *>(sender());
+    if (!reply) return;
+
+    if (reply->error() == QModbusDevice::NoError) {
+        const QModbusDataUnit unit = reply->result();
+        const quint8 slaveAddress = reply->serverAddress();
+        const quint16 startAddress = unit.startAddress(); // Get the start address
+
+        if (unit.valueCount() >= 1) {
+            quint16 rawValue = unit.value(0);
+            uint scaledValue = static_cast<uint>(rawValue);
+
+            const auto shiftedAddress = startAddress + 10;
+
+            if (Sensor::mapInputPin.contains(shiftedAddress)) {
+                Logger::info(QString("Read slave:%1 address:%2 value:%3")
+                                 .arg(slaveAddress)
+                                 .arg(startAddress)  // Added start address
+                                 .arg(scaledValue));
+
+                Sensor::mapInputPin[shiftedAddress]->setValue(scaledValue);
+            } else {
+                Logger::crit(QString("Sensor not found for slave:%1 address:%2")
+                                 .arg(slaveAddress)
+                                 .arg(startAddress));  // Added start address
+                GlobalErrors::setError(GlobalErrors::DbError);
+            }
+
+            lastDataTime = QDateTime::currentMSecsSinceEpoch();
+        }
+    } else {
+        qDebug() << "Read error:" << reply->errorString();
+    }
+    reply->deleteLater();
+}
+
 
 void ModbusRTU::writeSingleCoil(quint8 slaveAddress, quint16 coilAddress, bool value)
 {

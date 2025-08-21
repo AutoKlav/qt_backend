@@ -21,6 +21,7 @@ public:
 
 private slots:
     void onReadReady();
+    void onDigitalInputReady();
     void onErrorOccurred(QModbusDevice::Error error);
     void onStateChanged(QModbusDevice::State state);
 

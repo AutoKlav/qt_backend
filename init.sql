@@ -23,19 +23,19 @@ CREATE TABLE InputPin (
 );
 
 -- Input pins
-INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (0, 'temp', -48.35, 220.12);
-INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (1, 'tempK', -51.23, 217.24);
-INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (2, 'expansionTemp', -48.35, 220.12);
-INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (3, 'heaterTemp', -48.35, 220.12);
-INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (4, 'tankTemp', -48.35, 220.12);
-INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (5, 'tankWaterLevel', -43.731249999999875, 167.46874999999994);
-INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (7, 'pressure', -1.08, 5.064);
-INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (6, 'steamPressure', -0.00598, 16.16966);
+INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (2, 'temp', -48.35, 220.12);
+INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (3, 'tempK', -51.23, 217.24);
+INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (4, 'expansionTemp', -48.35, 220.12);
+INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (5, 'heaterTemp', -48.35, 220.12);
+INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (6, 'tankTemp', -48.35, 220.12);
+INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (7, 'tankWaterLevel', -43.731249999999875, 167.46874999999994);
+INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (8, 'pressure', -1.08, 5.064);
+INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (9, 'steamPressure', -0.00598, 16.16966);
 
 -- Digital Pins read through Analog Inputs, converted from [analogMin, analogMax] to [0, 1]
-INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (8, 'doorClosed', 0, 1);
-INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (9, 'burnerFault', 0, 1);
-INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (10, 'waterShortage', 0, 1);
+INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (10, 'doorClosed', 0, 1);
+INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (11, 'burnerFault', 0, 1);
+INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (12, 'waterShortage', 0, 1);
 
 -- OutputPin, used for sending commands to the PLC through Modbus network, QT acts as clients that sends commands to the server PLC
 DROP TABLE IF EXISTS OutputPin;
