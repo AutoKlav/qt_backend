@@ -16,6 +16,7 @@ public:
 
     void connectToDevice();
     void readHoldingRegisters(quint8 slaveAddress, quint16 startAddr, quint16 count);
+    void readDiscreteRegisters(quint8 slaveAddress, quint16 startAddr, quint16 count);
     void writeSingleCoil(quint8 slaveAddress, quint16 coilAddress, bool value);
 
 private slots:

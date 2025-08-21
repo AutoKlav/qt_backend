@@ -18,7 +18,7 @@ namespace CONSTANTS {
     inline const ushort PRESSURE = 9;  // pressure
 
     // Digital input constants
-    inline const ushort DOOR_CLOSED = 0;  // doorClosed
+    inline const ushort     DOOR_CLOSED = 0;  // doorClosed
     inline const ushort BURNER_FAULT = 1;  // burnerFault
     inline const ushort WATER_SHORTAGE = 2;  // waterShortage
 
