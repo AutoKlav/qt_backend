@@ -7,20 +7,29 @@
 * @brief Constants related to the Controllino board, only ushort values are send and received through network.
 */
 namespace CONSTANTS {
-    // Analog sensor constants
-    inline const ushort TEMP = 0;  // temp
-    inline const ushort EXPANSION_TEMP = 2;  // expansionTemp
-    inline const ushort HEATER_TEMP = 3;  // heaterTemp
-    inline const ushort TANK_TEMP = 4;  // tankTemp
-    inline const ushort TEMP_K = 1;  // tempK
-    inline const ushort TANK_WATER_LEVEL = 5;  // tankWaterLevel
-    inline const ushort PRESSURE = 7;  // pressure
-    inline const ushort STEAM_PRESSURE = 6;  // steamPressure
+    // CWT Slave ID
+    inline const ushort CWT_SLAVE_ID = 1;
+    inline const ushort DIGITAL_INPUT_SHIFT = 10;  // Digital input shift for mapping
 
-    // Digital input constants
-    inline const ushort DOOR_CLOSED = 8;  // doorClosed
-    inline const ushort BURNER_FAULT = 9;  // burnerFault
-    inline const ushort WATER_SHORTAGE = 10;  // waterShortage
+    // Analog sensor constants
+    inline const ushort TEMP = 2;  // temp
+    inline const ushort TEMP_K = 3;  // tempK
+    inline const ushort EXPANSION_TEMP = 4;  // expansionTemp
+    inline const ushort HEATER_TEMP = 5;  // heaterTemp
+    inline const ushort TANK_TEMP = 6;  // tankTemp
+    inline const ushort TANK_WATER_LEVEL = 7;  // tankWaterLevel
+    inline const ushort STEAM_PRESSURE = 8;  // steamPressure
+    inline const ushort PRESSURE = 9;  // pressure
+
+    // Digital input constants, we use raw values from cwt slave 1 and then shift them by 10 for mapInputSensor
+    inline const ushort DOOR_CLOSED = 0;  // doorClosed
+    inline const ushort BURNER_FAULT = 1;  // burnerFault
+    inline const ushort WATER_SHORTAGE = 2;  // waterShortage
+
+    // Shifted digital input constants for mapInputPin
+    inline const ushort DOOR_CLOSED_SHIFTED = DOOR_CLOSED + DIGITAL_INPUT_SHIFT;  // doorClosed
+    inline const ushort BURNER_FAULT_SHIFTED = BURNER_FAULT + DIGITAL_INPUT_SHIFT;  // burnerFault
+    inline const ushort WATER_SHORTAGE_SHIFTED = WATER_SHORTAGE + DIGITAL_INPUT_SHIFT;  // waterShortage
 
     // Digital output constants
     inline const ushort FILL_TANK_WITH_WATER = 0;  // fillTankWithWater
@@ -29,18 +38,17 @@ namespace CONSTANTS {
     inline const ushort COOLING_HELPER = 3;  // coolingHelper
     inline const ushort AUTOKLAV_FILL = 4;  // autoklavFill
     inline const ushort WATER_DRAIN = 5;  // waterDrain
-
-    // default steam heating
     inline ushort STEAM_HEATING = 6;  // heating
-
     inline const ushort PUMP = 7;  // pump
-
-    // electric heating
+    inline const ushort INCREASE_PRESSURE = 8;  // increasePressure
+    inline const ushort ALARM_SIGNAL = 9;  // alarmSignal
+    inline const ushort EXTENSION_COOLING = 10;  // extensionCooling
     inline const ushort ELECTRIC_HEATING = 11;  // electricHeating
 
-    inline const ushort INCREASE_PRESSURE = 8;  // increasePressure
-    inline const ushort EXTENSION_COOLING = 10;  // extensionCooling
-    inline const ushort ALARM_SIGNAL = 9;  // alarmSignal
+    inline const quint16 MODBUS_COIL_ON = 0xFF00;  // Modbus coil ON value
+    inline const quint16 MODBUS_COIL_OFF = 0x0000;  // Modbus coil OFF value
+
+    inline const float SENSOR_PIN_SCALING_FACTOR = 10.0;
 }
 
 #endif // CONSTANTS_H
