@@ -23,7 +23,7 @@ ModbusRTU::ModbusRTU(QObject *parent)
         readHoldingRegisters(CONSTANTS::TEMP, 1, 1);
         readHoldingRegisters(CONSTANTS::TEMP_K, 1, 1);
 
-        // we are reading digital inputs from
+        // Read digital input directly from cwt digital input pins
         readDiscreteRegisters(CONSTANTS::CWT_SLAVE_ID, CONSTANTS::DOOR_CLOSED, 1);
         readDiscreteRegisters(CONSTANTS::CWT_SLAVE_ID, CONSTANTS::BURNER_FAULT, 1);
         readDiscreteRegisters(CONSTANTS::CWT_SLAVE_ID, CONSTANTS::WATER_SHORTAGE, 1);

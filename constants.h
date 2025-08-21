@@ -26,6 +26,11 @@ namespace CONSTANTS {
     inline const ushort BURNER_FAULT = 1;  // burnerFault
     inline const ushort WATER_SHORTAGE = 2;  // waterShortage
 
+    // Shifted digital input constants for mapInputPin
+    inline const ushort DOOR_CLOSED_SHIFTED = DOOR_CLOSED + DIGITAL_INPUT_SHIFT;  // doorClosed
+    inline const ushort BURNER_FAULT_SHIFTED = BURNER_FAULT + DIGITAL_INPUT_SHIFT;  // burnerFault
+    inline const ushort WATER_SHORTAGE_SHIFTED = WATER_SHORTAGE + DIGITAL_INPUT_SHIFT;  // waterShortage
+
     // Digital output constants
     inline const ushort FILL_TANK_WITH_WATER = 0;  // fillTankWithWater
     inline const ushort COOLING = 1;  // cooling

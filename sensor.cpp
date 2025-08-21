@@ -62,7 +62,7 @@ void Sensor::setValue(uint newPinValue)
 {    
     pinValue = newPinValue;
 
-    double scalingFactor;
+    //double scalingFactor;
 
     // if(id < 7){
     //     // for 4-20mA range
@@ -100,9 +100,9 @@ SensorValues Sensor::getValues()
     values.pressure = mapInputPin[CONSTANTS::PRESSURE]->value;
     values.steamPressure = mapInputPin[CONSTANTS::STEAM_PRESSURE]->value;
 
-    values.doorClosed = mapInputPin[CONSTANTS::DOOR_CLOSED]->value;
-    values.burnerFault = mapInputPin[CONSTANTS::BURNER_FAULT]->value;
-    values.waterShortage = mapInputPin[CONSTANTS::WATER_SHORTAGE]->value;
+    values.doorClosed = mapInputPin[CONSTANTS::DOOR_CLOSED_SHIFTED]->value;
+    values.burnerFault = mapInputPin[CONSTANTS::BURNER_FAULT_SHIFTED]->value;
+    values.waterShortage = mapInputPin[CONSTANTS::WATER_SHORTAGE_SHIFTED]->value;
     
     return values;
 }
@@ -125,9 +125,10 @@ SensorValues Sensor::getPinValues()
     values.pressure = mapInputPin[CONSTANTS::PRESSURE]->pinValue;
     values.steamPressure = mapInputPin[CONSTANTS::STEAM_PRESSURE]->pinValue;
 
-    values.doorClosed = mapInputPin[CONSTANTS::DOOR_CLOSED]->pinValue;
-    values.burnerFault = mapInputPin[CONSTANTS::BURNER_FAULT]->pinValue;
-    values.waterShortage = mapInputPin[CONSTANTS::WATER_SHORTAGE]->pinValue;
+    // We are using shifted values
+    values.doorClosed = mapInputPin[CONSTANTS::DOOR_CLOSED_SHIFTED]->pinValue;
+    values.burnerFault = mapInputPin[CONSTANTS::BURNER_FAULT_SHIFTED]->pinValue;
+    values.waterShortage = mapInputPin[CONSTANTS::WATER_SHORTAGE_SHIFTED]->pinValue;
 
     return values;
 }
