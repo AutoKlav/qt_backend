@@ -191,7 +191,7 @@ void ModbusRTU::onDigitalInputReady()
             quint16 rawValue = unit.value(0);
             uint scaledValue = static_cast<uint>(rawValue);
 
-            const auto shiftedAddress = startAddress + 10;
+            const auto shiftedAddress = startAddress + CONSTANTS::DIGITAL_INPUT_SHIFT; // Shifted address for digital inputs
 
             if (Sensor::mapInputPin.contains(shiftedAddress)) {
                 Logger::info(QString("Read slave:%1 address:%2 value:%3")
