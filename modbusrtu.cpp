@@ -224,7 +224,7 @@ void ModbusRTU::writeSingleCoil(quint8 slaveAddress, quint16 coilAddress, bool v
     }
 
     QModbusDataUnit writeUnit(QModbusDataUnit::Coils, coilAddress, 1);
-    writeUnit.setValue(0, value ? 0xFF00 : 0x0000); // Modbus spec: 0xFF00 for ON, 0x0000 for OFF
+    writeUnit.setValue(0, value ? CONSTANTS::MODBUS_COIL_ON : CONSTANTS::MODBUS_COIL_OFF); // Modbus spec: 0xFF00 for ON, 0x0000 for OFF
 
     if (auto *reply = modbusDevice->sendWriteRequest(writeUnit, slaveAddress)) {
         connect(reply, &QModbusReply::finished, this, [this, reply]() {

@@ -9,6 +9,7 @@
 namespace CONSTANTS {
     // CWT Slave ID
     inline const ushort CWT_SLAVE_ID = 1;
+    inline const ushort DIGITAL_INPUT_SHIFT = 10;  // Digital input shift for mapping
 
     // Analog sensor constants
     inline const ushort TEMP = 2;  // temp
@@ -38,6 +39,11 @@ namespace CONSTANTS {
     inline const ushort ALARM_SIGNAL = 9;  // alarmSignal
     inline const ushort EXTENSION_COOLING = 10;  // extensionCooling
     inline const ushort ELECTRIC_HEATING = 11;  // electricHeating
+
+    inline const qint16 MODBUS_COIL_ON = 0xFF00;  // Modbus coil ON value
+    inline const qint16 MODBUS_COIL_OFF = 0x0000;  // Modbus coil OFF value
+
+    inline const float SENSOR_PIN_SCALING_FACTOR = 10.0;
 }
 
 #endif // CONSTANTS_H

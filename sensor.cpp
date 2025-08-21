@@ -33,8 +33,7 @@ void Sensor::send(double newValue)
     value = newValue; // Update the internal value
     uint pinValue = newValue;
 
-    const auto cwtSlaveId = 1; // I set manually to be slave id = 1
-    ModbusRTU::instance().writeSingleCoil(cwtSlaveId, id, newValue);
+    ModbusRTU::instance().writeSingleCoil(CONSTANTS::CWT_SLAVE_ID, id, newValue);
 }
 
 bool Sensor::setRelayState(ushort id, ushort value)
@@ -80,7 +79,7 @@ void Sensor::setValue(uint newPinValue)
 
     // Calculate the new value based on the scaling factor and the min/max range
     //value = scalingFactor * (maxValue - minValue) + minValue;
-    value = newPinValue / 10.0f;
+    value = newPinValue / CONSTANTS::SENSOR_PIN_SCALING_FACTOR;
 }
 
 /**
