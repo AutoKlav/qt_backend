@@ -2,7 +2,8 @@
 #include "logger.h"
 #include "dbmanager.h"
 #include "statemachine.h"
-#include "modbusrtu.h"
+#include "modbus.h"
+//#include "modbusrtu.h"
 
 Master::Master(QObject *parent)
     : QObject{parent}
@@ -12,13 +13,12 @@ Master::Master(QObject *parent)
     db.loadInputPins();
     db.loadOutputPins();
 
-    //Modbus &modbusApp = Modbus::instance();
-
-    //modbusApp.connectToServer("172.16.0.2", 502);
+    Modbus &modbusApp = Modbus::instance();
+    modbusApp.connectToServer("172.16.0.2", 502);
 
     // Initialize Modbus RTU
-    ModbusRTU &rtu = ModbusRTU::instance();
-    rtu.connectToDevice();
+    //ModbusRTU &rtu = ModbusRTU::instance();
+    //rtu.connectToDevice();
 
     StateMachine::instance();
 

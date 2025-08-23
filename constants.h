@@ -11,20 +11,35 @@ namespace CONSTANTS {
     inline const ushort CWT_SLAVE_ID = 1;
     inline const ushort DIGITAL_INPUT_SHIFT = 10;  // Digital input shift for mapping
 
-    // Analog sensor constants
-    inline const ushort TEMP = 2;  // temp
-    inline const ushort TEMP_K = 3;  // tempK
-    inline const ushort EXPANSION_TEMP = 4;  // expansionTemp
-    inline const ushort HEATER_TEMP = 5;  // heaterTemp
-    inline const ushort TANK_TEMP = 6;  // tankTemp
-    inline const ushort TANK_WATER_LEVEL = 7;  // tankWaterLevel
-    inline const ushort STEAM_PRESSURE = 8;  // steamPressure
-    inline const ushort PRESSURE = 9;  // pressure
+    // // Analog sensor constants
+    // inline const ushort TEMP = 2;  // temp
+    // inline const ushort TEMP_K = 3;  // tempK
+    // inline const ushort EXPANSION_TEMP = 4;  // expansionTemp
+    // inline const ushort HEATER_TEMP = 5;  // heaterTemp
+    // inline const ushort TANK_TEMP = 6;  // tankTemp
+    // inline const ushort TANK_WATER_LEVEL = 7;  // tankWaterLevel
+    // inline const ushort STEAM_PRESSURE = 8;  // steamPressure
+    // inline const ushort PRESSURE = 9;  // pressure
 
-    // Digital input constants, we use raw values from cwt slave 1 and then shift them by 10 for mapInputSensor
-    inline const ushort DOOR_CLOSED = 0;  // doorClosed
-    inline const ushort BURNER_FAULT = 1;  // burnerFault
-    inline const ushort WATER_SHORTAGE = 2;  // waterShortage
+    // // Digital input constants, we use raw values from cwt slave 1 and then shift them by 10 for mapInputSensor
+    // inline const ushort DOOR_CLOSED = 0;  // doorClosed
+    // inline const ushort BURNER_FAULT = 1;  // burnerFault
+    // inline const ushort WATER_SHORTAGE = 2;  // waterShortage
+
+     // Analog sensor constants
+    inline const ushort TEMP = 0;  // temp
+    inline const ushort EXPANSION_TEMP = 2;  // expansionTemp
+    inline const ushort HEATER_TEMP = 3;  // heaterTemp
+    inline const ushort TANK_TEMP = 4;  // tankTemp
+    inline const ushort TEMP_K = 1;  // tempK
+    inline const ushort TANK_WATER_LEVEL = 5;  // tankWaterLevel
+    inline const ushort PRESSURE = 7;  // pressure
+    inline const ushort STEAM_PRESSURE = 6;  // steamPressure
+
+    // Digital input constants
+    inline const ushort DOOR_CLOSED = 8;  // doorClosed
+    inline const ushort BURNER_FAULT = 9;  // burnerFault
+    inline const ushort WATER_SHORTAGE = 10;  // waterShortage
 
     // Shifted digital input constants for mapInputPin
     inline const ushort DOOR_CLOSED_SHIFTED = DOOR_CLOSED + DIGITAL_INPUT_SHIFT;  // doorClosed
