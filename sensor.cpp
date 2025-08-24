@@ -100,10 +100,15 @@ SensorValues Sensor::getValues()
     values.pressure = mapInputPin[CONSTANTS::PRESSURE]->value;
     values.steamPressure = mapInputPin[CONSTANTS::STEAM_PRESSURE]->value;
 
-    values.doorClosed = mapInputPin[CONSTANTS::DOOR_CLOSED_SHIFTED]->value;
-    values.burnerFault = mapInputPin[CONSTANTS::BURNER_FAULT_SHIFTED]->value;
-    values.waterShortage = mapInputPin[CONSTANTS::WATER_SHORTAGE_SHIFTED]->value;
+    // TODO revert this
+    //values.doorClosed = mapInputPin[CONSTANTS::DOOR_CLOSED_SHIFTED]->value;
+    //values.burnerFault = mapInputPin[CONSTANTS::BURNER_FAULT_SHIFTED]->value;
+    //values.waterShortage = mapInputPin[CONSTANTS::WATER_SHORTAGE_SHIFTED]->value;
     
+    values.doorClosed = mapInputPin[CONSTANTS::DOOR_CLOSED]->value;
+    values.burnerFault = mapInputPin[CONSTANTS::BURNER_FAULT]->value;
+    values.waterShortage = mapInputPin[CONSTANTS::WATER_SHORTAGE]->value;
+
     return values;
 }
 
