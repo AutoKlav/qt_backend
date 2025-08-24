@@ -11,6 +11,7 @@ namespace CONSTANTS {
     inline const ushort CWT_SLAVE_ID = 1;
     inline const ushort DIGITAL_INPUT_SHIFT = 10;  // Digital input shift for mapping
 
+    // Revert this
     // // Analog sensor constants
     // inline const ushort TEMP = 2;  // temp
     // inline const ushort TEMP_K = 3;  // tempK

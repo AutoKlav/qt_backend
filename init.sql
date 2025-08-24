@@ -22,6 +22,7 @@ CREATE TABLE InputPin (
     maxValue REAL NOT NULL
 );
 
+-- Revert this
 -- Input pins CWT
 -- INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (2, 'temp', -48.35, 220.12);
 -- INSERT INTO InputPin (id, alias, minValue, maxValue) VALUES (3, 'tempK', -51.23, 217.24);
