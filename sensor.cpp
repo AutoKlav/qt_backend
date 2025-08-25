@@ -104,7 +104,7 @@ SensorValues Sensor::getValues()
     //values.doorClosed = mapInputPin[CONSTANTS::DOOR_CLOSED_SHIFTED]->value;
     //values.burnerFault = mapInputPin[CONSTANTS::BURNER_FAULT_SHIFTED]->value;
     //values.waterShortage = mapInputPin[CONSTANTS::WATER_SHORTAGE_SHIFTED]->value;
-    
+
     values.doorClosed = mapInputPin[CONSTANTS::DOOR_CLOSED]->value;
     values.burnerFault = mapInputPin[CONSTANTS::BURNER_FAULT]->value;
     values.waterShortage = mapInputPin[CONSTANTS::WATER_SHORTAGE]->value;
