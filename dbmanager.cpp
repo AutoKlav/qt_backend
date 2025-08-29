@@ -10,18 +10,18 @@
 
 DbManager::DbManager()
 {
-    // QString path;
-    // if (QDir("C:/Development/db").exists()) {
-    //     path = "C:/Development/db";
-    // } else if (QDir("C:/db").exists()) {
-    //     path = "C:/db";
-    // } else {
-    //     Logger::crit("Database: No valid database directory found.");
-    //     GlobalErrors::setError(GlobalErrors::DbError);
-    //     qFatal("Unable to find database directory.");
-    // }
+    QString path;
+    if (QDir("C:/Development/db").exists()) {
+        path = "C:/Development/db";
+    } else if (QDir("C:/db").exists()) {
+        path = "C:/db";
+    } else {
+        Logger::crit("Database: No valid database directory found.");
+        GlobalErrors::setError(GlobalErrors::DbError);
+        qFatal("Unable to find database directory.");
+    }
 
-    auto path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    // auto path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 
     m_db = QSqlDatabase::addDatabase("QSQLITE", QString::number((quint64)QThread::currentThread(), 16));
     m_db.setDatabaseName(path + "/db.sqlite");

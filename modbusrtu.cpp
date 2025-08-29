@@ -20,13 +20,13 @@ ModbusRTU::ModbusRTU(QObject *parent)
     readTimer.setInterval(READ_INTERVAL_MS);  // Read every 1 second
     connect(&readTimer, &QTimer::timeout, this, [this]() {
         // here each slave has its own id
-        readHoldingRegisters(CONSTANTS::TEMP, 1, 1);
+        // readHoldingRegisters(CONSTANTS::TEMP, 1, 1);
         readHoldingRegisters(CONSTANTS::TEMP_K, 1, 1);
 
         // Read digital input directly from cwt digital input pins
-        readDiscreteRegisters(CONSTANTS::CWT_SLAVE_ID, CONSTANTS::DOOR_CLOSED, 1);
-        readDiscreteRegisters(CONSTANTS::CWT_SLAVE_ID, CONSTANTS::BURNER_FAULT, 1);
-        readDiscreteRegisters(CONSTANTS::CWT_SLAVE_ID, CONSTANTS::WATER_SHORTAGE, 1);
+        // readDiscreteRegisters(CONSTANTS::CWT_SLAVE_ID, CONSTANTS::DOOR_CLOSED, 1);
+        // readDiscreteRegisters(CONSTANTS::CWT_SLAVE_ID, CONSTANTS::BURNER_FAULT, 1);
+        // readDiscreteRegisters(CONSTANTS::CWT_SLAVE_ID, CONSTANTS::WATER_SHORTAGE, 1);
     });
 
       // Initialize retry timer
@@ -41,7 +41,7 @@ void ModbusRTU::configureConnectionParameters()
 {
     modbusDevice->setConnectionParameter(
         QModbusDevice::SerialPortNameParameter,
-        QVariant(QStringLiteral("COM5"))
+        QVariant(QStringLiteral("COM7"))
     );
 
     modbusDevice->setConnectionParameter(
