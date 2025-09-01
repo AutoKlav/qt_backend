@@ -33,7 +33,8 @@ void Sensor::send(double newValue)
     value = newValue; // Update the internal value
     uint pinValue = newValue;
 
-    ModbusRTU::instance().writeSingleCoil(CONSTANTS::CWT_SLAVE_ID, id, newValue);
+    //TODO Revert this
+    //ModbusRTU::instance().writeSingleCoil(CONSTANTS::CWT_SLAVE_ID, id, newValue);
 }
 
 bool Sensor::setRelayState(ushort id, ushort value)

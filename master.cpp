@@ -16,7 +16,7 @@ Master::Master(QObject *parent)
     Modbus &modbusApp = Modbus::instance();
     modbusApp.connectToServer("172.16.0.2", 502);
 
-    // Revert this
+    // Revert this TODO
     // Initialize Modbus RTU
     //ModbusRTU &rtu = ModbusRTU::instance();
     //rtu.connectToDevice();

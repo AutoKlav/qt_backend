@@ -10,6 +10,7 @@
 
 DbManager::DbManager()
 {
+    // TODO Revert this
     // QString path;
     // if (QDir("C:/Development/db").exists()) {
     //     path = "C:/Development/db";
