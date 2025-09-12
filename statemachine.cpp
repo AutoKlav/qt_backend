@@ -351,6 +351,8 @@ void StateMachine::autoklavControl()
 
         state = State::STERILIZING;
         heatingStart = QDateTime::currentDateTime();
+
+        if (processConfig.mode == Mode::TIME)
         heatingEnd = (heatingStart.addMSecs(static_cast<qint64>(processInfo.targetHeatingTime.toDouble()))).toString(Qt::ISODate);
 
         Logger::info("StateMachine: Sterilizing");
@@ -397,6 +399,8 @@ void StateMachine::autoklavControl()
         }
 
         state = State::COOLING;
+
+        if (processConfig.mode == Mode::TIME)
         coolingEnd = (coolingStart.addMSecs(static_cast<qint64>(processInfo.targetCoolingTime.toDouble()))).toString(Qt::ISODate);
 
         Logger::info("StateMachine: Cooling");
