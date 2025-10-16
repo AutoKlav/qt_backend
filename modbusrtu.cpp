@@ -84,7 +84,7 @@ ModbusRTU &ModbusRTU::instance()
 void ModbusRTU::readHoldingRegisters(quint8 slaveAddress, quint16 startAddr, quint16 count)
 {
     if (!modbusDevice || modbusDevice->state() != QModbusDevice::ConnectedState) {
-        qDebug() << "RTU device not connected";
+        qDebug() << "RTU device not connected - Slave:" << slaveAddress;
         return;
     }
 
@@ -97,14 +97,14 @@ void ModbusRTU::readHoldingRegisters(quint8 slaveAddress, quint16 startAddr, qui
             delete reply;
         }
     } else {
-        qDebug() << "Read request error:" << modbusDevice->errorString();
+        qDebug() << "Read request error - Slave" << slaveAddress << ":" << modbusDevice->errorString();
     }
 }
 
 void ModbusRTU::readDiscreteRegisters(quint8 slaveAddress, quint16 startAddr, quint16 count)
 {
     if (!modbusDevice || modbusDevice->state() != QModbusDevice::ConnectedState) {
-        qDebug() << "RTU device not connected";
+        qDebug() << "RTU device not connected - Slave:" << slaveAddress;
         return;
     }
 
@@ -117,7 +117,7 @@ void ModbusRTU::readDiscreteRegisters(quint8 slaveAddress, quint16 startAddr, qu
             delete reply;
         }
     } else {
-        qDebug() << "Read request error:" << modbusDevice->errorString();
+        qDebug() << "Read request error - Slave" << slaveAddress << ":" << modbusDevice->errorString();
     }
 }
 
