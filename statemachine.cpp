@@ -305,7 +305,7 @@ void StateMachine::autoklavControl()
         Logger::info("StateMachine: Starting");
 
         Sensor::mapOutputPin[CONSTANTS::AUTOKLAV_FILL]->send(1);
-        stopwatch1 = QDateTime::currentDateTime().addMSecs(0*60*1000); // 3 minutes TODO revert
+        stopwatch1 = QDateTime::currentDateTime().addMSecs(3*60*1000); // 10 minutes TODO revert for testing
 
         state = State::FILLING;
         Logger::info("StateMachine: Filling");
@@ -346,7 +346,7 @@ void StateMachine::autoklavControl()
 
         if(stateMachineValues.temp < processInfo.processType.maintainTemp) {
             Logger::info(QString("Wait until %1 reaches %2").arg(QString::number(stateMachineValues.temp)).arg(QString::number(processInfo.processType.maintainTemp)));
-            //break; TODO revert
+            break; // TODO revert for testing
         }
 
         state = State::STERILIZING;
@@ -425,14 +425,14 @@ void StateMachine::autoklavControl()
         Sensor::mapOutputPin[CONSTANTS::WATER_DRAIN]->send(1);
 
         state = State::FINISHING;
-        stopwatch1 = QDateTime::currentDateTime().addMSecs(1000); // 10 minutes TODO change this later
+        stopwatch1 = QDateTime::currentDateTime().addMSecs(10*60*1000); // 10 minutes
         Logger::info("StateMachine: Finishing");
         break;
 
     case State::FINISHING:
 
         if(QDateTime::currentDateTime() < stopwatch1){
-            Logger::info("Wait 1s"); // TODO revert this to 10 minutes
+            Logger::info("Wait 10min");
             break;
         }
 
