@@ -24,12 +24,12 @@ ModbusRTU::ModbusRTU(QObject *parent)
         readHoldingRegisters(CONSTANTS::TEMP, 1, 1);           // Read temperature
         readHoldingRegisters(CONSTANTS::TEMP_K, 1, 1);         // Read temperature in Kelvin
         readHoldingRegisters(CONSTANTS::EXPANSION_TEMP, 1, 1); // Read expansion temperature
-        readHoldingRegisters(CONSTANTS::HEATER_TEMP, 1, 1);    // Read heater temperature
-        readHoldingRegisters(CONSTANTS::TANK_TEMP, 1, 1);      // Read tank temperature
+        //readHoldingRegisters(CONSTANTS::HEATER_TEMP, 1, 1);    // Read heater temperature
+        //readHoldingRegisters(CONSTANTS::TANK_TEMP, 1, 1);      // Read tank temperature
 
         // Read level and pressure values
         readHoldingRegisters(CONSTANTS::TANK_WATER_LEVEL, 1, 1); // Read tank water level
-        readHoldingRegisters(CONSTANTS::STEAM_PRESSURE, 1, 1);   // Read steam pressure
+        //readHoldingRegisters(CONSTANTS::STEAM_PRESSURE, 1, 1);   // Read steam pressure
         readHoldingRegisters(CONSTANTS::PRESSURE, 1, 1);         // Read general pressure
 
 

@@ -22,7 +22,8 @@ int StateMachine::getState()
 void StateMachine::tick()
 {
     pipeControl();
-    tankControl();
+    // TODO uncomment this on new version
+    //tankControl();
     autoklavControl();
 }
 
@@ -305,7 +306,7 @@ void StateMachine::autoklavControl()
         Logger::info("StateMachine: Starting");
 
         Sensor::mapOutputPin[CONSTANTS::AUTOKLAV_FILL]->send(1);
-        stopwatch1 = QDateTime::currentDateTime().addMSecs(3*60*1000); // 10 minutes TODO revert for testing
+        stopwatch1 = QDateTime::currentDateTime().addMSecs(3*60*1000); // 10 minutes TODO revert for testing to 1000
 
         state = State::FILLING;
         Logger::info("StateMachine: Filling");
@@ -323,7 +324,7 @@ void StateMachine::autoklavControl()
 
 
         if(stateMachineValues.pressure < 0.16){
-            Logger::info(QString("Wait until pressure %1 is reached").arg(QString::number(stateMachineValues.pressure)));
+            Logger::info(QString("Wait until pressure %1 reaches 0.16").arg(QString::number(stateMachineValues.pressure)));
             break;
         }
 
@@ -331,7 +332,7 @@ void StateMachine::autoklavControl()
         Sensor::mapOutputPin[CONSTANTS::INCREASE_PRESSURE]->send(1);
 
         if(stateMachineValues.pressure < 1.5){
-            Logger::info(QString("Wait until pressure %1 is reached").arg(QString::number(stateMachineValues.pressure)));
+            Logger::info(QString("Wait until pressure %1 reaches 1.5").arg(QString::number(stateMachineValues.pressure)));
             break;
         }
            
