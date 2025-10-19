@@ -14,24 +14,30 @@ ModbusRTU::ModbusRTU(QObject *parent)
     connect(modbusDevice, &QModbusClient::errorOccurred, this, &ModbusRTU::onErrorOccurred);
     connect(modbusDevice, &QModbusClient::stateChanged, this, &ModbusRTU::onStateChanged);
 
-    configureConnectionParameters();  // Set up connection parameters
+    configureConnectionParameters();
 
     // Set up periodic reading
-    readTimer.setInterval(READ_INTERVAL_MS);  // Read every 1 second
+    readTimer.setInterval(READ_INTERVAL_MS);
     connect(&readTimer, &QTimer::timeout, this, [this]() {
+        // Only send new requests if we're connected
+        if (!modbusDevice || modbusDevice->state() != QModbusDevice::ConnectedState) {
+            return;
+        }
+
+        // Clean up any stale pending replies first
+        cleanupStaleReplies();
 
         // Read all temperature values
-        readHoldingRegisters(CONSTANTS::TEMP, 1, 1);           // Read temperature
-        readHoldingRegisters(CONSTANTS::TEMP_K, 1, 1);         // Read temperature in Kelvin
-        readHoldingRegisters(CONSTANTS::EXPANSION_TEMP, 1, 1); // Read expansion temperature
-        //readHoldingRegisters(CONSTANTS::HEATER_TEMP, 1, 1);    // Read heater temperature
-        //readHoldingRegisters(CONSTANTS::TANK_TEMP, 1, 1);      // Read tank temperature
+        readHoldingRegisters(CONSTANTS::TEMP, 1, 1);
+        readHoldingRegisters(CONSTANTS::TEMP_K, 1, 1);
+        readHoldingRegisters(CONSTANTS::EXPANSION_TEMP, 1, 1);
+        // readHoldingRegisters(CONSTANTS::HEATER_TEMP, 1, 1);
+        // readHoldingRegisters(CONSTANTS::TANK_TEMP, 1, 1);
 
         // Read level and pressure values
-        readHoldingRegisters(CONSTANTS::TANK_WATER_LEVEL, 1, 1); // Read tank water level
-        //readHoldingRegisters(CONSTANTS::STEAM_PRESSURE, 1, 1);   // Read steam pressure
-        readHoldingRegisters(CONSTANTS::PRESSURE, 1, 1);         // Read general pressure
-
+        readHoldingRegisters(CONSTANTS::TANK_WATER_LEVEL, 1, 1);
+        // readHoldingRegisters(CONSTANTS::STEAM_PRESSURE, 1, 1);
+        readHoldingRegisters(CONSTANTS::PRESSURE, 1, 1);
 
         // Read digital input directly from cwt digital input pins
         // readDiscreteRegisters(CONSTANTS::CWT_SLAVE_ID, CONSTANTS::DOOR_CLOSED, 1);
@@ -39,40 +45,48 @@ ModbusRTU::ModbusRTU(QObject *parent)
         // readDiscreteRegisters(CONSTANTS::CWT_SLAVE_ID, CONSTANTS::WATER_SHORTAGE, 1);
     });
 
-      // Initialize retry timer
     retryTimer.setInterval(WAIT_TIME_MS);
     connect(&retryTimer, &QTimer::timeout, this, &ModbusRTU::attemptReconnect);
 
-    // Start initial connection
+    // Set up a timer to periodically clean up stale replies
+    QTimer *cleanupTimer = new QTimer(this);
+    cleanupTimer->setInterval(5000); // Clean up every 5 seconds
+    connect(cleanupTimer, &QTimer::timeout, this, &ModbusRTU::cleanupStaleReplies);
+    cleanupTimer->start();
+
     attemptReconnect();
 }
 
 void ModbusRTU::configureConnectionParameters()
 {
+    if (!modbusDevice) {
+        return;
+    }
+
     modbusDevice->setConnectionParameter(
         QModbusDevice::SerialPortNameParameter,
         QVariant(QStringLiteral("COM7"))
-    );
+        );
 
     modbusDevice->setConnectionParameter(
         QModbusDevice::SerialBaudRateParameter,
         QVariant(static_cast<int>(QSerialPort::Baud9600))
-    );
+        );
 
     modbusDevice->setConnectionParameter(
         QModbusDevice::SerialParityParameter,
         QVariant(static_cast<int>(QSerialPort::OddParity))
-    );
+        );
 
     modbusDevice->setConnectionParameter(
         QModbusDevice::SerialDataBitsParameter,
         QVariant(static_cast<int>(QSerialPort::Data8))
-    );
+        );
 
     modbusDevice->setConnectionParameter(
         QModbusDevice::SerialStopBitsParameter,
         QVariant(static_cast<int>(QSerialPort::OneStop))
-    );
+        );
 }
 
 ModbusRTU &ModbusRTU::instance()
@@ -88,11 +102,17 @@ void ModbusRTU::readHoldingRegisters(quint8 slaveAddress, quint16 startAddr, qui
         return;
     }
 
+    // Check if we have too many pending requests
+    if (pendingReplies.count() >= MAX_PENDING_REQUESTS) {
+        qDebug() << "Too many pending requests, skipping read for slave:" << slaveAddress;
+        return;
+    }
+
     QModbusDataUnit readUnit(QModbusDataUnit::HoldingRegisters, startAddr, count);
 
     if (auto *reply = modbusDevice->sendReadRequest(readUnit, slaveAddress)) {
         if (!reply->isFinished()) {
-            connect(reply, &QModbusReply::finished, this, &ModbusRTU::onReadReady);
+            setupReplyConnections(reply, "Holding");
         } else {
             delete reply;
         }
@@ -108,11 +128,17 @@ void ModbusRTU::readDiscreteRegisters(quint8 slaveAddress, quint16 startAddr, qu
         return;
     }
 
+    // Check if we have too many pending requests
+    if (pendingReplies.count() >= MAX_PENDING_REQUESTS) {
+        qDebug() << "Too many pending requests, skipping read for slave:" << slaveAddress;
+        return;
+    }
+
     QModbusDataUnit readUnit(QModbusDataUnit::DiscreteInputs, startAddr, count);
 
     if (auto *reply = modbusDevice->sendReadRequest(readUnit, slaveAddress)) {
         if (!reply->isFinished()) {
-            connect(reply, &QModbusReply::finished, this, &ModbusRTU::onDigitalInputReady);
+            setupReplyConnections(reply, "Discrete");
         } else {
             delete reply;
         }
@@ -121,45 +147,38 @@ void ModbusRTU::readDiscreteRegisters(quint8 slaveAddress, quint16 startAddr, qu
     }
 }
 
-
-void ModbusRTU::attemptReconnect()
+void ModbusRTU::setupReplyConnections(QModbusReply *reply, const QString &type)
 {
-    if (modbusDevice && modbusDevice->state() == QModbusDevice::ConnectedState)
-        return;
+    pendingReplies.insert(reply);
 
-    Logger::info("Reinitializing Modbus RTU client...");
-
-    // 1. Clean up the old client
-    if (modbusDevice) {
-        modbusDevice->disconnectDevice();
-        modbusDevice->deleteLater();
+    if (type == "Holding") {
+        connect(reply, &QModbusReply::finished, this, &ModbusRTU::onReadReady);
+    } else if (type == "Discrete") {
+        connect(reply, &QModbusReply::finished, this, &ModbusRTU::onDigitalInputReady);
     }
 
-    // 2. Re-create and configure
-    modbusDevice = new QModbusRtuSerialClient(this);
-    configureConnectionParameters();
-    // (move your setConnectionParameter calls into this helper)
-
-    connect(modbusDevice, &QModbusClient::errorOccurred, this, &ModbusRTU::onErrorOccurred);
-    connect(modbusDevice, &QModbusClient::stateChanged, this, &ModbusRTU::onStateChanged);
-
-    // 3. Attempt to connect anew
-    if (!modbusDevice->connectDevice()) {
-        Logger::crit(QString("Reconnect failed: %1").arg(modbusDevice->errorString()));
-        retryTimer.start();
-    }
+    // Set individual timeout for this request
+    QTimer::singleShot(REQUEST_TIMEOUT_MS, this, [this, reply]() {
+        if (pendingReplies.contains(reply) && !reply->isFinished()) {
+            qDebug() << "Request timeout, cleaning up reply";
+            pendingReplies.remove(reply);
+            reply->deleteLater();
+        }
+    });
 }
-
 
 void ModbusRTU::onReadReady()
 {
     auto reply = qobject_cast<QModbusReply *>(sender());
     if (!reply) return;
 
+    // Remove from pending set
+    pendingReplies.remove(reply);
+
     if (reply->error() == QModbusDevice::NoError) {
         const QModbusDataUnit unit = reply->result();
         const quint8 slaveAddress = reply->serverAddress();
-        const quint16 startAddress = unit.startAddress(); // Get the start address
+        const quint16 startAddress = unit.startAddress();
 
         if (unit.valueCount() >= 1) {
             quint16 rawValue = unit.value(0);
@@ -168,21 +187,33 @@ void ModbusRTU::onReadReady()
             if (Sensor::mapInputPin.contains(slaveAddress)) {
                 Logger::info(QString("Read slave:%1 address:%2 value:%3")
                                  .arg(slaveAddress)
-                                 .arg(startAddress)  // Added start address
+                                 .arg(startAddress)
                                  .arg(scaledValue));
 
                 Sensor::mapInputPin[slaveAddress]->setValue(scaledValue);
             } else {
                 Logger::crit(QString("Sensor not found for slave:%1 address:%2")
                                  .arg(slaveAddress)
-                                 .arg(startAddress));  // Added start address
+                                 .arg(startAddress));
                 GlobalErrors::setError(GlobalErrors::DbError);
             }
 
             lastDataTime = QDateTime::currentMSecsSinceEpoch();
         }
     } else {
-        qDebug() << "Read error:" << reply->errorString();
+        // Only log non-timeout errors
+        if (reply->error() != QModbusDevice::TimeoutError) {
+            qDebug() << "Read error:" << reply->errorString();
+        }
+
+        // If we're getting consistent errors, consider reconnecting
+        static int errorCount = 0;
+        errorCount++;
+        if (errorCount > 5) {
+            qDebug() << "Multiple consecutive errors, attempting reconnect";
+            errorCount = 0;
+            QTimer::singleShot(0, this, &ModbusRTU::attemptReconnect);
+        }
     }
     reply->deleteLater();
 }
@@ -192,39 +223,44 @@ void ModbusRTU::onDigitalInputReady()
     auto reply = qobject_cast<QModbusReply *>(sender());
     if (!reply) return;
 
+    // Remove from pending set
+    pendingReplies.remove(reply);
+
     if (reply->error() == QModbusDevice::NoError) {
         const QModbusDataUnit unit = reply->result();
         const quint8 slaveAddress = reply->serverAddress();
-        const quint16 startAddress = unit.startAddress(); // Get the start address
+        const quint16 startAddress = unit.startAddress();
 
         if (unit.valueCount() >= 1) {
             quint16 rawValue = unit.value(0);
             uint scaledValue = static_cast<uint>(rawValue);
 
-            const auto shiftedAddress = startAddress + CONSTANTS::DIGITAL_INPUT_SHIFT; // Shifted address for digital inputs
+            const auto shiftedAddress = startAddress + CONSTANTS::DIGITAL_INPUT_SHIFT;
 
             if (Sensor::mapInputPin.contains(shiftedAddress)) {
                 Logger::info(QString("Read slave:%1 address:%2 value:%3")
                                  .arg(slaveAddress)
-                                 .arg(startAddress)  // Added start address
+                                 .arg(startAddress)
                                  .arg(scaledValue));
 
                 Sensor::mapInputPin[shiftedAddress]->setValue(scaledValue);
             } else {
                 Logger::crit(QString("Sensor not found for slave:%1 address:%2")
                                  .arg(slaveAddress)
-                                 .arg(startAddress));  // Added start address
+                                 .arg(startAddress));
                 GlobalErrors::setError(GlobalErrors::DbError);
             }
 
             lastDataTime = QDateTime::currentMSecsSinceEpoch();
         }
     } else {
-        qDebug() << "Read error:" << reply->errorString();
+        // Only log non-timeout errors
+        if (reply->error() != QModbusDevice::TimeoutError) {
+            qDebug() << "Read error:" << reply->errorString();
+        }
     }
     reply->deleteLater();
 }
-
 
 void ModbusRTU::writeSingleCoil(quint8 slaveAddress, quint16 coilAddress, bool value)
 {
@@ -234,10 +270,13 @@ void ModbusRTU::writeSingleCoil(quint8 slaveAddress, quint16 coilAddress, bool v
     }
 
     QModbusDataUnit writeUnit(QModbusDataUnit::Coils, coilAddress, 1);
-    writeUnit.setValue(0, value ? static_cast<quint16>(CONSTANTS::MODBUS_COIL_ON) : static_cast<quint16>(CONSTANTS::MODBUS_COIL_OFF)); // Modbus spec: 0xFF00 for ON, 0x0000 for OFF
-    
+    writeUnit.setValue(0, value ? static_cast<quint16>(CONSTANTS::MODBUS_COIL_ON) : static_cast<quint16>(CONSTANTS::MODBUS_COIL_OFF));
+
     if (auto *reply = modbusDevice->sendWriteRequest(writeUnit, slaveAddress)) {
+        pendingReplies.insert(reply);
         connect(reply, &QModbusReply::finished, this, [this, reply]() {
+            pendingReplies.remove(reply);
+
             if (reply->error() != QModbusDevice::NoError) {
                 Logger::crit(QString("Write coil error: %1").arg(reply->errorString()));
                 GlobalErrors::setError(GlobalErrors::ModbusWriteCoilError);
@@ -246,9 +285,86 @@ void ModbusRTU::writeSingleCoil(quint8 slaveAddress, quint16 coilAddress, bool v
             }
             reply->deleteLater();
         });
+
+        // Set timeout for write request
+        QTimer::singleShot(REQUEST_TIMEOUT_MS, this, [this, reply]() {
+            if (pendingReplies.contains(reply) && !reply->isFinished()) {
+                pendingReplies.remove(reply);
+                reply->deleteLater();
+            }
+        });
     } else {
         Logger::crit(QString("Write coil request failed: %1").arg(modbusDevice->errorString()));
     }
+}
+
+void ModbusRTU::attemptReconnect()
+{
+    if (modbusDevice && modbusDevice->state() == QModbusDevice::ConnectedState) {
+        return;
+    }
+
+    Logger::info("Reinitializing Modbus RTU client...");
+
+    // Clean up all pending replies first
+    cleanupPendingReplies();
+
+    // Stop timers during reconnection
+    readTimer.stop();
+    retryTimer.stop();
+
+    // Clean up the old client
+    if (modbusDevice) {
+        modbusDevice->disconnectDevice();
+        modbusDevice->deleteLater();
+        modbusDevice = nullptr;
+    }
+
+    // Re-create and configure
+    modbusDevice = new QModbusRtuSerialClient(this);
+    configureConnectionParameters();
+    connect(modbusDevice, &QModbusClient::errorOccurred, this, &ModbusRTU::onErrorOccurred);
+    connect(modbusDevice, &QModbusClient::stateChanged, this, &ModbusRTU::onStateChanged);
+
+    if (!modbusDevice->connectDevice()) {
+        Logger::crit(QString("Reconnect failed: %1").arg(modbusDevice->errorString()));
+        retryTimer.start();
+    }
+}
+
+void ModbusRTU::cleanupPendingReplies()
+{
+    for (QModbusReply *reply : pendingReplies) {
+        if (reply) {
+            pendingReplies.remove(reply);
+            reply->deleteLater();
+        }
+    }
+    pendingReplies.clear();
+}
+
+void ModbusRTU::cleanupStaleReplies()
+{
+    // Remove any replies that are finished but still in the set (shouldn't happen, but just in case)
+    QSet<QModbusReply*> toRemove;
+    for (QModbusReply *reply : pendingReplies) {
+        if (reply && reply->isFinished()) {
+            toRemove.insert(reply);
+            reply->deleteLater();
+        }
+    }
+    for (QModbusReply *reply : toRemove) {
+        pendingReplies.remove(reply);
+    }
+}
+
+bool ModbusRTU::isRequestPending(quint8 slaveAddress, quint16 startAddr)
+{
+    Q_UNUSED(slaveAddress)
+    Q_UNUSED(startAddr)
+
+    // Simple throttle - if we have too many pending requests, don't add more
+    return pendingReplies.count() >= MAX_PENDING_REQUESTS;
 }
 
 void ModbusRTU::onErrorOccurred(QModbusDevice::Error error)
@@ -256,6 +372,7 @@ void ModbusRTU::onErrorOccurred(QModbusDevice::Error error)
     if (error != QModbusDevice::NoError) {
         Logger::crit(QString("Modbus RTU error: %1").arg(modbusDevice->errorString()));
         if (modbusDevice->state() != QModbusDevice::ConnectedState) {
+            readTimer.stop();
             retryTimer.start();
         }
     }
@@ -270,12 +387,19 @@ void ModbusRTU::onStateChanged(QModbusDevice::State state)
         GlobalErrors::removeError(GlobalErrors::ModbusError);
         retryTimer.stop();
         readTimer.start();  // Restart reading
+        // Clean up any stale replies when we reconnect
+        cleanupStaleReplies();
     }
     else if (state == QModbusDevice::UnconnectedState) {
         Logger::info("Modbus RTU disconnected - attempting reconnection");
         GlobalErrors::setError(GlobalErrors::ModbusError);
         readTimer.stop();  // Stop trying to read while disconnected
+        cleanupPendingReplies(); // Clean up any pending requests
         retryTimer.start();
+    }
+    else if (state == QModbusDevice::ConnectingState) {
+        Logger::info("Modbus RTU connecting...");
+        readTimer.stop(); // Stop reading while connecting
     }
 }
 
@@ -283,5 +407,3 @@ void ModbusRTU::connectToDevice()
 {
     attemptReconnect();
 }
-
-
