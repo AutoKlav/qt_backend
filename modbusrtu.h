@@ -2,9 +2,10 @@
 #define MODBUSRTU_H
 
 #include <QObject>
-#include <QtSerialBus/qmodbusrtuserialclient.h>  // Updated header
+#include <QtSerialBus/qmodbusrtuserialclient.h>
 #include <QTimer>
 #include <QDebug>
+#include <QSet>
 
 class ModbusRTU : public QObject
 {
@@ -29,12 +30,19 @@ private:
     QModbusRtuSerialClient *modbusDevice;
     QTimer readTimer;
     QTimer retryTimer;
+    QSet<QModbusReply*> pendingReplies;
 
-    static constexpr int WAIT_TIME_MS = 2000; /**< The wait time in milliseconds for reconnection attempts. */
-    static constexpr int READ_INTERVAL_MS = 1000; /**< The interval in milliseconds for reading sensor data. */
+    static constexpr int WAIT_TIME_MS = 2000;
+    static constexpr int READ_INTERVAL_MS = 1000;
+    static constexpr int MAX_PENDING_REQUESTS = 10;
+    static constexpr int REQUEST_TIMEOUT_MS = 3000;
 
-    void attemptReconnect();  // Add reconnect method
-    void configureConnectionParameters();  // Helper to set connection parameters
+    void attemptReconnect();
+    void configureConnectionParameters();
+    void cleanupPendingReplies();
+    void cleanupStaleReplies();
+    bool isRequestPending(quint8 slaveAddress, quint16 startAddr);
+    void setupReplyConnections(QModbusReply *reply, const QString &type);
 };
 
 #endif // MODBUSRTU_H
