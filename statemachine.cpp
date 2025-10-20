@@ -306,7 +306,7 @@ void StateMachine::autoklavControl()
         Logger::info("StateMachine: Starting");
 
         Sensor::mapOutputPin[CONSTANTS::AUTOKLAV_FILL]->send(1);
-        stopwatch1 = QDateTime::currentDateTime().addMSecs(3*60*1000); // 10 minutes TODO revert for testing to 1000
+        stopwatch1 = QDateTime::currentDateTime().addMSecs(3*60*1000); // 3 minutes TODO revert for testing to 1000
 
         state = State::FILLING;
         Logger::info("StateMachine: Filling");

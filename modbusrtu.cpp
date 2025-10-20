@@ -272,29 +272,51 @@ void ModbusRTU::writeSingleCoil(quint8 slaveAddress, quint16 coilAddress, bool v
     QModbusDataUnit writeUnit(QModbusDataUnit::Coils, coilAddress, 1);
     writeUnit.setValue(0, value ? static_cast<quint16>(CONSTANTS::MODBUS_COIL_ON) : static_cast<quint16>(CONSTANTS::MODBUS_COIL_OFF));
 
+    // Log the write attempt with details
+    Logger::info(QString("Attempting to write coil - Slave: %1, Address: %2, Value: %3")
+                     .arg(slaveAddress)
+                     .arg(coilAddress)
+                     .arg(value ? "ON" : "OFF"));
+
     if (auto *reply = modbusDevice->sendWriteRequest(writeUnit, slaveAddress)) {
         pendingReplies.insert(reply);
-        connect(reply, &QModbusReply::finished, this, [this, reply]() {
+        connect(reply, &QModbusReply::finished, this, [this, reply, slaveAddress, coilAddress, value]() {
             pendingReplies.remove(reply);
 
             if (reply->error() != QModbusDevice::NoError) {
-                Logger::crit(QString("Write coil error: %1").arg(reply->errorString()));
+                Logger::crit(QString("Write coil error - Slave: %1, Address: %2, Value: %3 - Error: %4")
+                                 .arg(slaveAddress)
+                                 .arg(coilAddress)
+                                 .arg(value ? "ON" : "OFF")
+                                 .arg(reply->errorString()));
                 GlobalErrors::setError(GlobalErrors::ModbusWriteCoilError);
             } else {
-                Logger::info("Successfully wrote coil value");
+                // Expanded success message with all details
+                Logger::info(QString("Successfully wrote coil - Slave: %1, Address: %2, Value: %3")
+                                 .arg(slaveAddress)
+                                 .arg(coilAddress)
+                                 .arg(value ? "ON" : "OFF"));
             }
             reply->deleteLater();
         });
 
         // Set timeout for write request
-        QTimer::singleShot(REQUEST_TIMEOUT_MS, this, [this, reply]() {
+        QTimer::singleShot(REQUEST_TIMEOUT_MS, this, [this, reply, slaveAddress, coilAddress, value]() {
             if (pendingReplies.contains(reply) && !reply->isFinished()) {
                 pendingReplies.remove(reply);
+                Logger::warn(QString("Write coil timeout - Slave: %1, Address: %2, Value: %3")
+                                 .arg(slaveAddress)
+                                 .arg(coilAddress)
+                                 .arg(value ? "ON" : "OFF"));
                 reply->deleteLater();
             }
         });
     } else {
-        Logger::crit(QString("Write coil request failed: %1").arg(modbusDevice->errorString()));
+        Logger::crit(QString("Write coil request failed - Slave: %1, Address: %2, Value: %3 - Error: %4")
+                         .arg(slaveAddress)
+                         .arg(coilAddress)
+                         .arg(value ? "ON" : "OFF")
+                         .arg(modbusDevice->errorString()));
     }
 }
 
