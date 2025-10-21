@@ -371,12 +371,11 @@ void StateMachine::autoklavControl()
                 break;
             }
         } else if (processConfig.mode == Mode::TIME) {
-           if (heatingStart.msecsTo(QDateTime::currentDateTime()) < processInfo.targetHeatingTime.toDouble()) {
-                // Convert to integer to avoid scientific notation
-                qint64 targetTimeMs = static_cast<qint64>(processInfo.targetHeatingTime.toDouble());
-                Logger::info(QString("Wait until target time %1 ms is reached").arg(targetTimeMs));
-                
+            if (heatingStart.msecsTo(QDateTime::currentDateTime()) < processInfo.targetHeatingTime.toDouble()) {
+                Logger::info(QString("Wait until target time %1 is reached").arg(QString::number(processInfo.targetHeatingTime.toDouble())));
+                                
                 coolingStart = QDateTime::currentDateTime();
+
                 break;
             }
         
