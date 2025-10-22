@@ -72,6 +72,12 @@ ModbusRTU &ModbusRTU::instance()
 
 void ModbusRTU::queueRequest(const ModbusRequest &request)
 {
+     // Safety check - prevent unlimited queue growth
+    if (requestQueue.size() >= MAX_QUEUE_SIZE) {
+        Logger::info("Request queue full - discarding request");
+        return;
+    }
+    
     requestQueue.enqueue(request);
     if (!requestTimer.isActive() && !isProcessingRequest) {
         requestTimer.start();
@@ -126,8 +132,19 @@ void ModbusRTU::processNextRequest()
 
 void ModbusRTU::startSequentialReading()
 {
-    if (!isConnected() || !requestQueue.isEmpty()) {
-        return; // Skip if not connected or still processing previous requests
+    // Don't queue new requests if we're not connected
+    if (!isConnected()) {
+        return;
+    }
+    
+    // Also check if queue is already too large (safety measure)
+    if (requestQueue.size() > MAX_QUEUE_SIZE) {
+        Logger::info("Request queue too large - clearing stale requests");
+        requestQueue.clear();
+    }
+    
+    if (!requestQueue.isEmpty()) {
+        return; // Skip if still processing previous requests
     }
 
     // Queue all sensor reads sequentially
@@ -425,9 +442,14 @@ void ModbusRTU::onStateChanged(QModbusDevice::State state)
         readTimer.start();  // Restart reading
     }
     else if (state == QModbusDevice::UnconnectedState) {
-        Logger::info("Modbus RTU disconnected - attempting reconnection");
+        Logger::info("Modbus RTU disconnected - clearing request queue");
         GlobalErrors::setError(GlobalErrors::ModbusError);
         readTimer.stop();  // Stop trying to read while disconnected
+        
+        // CLEAR THE QUEUE when disconnected
+        requestQueue.clear();
+        isProcessingRequest = false;
+        
         retryTimer.start();
     }
 }

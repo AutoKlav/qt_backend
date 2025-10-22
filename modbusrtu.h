@@ -56,6 +56,7 @@ private:
     static constexpr int READ_INTERVAL_MS = 1000;
     static constexpr int REQUEST_DELAY_MS = 50; // Delay between requests
     static constexpr int MAX_RETRIES = 5;
+    static constexpr int MAX_QUEUE_SIZE = 10; // Reasonable limit
 
     void attemptReconnect();
     void configureConnectionParameters();
