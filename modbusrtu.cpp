@@ -206,7 +206,7 @@ void ModbusRTU::handleTemperatureReading(const QModbusDataUnit &unit, quint8 sla
 {
     if (unit.valueCount() >= 1) {
         quint16 rawValue = unit.value(0);
-        uint scaledValue = static_cast<uint>(rawValue);
+        uint scaledValue = static_cast<uint>(rawValue)/10;
 
         if (Sensor::mapInputPin.contains(slaveAddress)) {
             Logger::info(QString("Temperature - Slave:%1 Address:%2 Value:%3")
