@@ -321,7 +321,6 @@ void ModbusRTU::disconnectDevice()
     }
 }
 
-// FIXED writeSingleCoil - added missing description parameter
 void ModbusRTU::writeSingleCoil(quint8 slaveAddress, quint16 coilAddress, bool value, const QString &description)
 {
     if (!isConnected()) {
@@ -333,17 +332,17 @@ void ModbusRTU::writeSingleCoil(quint8 slaveAddress, quint16 coilAddress, bool v
     writeUnit.setValue(0, value ? static_cast<quint16>(CONSTANTS::MODBUS_COIL_ON) : static_cast<quint16>(CONSTANTS::MODBUS_COIL_OFF));
     
     if (auto *reply = modbusDevice->sendWriteRequest(writeUnit, slaveAddress)) {
-        connect(reply, &QModbusReply::finished, this, [this, reply, description]() {
+        connect(reply, &QModbusReply::finished, this, [this, reply, slaveAddress]() {
             if (reply->error() != QModbusDevice::NoError) {
-                Logger::crit(QString("Write coil error: %1 - %2").arg(description).arg(reply->errorString()));
+                Logger::crit(QString("Write coil error - Slave:%1 - %2").arg(slaveAddress).arg(reply->errorString()));
                 GlobalErrors::setError(GlobalErrors::ModbusWriteCoilError);
             } else {
-                Logger::info(QString("Successfully wrote coil: %1").arg(description));
+                Logger::info(QString("Successfully wrote coil - Slave:%1").arg(slaveAddress));
             }
             reply->deleteLater();
         });
     } else {
-        Logger::crit(QString("Write coil request failed: %1 - %2").arg(description).arg(modbusDevice->errorString()));
+        Logger::crit(QString("Write coil request failed - Slave:%1 - %2").arg(slaveAddress).arg(modbusDevice->errorString()));
     }
 }
 
