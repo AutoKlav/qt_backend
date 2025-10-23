@@ -434,7 +434,7 @@ void StateMachine::autoklavControl()
 
         if(QDateTime::currentDateTime() < stopwatch1){
             Logger::info("Wait 10min");
-            break;
+            //break;
         }
 
         Sensor::mapOutputPin[CONSTANTS::WATER_DRAIN]->send(0);
