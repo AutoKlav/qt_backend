@@ -93,7 +93,7 @@ create table ProcessType
     maintainTemp     REAL
 );
 
-INSERT INTO ProcessType (id, name, type, customTemp, maintainTemp) VALUES (0, 'Sterilizacija', 'sterilizacija', 121.11, 112 );
+INSERT INTO ProcessType (id, name, type, customTemp, maintainTemp) VALUES (0, 'Sterilizacija', 'sterilizacija', 121.11, 115 );
 INSERT INTO ProcessType (id, name, type, customTemp, maintainTemp) VALUES (1, 'Pasterizacija', 'pasterizacija', 78, 78);
 
 create table Process

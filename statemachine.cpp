@@ -132,7 +132,7 @@ bool StateMachine::stop()
     Sensor::mapOutputPin[CONSTANTS::TANK_HEATING]->send(0);
     Sensor::mapOutputPin[CONSTANTS::COOLING_HELPER]->send(0);
     Sensor::mapOutputPin[CONSTANTS::AUTOKLAV_FILL]->send(0);
-    Sensor::mapOutputPin[CONSTANTS::WATER_DRAIN]->send(0);
+    //Sensor::mapOutputPin[CONSTANTS::WATER_DRAIN]->send(0);
     Sensor::mapOutputPin[CONSTANTS::STEAM_HEATING]->send(0);
     Sensor::mapOutputPin[CONSTANTS::PUMP]->send(0);
     Sensor::mapOutputPin[CONSTANTS::ELECTRIC_HEATING]->send(0);
@@ -423,7 +423,7 @@ void StateMachine::autoklavControl()
 
         Sensor::mapOutputPin[CONSTANTS::COOLING_HELPER]->send(0);
         Sensor::mapOutputPin[CONSTANTS::PUMP]->send(0);
-        Sensor::mapOutputPin[CONSTANTS::WATER_DRAIN]->send(1);
+        //Sensor::mapOutputPin[CONSTANTS::WATER_DRAIN]->send(1);
 
         state = State::FINISHING;
         stopwatch1 = QDateTime::currentDateTime().addMSecs(10*60*1000); // 10 minutes
@@ -437,7 +437,7 @@ void StateMachine::autoklavControl()
             //break;
         }
 
-        Sensor::mapOutputPin[CONSTANTS::WATER_DRAIN]->send(0);
+        //Sensor::mapOutputPin[CONSTANTS::WATER_DRAIN]->send(0);
         Sensor::mapOutputPin[CONSTANTS::EXTENSION_COOLING]->sendIfNew(0);
         Sensor::mapOutputPin[CONSTANTS::TANK_HEATING]->sendIfNew(0);
         Sensor::mapOutputPin[CONSTANTS::FILL_TANK_WITH_WATER]->sendIfNew(0);
