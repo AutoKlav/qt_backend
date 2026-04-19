@@ -99,10 +99,10 @@ void ModbusRTU::processNextRequest()
     QModbusDataUnit unit(request.registerType, request.startAddress, request.count);
 
     if (auto *reply = modbusDevice->sendReadRequest(unit, request.slaveAddress)) {
-        Logger::debug(QString("Sent request: %1 - Slave: %2, Addr: %3")
-                          .arg(request.description)
-                          .arg(request.slaveAddress)
-                          .arg(request.startAddress));
+        // Logger::debug(QString("Sent request: %1 - Slave: %2, Addr: %3")
+        //                   .arg(request.description)
+        //                   .arg(request.slaveAddress)
+        //                   .arg(request.startAddress));
 
         connect(reply, &QModbusReply::finished, this, [this, request, reply]() {
             if (reply->error() == QModbusDevice::NoError) {
@@ -209,10 +209,10 @@ void ModbusRTU::handleTemperatureReading(const QModbusDataUnit &unit, quint8 sla
         uint scaledValue = static_cast<uint>(rawValue);
 
         if (Sensor::mapInputPin.contains(slaveAddress)) {
-            Logger::info(QString("Temperature - Slave:%1 Address:%2 Value:%3")
-                             .arg(slaveAddress)
-                             .arg(unit.startAddress())
-                             .arg(scaledValue));
+            // Logger::info(QString("Temperature - Slave:%1 Address:%2 Value:%3")
+            //                  .arg(slaveAddress)
+            //                  .arg(unit.startAddress())
+            //                  .arg(scaledValue));
 
             Sensor::mapInputPin[slaveAddress]->setValue(scaledValue);
             lastDataTime = QDateTime::currentMSecsSinceEpoch();
@@ -229,10 +229,10 @@ void ModbusRTU::handlePressureReading(const QModbusDataUnit &unit, quint8 slaveA
         uint scaledValue = static_cast<uint>(rawValue)/10;
 
         if (Sensor::mapInputPin.contains(slaveAddress)) {
-            Logger::info(QString("Pressure - Slave:%1 Address:%2 Value:%3")
-                             .arg(slaveAddress)
-                             .arg(unit.startAddress())
-                             .arg(scaledValue));
+            // Logger::info(QString("Pressure - Slave:%1 Address:%2 Value:%3")
+            //                  .arg(slaveAddress)
+            //                  .arg(unit.startAddress())
+            //                  .arg(scaledValue));
 
             Sensor::mapInputPin[slaveAddress]->setValue(scaledValue);
             lastDataTime = QDateTime::currentMSecsSinceEpoch();
@@ -247,10 +247,10 @@ void ModbusRTU::handleLevelReading(const QModbusDataUnit &unit, quint8 slaveAddr
         uint scaledValue = static_cast<uint>(rawValue);
 
         if (Sensor::mapInputPin.contains(slaveAddress)) {
-            Logger::info(QString("Level - Slave:%1 Address:%2 Value:%3")
-                             .arg(slaveAddress)
-                             .arg(unit.startAddress())
-                             .arg(scaledValue));
+            // Logger::info(QString("Level - Slave:%1 Address:%2 Value:%3")
+            //                  .arg(slaveAddress)
+            //                  .arg(unit.startAddress())
+            //                  .arg(scaledValue));
 
             Sensor::mapInputPin[slaveAddress]->setValue(scaledValue);
             lastDataTime = QDateTime::currentMSecsSinceEpoch();
@@ -267,10 +267,10 @@ void ModbusRTU::handleDigitalInputReading(const QModbusDataUnit &unit, quint8 sl
         const auto shiftedAddress = startAddress + CONSTANTS::DIGITAL_INPUT_SHIFT;
 
         if (Sensor::mapInputPin.contains(shiftedAddress)) {
-            Logger::info(QString("Digital Input - Slave:%1 Address:%2 Value:%3")
-                             .arg(slaveAddress)
-                             .arg(startAddress)
-                             .arg(scaledValue));
+            // Logger::info(QString("Digital Input - Slave:%1 Address:%2 Value:%3")
+            //                  .arg(slaveAddress)
+            //                  .arg(startAddress)
+            //                  .arg(scaledValue));
 
             Sensor::mapInputPin[shiftedAddress]->setValue(scaledValue);
             lastDataTime = QDateTime::currentMSecsSinceEpoch();

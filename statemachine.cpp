@@ -1,11 +1,48 @@
 #include "statemachine.h"
 
+#include <QStringList>
+
 #include "logger.h"
 #include "sensor.h"
 #include "globals.h"
 #include "dbmanager.h"
 #include "constants.h"
 #include "globalerrors.h"
+
+static QString stateName(StateMachine::State s)
+{
+    switch (s) {
+    case StateMachine::READY:       return "READY";
+    case StateMachine::STARTING:    return "STARTING";
+    case StateMachine::FILLING:     return "FILLING";
+    case StateMachine::HEATING:     return "HEATING";
+    case StateMachine::STERILIZING: return "STERILIZING";
+    case StateMachine::PRECOOLING:  return "PRECOOLING";
+    case StateMachine::COOLING:     return "COOLING";
+    case StateMachine::FINISHING:   return "FINISHING";
+    case StateMachine::FINISHED:    return "FINISHED";
+    }
+    return "UNKNOWN";
+}
+
+static QString modeName(StateMachine::Mode m)
+{
+    switch (m) {
+    case StateMachine::TARGETF: return "TARGETF";
+    case StateMachine::TIME:    return "TIME";
+    }
+    return "UNKNOWN";
+}
+
+static QString heatingTypeName(StateMachine::HeatingType h)
+{
+    switch (h) {
+    case StateMachine::STEAM:          return "STEAM";
+    case StateMachine::ELECTRIC:       return "ELECTRIC";
+    case StateMachine::STEAM_ELECTRIC: return "STEAM_ELECTRIC";
+    }
+    return "UNKNOWN";
+}
 
 // Constructor
 StateMachine::StateMachine(QObject *parent)
@@ -102,7 +139,27 @@ bool StateMachine::start(ProcessConfig processConfig, ProcessInfo processInfo)
 
     process = new Process(processStart.toString(Qt::ISODate), processInfo, this);
 
-    Logger::info("Process started");
+    Logger::info(QString("[SM/start] processStart=%1 batchLTO=%2 product=%3 qty=%4 "
+                         "mode=%5 heating=%6 "
+                         "processType=%7 maintainTemp=%8 customTemp=%9")
+                     .arg(processStart.toString(Qt::ISODate))
+                     .arg(processInfo.batchLTO)
+                     .arg(processInfo.productName)
+                     .arg(processInfo.productQuantity)
+                     .arg(modeName(processConfig.mode))
+                     .arg(heatingTypeName(processConfig.heatingType))
+                     .arg(processInfo.processType.name)
+                     .arg(processInfo.processType.maintainTemp)
+                     .arg(processInfo.processType.customTemp)
+                 + QString(" bacteria=%1 d0=%2 z=%3 "
+                           "targetF=%4 targetHeatingTime=%5 targetCoolingTime=%6 finishTemp=%7")
+                       .arg(processInfo.bacteria.name)
+                       .arg(processInfo.bacteria.d0)
+                       .arg(processInfo.bacteria.z)
+                       .arg(processInfo.targetF)
+                       .arg(processInfo.targetHeatingTime)
+                       .arg(processInfo.targetCoolingTime)
+                       .arg(processInfo.finishTemp));
 
     tick();
     timer.start(Globals::stateMachineTick);
@@ -118,12 +175,25 @@ bool StateMachine::start(ProcessConfig processConfig, ProcessInfo processInfo)
 
 bool StateMachine::stop()
 {
-    Logger::info("End process");
+    const auto errVec = GlobalErrors::getErrorsString();
+    const QString errorsJoined = QStringList(errVec.cbegin(), errVec.cend()).join(", ");
+
+    Logger::info(QString("[SM/stop] fromState=%1 processLength=%2s "
+                         "sumFr=%3 sumr=%4 temp=%5 tempK=%6 pressure=%7 errors=[%8]")
+                     .arg(stateName(state))
+                     .arg(stateMachineValues.time)
+                     .arg(stateMachineValues.sumFr)
+                     .arg(stateMachineValues.sumr)
+                     .arg(stateMachineValues.temp)
+                     .arg(stateMachineValues.tempK)
+                     .arg(stateMachineValues.pressure)
+                     .arg(errorsJoined));
+
     timer.stop();
 
     if (process) {
         auto processInfo = process->getInfo();
-        processInfo.processLength = QString::number(stateMachineValues.time);        
+        processInfo.processLength = QString::number(stateMachineValues.time);
         process->setInfo(processInfo);
     }
 
@@ -199,13 +269,7 @@ StateMachineValues StateMachine::calculateStateMachineValues()
     const auto z = processInfo.bacteria.z;
     const auto d0 = processInfo.bacteria.d0;
 
-    if (processConfig.mode == Mode::TARGETF) {
-        updateStateMachineValues.dTemp = updateStateMachineValues.tempK - processInfo.processType.customTemp;
-
-    } else if (processConfig.mode == Mode::TIME) {
-        // avoid calculations it time is selected
-        updateStateMachineValues.dTemp = NAN;
-    }
+    updateStateMachineValues.dTemp = updateStateMachineValues.tempK - processInfo.processType.customTemp;
 
     updateStateMachineValues.Dr = k * d0 * qPow(10, -1.0 / z * updateStateMachineValues.dTemp);
     updateStateMachineValues.Fr = 1.0 / (k * d0) * qPow(10, 1.0 / z * updateStateMachineValues.dTemp);
@@ -345,7 +409,7 @@ void StateMachine::autoklavControl()
 
     case State::HEATING:
 
-        if(stateMachineValues.temp < processInfo.processType.maintainTemp) {
+        if (stateMachineValues.temp < processInfo.processType.maintainTemp && stateMachineValues.sumFr < processInfo.targetF.toDouble()) {
             Logger::info(QString("Wait until %1 reaches %2").arg(QString::number(stateMachineValues.temp)).arg(QString::number(processInfo.processType.maintainTemp)));
             break; // TODO revert for testing
         }
@@ -365,14 +429,14 @@ void StateMachine::autoklavControl()
             Sensor::mapOutputPin[CONSTANTS::STEAM_HEATING]->send(1);
         }        
 
-        if (processConfig.mode == Mode::TARGETF) {            
+        if (processConfig.mode == Mode::TARGETF) {
             if (stateMachineValues.sumFr < processInfo.targetF.toDouble()) {
-                Logger::info(QString("Wait until sumfr %1 is reached").arg(QString::number(processInfo.targetF.toDouble())));
+                Logger::info(QString("Wait until sumfr %1 is reached %2").arg(QString::number(stateMachineValues.sumFr)).arg(QString::number(processInfo.targetF.toDouble())));
                 break;
             }
         } else if (processConfig.mode == Mode::TIME) {
             if (heatingStart.msecsTo(QDateTime::currentDateTime()) < processInfo.targetHeatingTime.toDouble()) {
-                Logger::info(QString("Wait until target time %1 is reached").arg(QString::number(processInfo.targetHeatingTime.toDouble())));
+                Logger::info(QString("Wait until target time %1 is reached %2").arg(QString::number(processInfo.targetHeatingTime.toDouble())).arg(QString::number(heatingStart.msecsTo(QDateTime::currentDateTime()))));
                                 
                 coolingStart = QDateTime::currentDateTime();
 
@@ -393,7 +457,7 @@ void StateMachine::autoklavControl()
         Sensor::mapOutputPin[CONSTANTS::FILL_TANK_WITH_WATER]->send(1);
 
         if(stateMachineValues.tankWaterLevel < Globals::tankWaterLevelThreshold) {
-            Logger::info(QString("Wait until tank water level %1 is reached").arg(Globals::tankWaterLevelThreshold));
+            Logger::info(QString("Wait until tank water level %1 is reached %2").arg(QString::number(stateMachineValues.tankWaterLevel)).arg(Globals::tankWaterLevelThreshold));
             break;
         }
 
@@ -410,13 +474,13 @@ void StateMachine::autoklavControl()
 
         if (processConfig.mode == Mode::TARGETF) {
             if(stateMachineValues.tempK > processInfo.finishTemp.toDouble()) {
-                Logger::info(QString("Wait until tempK %1 is reached").arg(QString::number(processInfo.finishTemp.toDouble())));
+                Logger::info(QString("Wait until tempK %1 is reached %2").arg(QString::number(stateMachineValues.tempK)).arg(QString::number(processInfo.finishTemp.toDouble())));
                 break;
             }
 
         } else if (processConfig.mode == Mode::TIME) {
             if (coolingStart.msecsTo(QDateTime::currentDateTime()) < processInfo.targetCoolingTime.toDouble()) {
-                Logger::info("Wait until target cooling is reached");
+                Logger::info(QString("Wait until target cooling is reached %1").arg(QString::number(coolingStart.msecsTo(QDateTime::currentDateTime()))));
                 break;
             }
         }
