@@ -521,8 +521,9 @@ Status GRpcServer::Impl::AutoklavServiceImpl::getProcessLogs(grpc::ServerContext
         sensorValues->set_steampressure(processLog.steamPressure);
         sensorValues->set_doorclosed(processLog.doorClosed);
         sensorValues->set_burnerfault(processLog.burnerFault);
-        sensorValues->set_watershortage(processLog.waterShortage);                
+        sensorValues->set_watershortage(processLog.waterShortage);
 
+        processLogInfo->set_dtemp(processLog.dTemp);
         processLogInfo->set_state(processLog.state);
         processLogInfo->set_dr(processLog.Dr);
         processLogInfo->set_fr(processLog.Fr);
