@@ -108,9 +108,9 @@ void ModbusRTU::processNextRequest()
             if (reply->error() == QModbusDevice::NoError) {
                 request.callback(reply->result(), request.slaveAddress);
             } else {
-                Logger::info(QString("Request failed: %1 - Error: %2")
-                                    .arg(request.description)
-                                    .arg(reply->errorString()));
+                // Logger::info(QString("Request failed: %1 - Error: %2")
+                //                     .arg(request.description)
+                //                     .arg(reply->errorString()));
 
                 // Optional: Re-queue failed request (be careful with this)
                 // if (retryCount < MAX_RETRIES) {
