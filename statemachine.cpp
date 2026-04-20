@@ -409,7 +409,7 @@ void StateMachine::autoklavControl()
 
     case State::HEATING:
 
-        if (stateMachineValues.temp < processInfo.processType.maintainTemp && stateMachineValues.sumFr < processInfo.targetF.toDouble()) {
+        if (processConfig.mode == Mode::TIME && stateMachineValues.temp < processInfo.processType.maintainTemp) {
             Logger::info(QString("Wait until %1 reaches %2").arg(QString::number(stateMachineValues.temp)).arg(QString::number(processInfo.processType.maintainTemp)));
             break; // TODO revert for testing
         }
