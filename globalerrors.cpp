@@ -18,6 +18,7 @@ const QString GlobalErrors::ALREADY_STARTED = "Program je već pokrenut!";
 
 const QString GlobalErrors::MODBUS_WRITE_COIL_ERROR = "Greška prilikom uključivanja izlaznog senzora!";
 const QString GlobalErrors::MODBUS_READ_REGISTER_ERROR = "Greška prilikom čitanja podataka!";
+const QString GlobalErrors::WRONG_STATE_FOR_SKIP = "Trenutno stanje ne dopušta preskakanje na hlađenje!";
 
 void GlobalErrors::setError(Error error)
 {
@@ -61,6 +62,7 @@ QVector<QString> GlobalErrors::getErrorsString()
     if (errors.testFlag(Error::AlreadyStarted)) err.push_back(ALREADY_STARTED);
     if (errors.testFlag(Error::ModbusWriteCoilError)) err.push_back(MODBUS_WRITE_COIL_ERROR);
     if (errors.testFlag(Error::ModbusReadRegisterError)) err.push_back(MODBUS_READ_REGISTER_ERROR);
+    if (errors.testFlag(Error::WrongStateForSkip)) err.push_back(WRONG_STATE_FOR_SKIP);
 
     return err;
 }

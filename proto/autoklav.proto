@@ -22,6 +22,7 @@ service Autoklav {
     rpc deleteProcess(TypeRequest) returns (Status);
     rpc startProcess(StartProcessRequest) returns (Status);
     rpc stopProcess(Empty) returns (Status);
+    rpc skipToCooling(Empty) returns (Status);
 
     // Sensor
     rpc getSensorPinValues(Empty) returns (SensorValues);

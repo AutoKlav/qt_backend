@@ -221,6 +221,35 @@ bool StateMachine::stop()
     return true;
 }
 
+bool StateMachine::skipToCooling()
+{
+    if (state != State::STERILIZING) {
+        Logger::warn(QString("[SM/skipToCooling] rejected fromState=%1, expected STERILIZING").arg(stateName(state)));
+        GlobalErrors::setError(GlobalErrors::WrongStateForSkip);
+        return false;
+    }
+
+    GlobalErrors::removeError(GlobalErrors::WrongStateForSkip);
+
+    Logger::info(QString("[SM/skipToCooling] sumFr=%1 targetF=%2 heatingElapsedMs=%3 mode=%4")
+                     .arg(stateMachineValues.sumFr)
+                     .arg(processInfo.targetF.toDouble())
+                     .arg(heatingStart.msecsTo(QDateTime::currentDateTime()))
+                     .arg(modeName(processConfig.mode)));
+
+    Sensor::mapOutputPin[CONSTANTS::STEAM_HEATING]->send(0);
+    Sensor::mapOutputPin[CONSTANTS::ELECTRIC_HEATING]->send(0);
+
+    // PRECOOLING block does not initialize coolingStart; in normal flow STERILIZING TIME-mode
+    // sets it before the transition. Set it now so PRECOOLING→COOLING computes coolingEnd
+    // and TIME-mode COOLING exit has a valid baseline.
+    coolingStart = QDateTime::currentDateTime();
+
+    state = State::PRECOOLING;
+    Logger::info("StateMachine: Pre cooling (skipped from STERILIZING)");
+    return true;
+}
+
 inline bool StateMachine::isRunning()
 {
     return state != State::READY;

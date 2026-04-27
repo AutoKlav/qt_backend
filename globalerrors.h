@@ -17,6 +17,7 @@ public:
         AlreadyStarted = 0x80,
         ModbusWriteCoilError = 0x100,
         ModbusReadRegisterError = 0x200,
+        WrongStateForSkip = 0x400,
     };
     Q_DECLARE_FLAGS(Errors, Error);
 
@@ -35,6 +36,7 @@ public:
     static const QString ALREADY_STARTED;
     static const QString MODBUS_WRITE_COIL_ERROR;
     static const QString MODBUS_READ_REGISTER_ERROR;
+    static const QString WRONG_STATE_FOR_SKIP;
 
     static void setError(Error error);
     static void removeError(Error error);

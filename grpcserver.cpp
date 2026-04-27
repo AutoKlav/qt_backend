@@ -48,6 +48,7 @@ private:
         Status deleteBacteria(grpc::ServerContext *context, const autoklav::TypeRequest *request, autoklav::Status *replay) override;
         Status startProcess(grpc::ServerContext *context, const autoklav::StartProcessRequest *request, autoklav::Status *replay) override;
         Status stopProcess(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay) override;
+        Status skipToCooling(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay) override;
         Status getSensorPinValues(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::SensorValues *replay) override;
         Status getSensorRelayValues(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::SensorRelayValues *replay) override;
         Status updateInputPin(grpc::ServerContext *context, const autoklav::UpdateInputPinRequest *request, autoklav::Status *replay) override;
@@ -316,6 +317,19 @@ Status GRpcServer::Impl::AutoklavServiceImpl::stopProcess(grpc::ServerContext *c
 
     bool success = invokeOnMainThreadBlocking([](){
         return StateMachine::instance().stop();
+    });
+
+    setStatusReply(replay, !success);
+    return Status::OK;
+}
+
+Status GRpcServer::Impl::AutoklavServiceImpl::skipToCooling(grpc::ServerContext *context, const autoklav::Empty *request, autoklav::Status *replay)
+{
+    Q_UNUSED(context);
+    Q_UNUSED(request);
+
+    bool success = invokeOnMainThreadBlocking([](){
+        return StateMachine::instance().skipToCooling();
     });
 
     setStatusReply(replay, !success);

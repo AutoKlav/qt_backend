@@ -37,8 +37,9 @@ public:
 
     bool start(ProcessConfig processConfig, ProcessInfo processInfo);
     bool stop();
+    bool skipToCooling();
     bool isRunning();
-    int getState();    
+    int getState();
 
     StateMachineValues getValues();
     StateMachineValues readInputPinValues();
