@@ -189,8 +189,8 @@ Status GRpcServer::Impl::AutoklavServiceImpl::startProcess(grpc::ServerContext *
     const ProcessType processType = {
         .id = static_cast<int>(request->processinfo().processtype().id()),
         .name = QString::fromUtf8(request->processinfo().processtype().name()).trimmed(),
-        .type = QString::fromUtf8(request->processinfo().processtype().name()).trimmed(),
-        .customTemp = request->processinfo().processtype().customtemp(),        
+        .type = QString::fromUtf8(request->processinfo().processtype().type()).trimmed(),
+        .customTemp = request->processinfo().processtype().customtemp(),
         .maintainTemp  = request->processinfo().processtype().maintaintemp()
     };
 
