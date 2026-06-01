@@ -328,9 +328,17 @@ Status GRpcServer::Impl::AutoklavServiceImpl::skipToCooling(grpc::ServerContext 
     Q_UNUSED(context);
     Q_UNUSED(request);
 
+    // SKIP_DEBUG: remove after prod debug session
+    Logger::info("[SKIP_DEBUG] gRPC skipToCooling handler entered");
+
     bool success = invokeOnMainThreadBlocking([](){
         return StateMachine::instance().skipToCooling();
     });
+
+    // SKIP_DEBUG: remove after prod debug session
+    Logger::info(QString("[SKIP_DEBUG] gRPC skipToCooling result success=%1 globalErrors=%2")
+                     .arg(success)
+                     .arg(static_cast<int>(GlobalErrors::getErrors())));
 
     setStatusReply(replay, !success);
     return Status::OK;

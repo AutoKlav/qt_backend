@@ -223,8 +223,20 @@ bool StateMachine::stop()
 
 bool StateMachine::skipToCooling()
 {
+    // SKIP_DEBUG: remove after prod debug session
+    Logger::info(QString("[SKIP_DEBUG] StateMachine::skipToCooling entry state=%1 isRunning=%2 mode=%3 temp=%4 tempK=%5 pressure=%6 sumFr=%7")
+                     .arg(stateName(state))
+                     .arg(state != State::READY)
+                     .arg(modeName(processConfig.mode))
+                     .arg(stateMachineValues.temp)
+                     .arg(stateMachineValues.tempK)
+                     .arg(stateMachineValues.pressure)
+                     .arg(stateMachineValues.sumFr));
+
     if (state != State::STERILIZING) {
         Logger::warn(QString("[SM/skipToCooling] rejected fromState=%1, expected STERILIZING").arg(stateName(state)));
+        // SKIP_DEBUG: remove after prod debug session
+        Logger::warn(QString("[SKIP_DEBUG] REJECTED: not in STERILIZING (was %1). Returning false.").arg(stateName(state)));
         GlobalErrors::setError(GlobalErrors::WrongStateForSkip);
         return false;
     }
@@ -237,16 +249,25 @@ bool StateMachine::skipToCooling()
                      .arg(heatingStart.msecsTo(QDateTime::currentDateTime()))
                      .arg(modeName(processConfig.mode)));
 
+    // SKIP_DEBUG: remove after prod debug session
+    Logger::info("[SKIP_DEBUG] turning off STEAM_HEATING + ELECTRIC_HEATING relays");
     Sensor::mapOutputPin[CONSTANTS::STEAM_HEATING]->send(0);
     Sensor::mapOutputPin[CONSTANTS::ELECTRIC_HEATING]->send(0);
+    // SKIP_DEBUG: remove after prod debug session
+    Logger::info(QString("[SKIP_DEBUG] post-relay-write globalErrors=%1 (Modbus write errors land in flag 0x100)")
+                     .arg(static_cast<int>(GlobalErrors::getErrors())));
 
     // PRECOOLING block does not initialize coolingStart; in normal flow STERILIZING TIME-mode
     // sets it before the transition. Set it now so PRECOOLING→COOLING computes coolingEnd
     // and TIME-mode COOLING exit has a valid baseline.
     coolingStart = QDateTime::currentDateTime();
+    // SKIP_DEBUG: remove after prod debug session
+    Logger::info(QString("[SKIP_DEBUG] coolingStart=%1").arg(coolingStart.toString(Qt::ISODate)));
 
     state = State::PRECOOLING;
     Logger::info("StateMachine: Pre cooling (skipped from STERILIZING)");
+    // SKIP_DEBUG: remove after prod debug session
+    Logger::info(QString("[SKIP_DEBUG] state transition complete; new state=%1. Returning true.").arg(stateName(state)));
     return true;
 }
 
